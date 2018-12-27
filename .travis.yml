@@ -1,0 +1,13 @@
+sudo: false
+language: java
+jdk:
+  - oraclejdk8
+
+before_install: "git clone --depth 1 https://github.com/igniterealtime/ci-tooling.git target/ci-tooling"
+
+deploy:
+  provider: script
+  script: "mvn deploy --settings target/ci-tooling/maven-settings-for-openfire-plugins.xml"
+  skip_cleanup: true
+  on:
+    all_branches: true
