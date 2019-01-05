@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>REST API</title>
+  <title>RestAPI</title>
   <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
 
@@ -48,10 +48,11 @@
 <li><a href="#retrieve-a-chat-room">Retrieve a chat room</a></li>
 <li><a href="#retrieve-chat-room-participants">Retrieve chat room participants</a></li>
 <li><a href="#retrieve-chat-room-occupants">Retrieve chat room occupants</a></li>
-<li><a href="#retrieve-chat-room-history">Retrieve chat room message history</a></li>
+<li><a href="#retrieve-chat-room-message-history">Retrieve chat room message history</a></li>
 <li><a href="#create-a-chat-room">Create a chat room</a></li>
 <li><a href="#delete-a-chat-room">Delete a chat room</a></li>
 <li><a href="#update-a-chat-room">Update a chat room</a></li>
+<li><a href="#invite-user-to-a-chat-room">Invite user to a chat Room</a></li>
 <li><a href="#add-user-with-role-to-chat-room">Add user with role to chat room</a></li>
 <li><a href="#add-group-with-role-to-chat-room">Add group with role to chat room</a></li>
 <li><a href="#delete-a-user-from-a-chat-room">Delete a user from a chat room</a></li>
@@ -118,17 +119,17 @@
 <p>The REST API Plugin provides the ability to manage Openfire by sending an REST/HTTP request to the server. This plugin’s functionality is useful for applications that need to administer Openfire outside of the Openfire admin console.</p>
 <h2 id="feature-list">Feature list</h2>
 <ul>
-    <li>Get overview over all or specific user and to create, update or delete a user</li>
-    <li>Get overview over all or specific group and to create, update or delete a group</li>
-    <li>Get overview over all user roster entries and to add, update or delete a roster entry</li>
-    <li>Add user to a group and remove a user from a group</li>
-    <li>Lockout, unlock or kick the user (enable / disable)</li>
-    <li>Get overview over all or specific system properties and to create, update or delete system property</li>
-    <li>Get overview over all or specific chat room and to create, update or delete a chat room</li>
-    <li>Get overview over all or specific user sessions</li>
-    <li>Send broadcast message to all online users</li>
-    <li>Get overview of all or specific security audit logs</li>
-    <li>Get chat message history from a Multi User Chatroom</li>
+<li>Get overview over all or specific user and to create, update or delete a user</li>
+<li>Get overview over all or specific group and to create, update or delete a group</li>
+<li>Get overview over all user roster entries and to add, update or delete a roster entry</li>
+<li>Add user to a group and remove a user from a group</li>
+<li>Lockout, unlock or kick the user (enable / disable)</li>
+<li>Get overview over all or specific system properties and to create, update or delete system property</li>
+<li>Get overview over all or specific chat room and to create, update or delete a chat room</li>
+<li>Get overview over all or specific user sessions</li>
+<li>Send broadcast message to all online users</li>
+<li>Get overview of all or specific security audit logs</li>
+<li>Get chat message history from a Multi User Chatroom</li>
 </ul>
 <h2 id="available-rest-api-clients">Available REST API clients</h2>
 <p>REST API clients are implementations of the REST API in a specific programming language.</p>
@@ -147,33 +148,33 @@
 <p>Copy restAPI.jar into the plugins directory of your Openfire server. The plugin will be automatically deployed. To upgrade to a newer version, overwrite the restAPI.jar file with the new one.</p>
 <h2 id="explanation-of-rest">Explanation of REST</h2>
 <p>To provide a standard way of accessing the data the plugin is using REST.</p>
-
 <table>
-<thead>
-<tr>
-<th>HTTP Method</th>
-<th>Usage</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>GET</strong></td>
-<td>Receive a read-only data</td>
-</tr>
-<tr>
-<td><strong>PUT</strong></td>
-<td>Overwrite an existing resource</td>
-</tr>
-<tr>
-<td><strong>POST</strong></td>
-<td>Creates a new resource</td>
-</tr>
-<tr>
-<td><strong>DELETE</strong></td>
-<td>Deletes the given resource</td>
-</tr>
-</tbody>
-</table><h2 id="authentication">Authentication</h2>
+    <thead>
+        <tr>
+            <th>HTTP Method</th>
+            <th>Usage</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>**GET**</td>
+            <td>Receive a read-only data</td>
+        </tr>
+        <tr>
+            <td>**PUT**</td>
+            <td>Overwrite an existing resource</td>
+        </tr>
+        <tr>
+            <td>**POST**</td>
+            <td>Creates a new resource</td>
+        </tr>
+        <tr>
+            <td>**DELETE**</td>
+            <td>Deletes the given resource</td>
+        </tr>
+    </tbody>
+</table>
+<h2 id="authentication">Authentication</h2>
 <p>All REST Endpoint are secured and must be authenticated. There are two ways to authenticate:</p>
 <ul>
 <li><a href="http://en.wikipedia.org/wiki/Basic_access_authentication">Basic HTTP Authentication</a></li>
@@ -182,7 +183,7 @@
 <p>The configuration can be done in Openfire Admin console under Server &gt; Server Settings &gt; REST API.</p>
 <h3 id="basic-http-authentication">Basic HTTP Authentication</h3>
 <p>To access the endpoints is that required to send the Username and Password of a Openfire Admin account in your HTTP header request.</p>
-<p>E.g. <strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=  (username: admin / password: 12345)</p>
+<p>E.g. <strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU= (username: admin / password: 12345)</p>
 <h3 id="shared-secret-key">Shared secret key</h3>
 <p>To access the endpoints is that required to send the secret key in your header request.<br>
 The secret key can be defined in Openfire Admin console under Server &gt; Server Settings &gt; REST API.</p>
@@ -196,37 +197,40 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Users</p>
 <h3 id="possible-parameters">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>search</td>
-<td>@QueryParam</td>
-<td>Search/Filter by username. <br> This act like the wildcard search %String%</td>
-<td></td>
-</tr>
-<tr>
-<td>propertyKey</td>
-<td>@QueryParam</td>
-<td>Filter by user propertyKey.</td>
-<td></td>
-</tr>
-<tr>
-<td>propertyValue</td>
-<td>@QueryParam</td>
-<td>Filter by user propertyKey and propertyValue. <br><strong>Note:</strong> It can only be used within propertyKey parameter</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>search</td>
+            <td>@QueryParam</td>
+            <td>Search/Filter by username.  
+This act like the wildcard search %String%</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>propertyKey</td>
+            <td>@QueryParam</td>
+            <td>Filter by user propertyKey.</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>propertyValue</td>
+            <td>@QueryParam</td>
+            <td>Filter by user propertyKey and propertyValue.  
+**Note:** It can only be used within propertyKey parameter</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples">Examples</h3>
+<p>f</p>
 <blockquote>
 <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -245,25 +249,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> User</p>
 <h3 id="possible-parameters-1">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-1">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-1">Examples</h3>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser">http://example.org:9090/plugins/restapi/v1/users/testuser</a></p>
 <h2 id="create-a-user">Create a user</h2>
@@ -283,24 +287,24 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/users">http://example.org:9090/plugins/restapi/v1/users</a></p>
 </blockquote>
 <p><strong>Payload Example 1 (required parameters):</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>user</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>username</span><span class="token punctuation">&gt;</span></span>test3<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>username</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>password</span><span class="token punctuation">&gt;</span></span>p4ssword<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>password</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>user</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;user&gt;
+    &lt;username&gt;test3&lt;/username&gt;
+    &lt;password&gt;p4ssword&lt;/password&gt;
+&lt;/user&gt;
 </code></pre>
 <p><strong>Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>user</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>username</span><span class="token punctuation">&gt;</span></span>testuser<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>username</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>password</span><span class="token punctuation">&gt;</span></span>p4ssword<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>password</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>Test User<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>email</span><span class="token punctuation">&gt;</span></span>test@localhost.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>email</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>keyname<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>value<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>anotherkey<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>value<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>properties</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>user</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;user&gt;
+    &lt;username&gt;testuser&lt;/username&gt;
+    &lt;password&gt;p4ssword&lt;/password&gt;
+    &lt;name&gt;Test User&lt;/name&gt;
+    &lt;email&gt;test@localhost.de&lt;/email&gt;
+    &lt;properties&gt;
+        &lt;property key="keyname" value="value"/&gt;
+        &lt;property key="anotherkey" value="value"/&gt;
+    &lt;/properties&gt;
+&lt;/user&gt;
 </code></pre>
 <h4 id="json-examples">JSON Examples</h4>
 <blockquote>
@@ -311,53 +315,53 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/users">http://example.org:9090/plugins/restapi/v1/users</a></p>
 </blockquote>
 <p><strong>Payload Example 1 (required parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"username"</span><span class="token punctuation">:</span> <span class="token string">"admin"</span><span class="token punctuation">,</span>
-    <span class="token string">"password"</span><span class="token punctuation">:</span> <span class="token string">"p4ssword"</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "username": "admin",
+    "password": "p4ssword"
+}
 </code></pre>
 <p><strong>Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"username"</span><span class="token punctuation">:</span> <span class="token string">"admin"</span><span class="token punctuation">,</span>
-    <span class="token string">"password"</span><span class="token punctuation">:</span> <span class="token string">"p4ssword"</span><span class="token punctuation">,</span>
-    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"Administrator"</span><span class="token punctuation">,</span>
-    <span class="token string">"email"</span><span class="token punctuation">:</span> <span class="token string">"admin@example.com"</span><span class="token punctuation">,</span>
-    <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"property"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-            <span class="token punctuation">{</span>
-                <span class="token string">"@key"</span><span class="token punctuation">:</span> <span class="token string">"console.rows_per_page"</span><span class="token punctuation">,</span>
-                <span class="token string">"@value"</span><span class="token punctuation">:</span> <span class="token string">"user-summary=8"</span>
-            <span class="token punctuation">}</span><span class="token punctuation">,</span>
-            <span class="token punctuation">{</span>
-                <span class="token string">"@key"</span><span class="token punctuation">:</span> <span class="token string">"console.order"</span><span class="token punctuation">,</span>
-                <span class="token string">"@value"</span><span class="token punctuation">:</span> <span class="token string">"session-summary=1"</span>
-            <span class="token punctuation">}</span>
-        <span class="token punctuation">]</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "username": "admin",
+    "password": "p4ssword",
+    "name": "Administrator",
+    "email": "admin@example.com",
+    "properties": {
+        "property": [
+            {
+                "@key": "console.rows_per_page",
+                "@value": "user-summary=8"
+            },
+            {
+                "@key": "console.order",
+                "@value": "session-summary=1"
+            }
+        ]
+    }
+}
 </code></pre>
 <p><strong>REST API Version 1.3.0 and later - Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"users"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span>
-            <span class="token string">"username"</span><span class="token punctuation">:</span> <span class="token string">"admin"</span><span class="token punctuation">,</span>
-            <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"Administrator"</span><span class="token punctuation">,</span>
-            <span class="token string">"email"</span><span class="token punctuation">:</span> <span class="token string">"admin@example.com"</span><span class="token punctuation">,</span>
-            <span class="token string">"password"</span><span class="token punctuation">:</span> <span class="token string">"p4ssword"</span><span class="token punctuation">,</span>
-            <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-                <span class="token punctuation">{</span>
-                    <span class="token string">"key"</span><span class="token punctuation">:</span> <span class="token string">"console.order"</span><span class="token punctuation">,</span>
-                    <span class="token string">"value"</span><span class="token punctuation">:</span> <span class="token string">"session-summary=0"</span>
-                <span class="token punctuation">}</span>
-            <span class="token punctuation">]</span>
-        <span class="token punctuation">}</span><span class="token punctuation">,</span>
-        <span class="token punctuation">{</span>
-            <span class="token string">"username"</span><span class="token punctuation">:</span> <span class="token string">"test"</span><span class="token punctuation">,</span>
-            <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"Test"</span><span class="token punctuation">,</span>
-            <span class="token string">"password"</span><span class="token punctuation">:</span> <span class="token string">"p4ssword"</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "users": [
+        {
+            "username": "admin",
+            "name": "Administrator",
+            "email": "admin@example.com",
+            "password": "p4ssword",
+            "properties": [
+                {
+                    "key": "console.order",
+                    "value": "session-summary=0"
+                }
+            ]
+        },
+        {
+            "username": "test",
+            "name": "Test",
+            "password": "p4ssword"
+        }
+    ]
+}
 </code></pre>
 <h2 id="delete-a-user">Delete a user</h2>
 <p>Endpoint to delete a user</p>
@@ -367,25 +371,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-2">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-3">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-3">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser">http://example.org:9090/plugins/restapi/v1/users/testuser</a></p>
@@ -398,25 +402,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> User<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-3">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-4">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-4">Examples</h3>
 <h4 id="xml-example">XML Example</h4>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
@@ -426,15 +430,15 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser">http://example.org:9090/plugins/restapi/v1/users/testuser</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>user</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>username</span><span class="token punctuation">&gt;</span></span>testuser<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>username</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>Test User edit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>email</span><span class="token punctuation">&gt;</span></span>test@edit.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>email</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>keyname<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>value<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>properties</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>user</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;user&gt;
+    &lt;username&gt;testuser&lt;/username&gt;
+    &lt;name&gt;Test User edit&lt;/name&gt;
+    &lt;email&gt;test@edit.de&lt;/email&gt;
+    &lt;properties&gt;
+        &lt;property key="keyname" value="value"/&gt;
+    &lt;/properties&gt;
+&lt;/user&gt;
 </code></pre>
 <h4 id="rename-example">Rename Example</h4>
 <blockquote>
@@ -445,15 +449,15 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/oldUsername">http://example.org:9090/plugins/restapi/v1/users/oldUsername</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>user</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>username</span><span class="token punctuation">&gt;</span></span>newUsername<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>username</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>Test User edit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>email</span><span class="token punctuation">&gt;</span></span>test@edit.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>email</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>properties</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>keyname<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>value<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>properties</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>user</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;user&gt;
+    &lt;username&gt;newUsername&lt;/username&gt;
+    &lt;name&gt;Test User edit&lt;/name&gt;
+    &lt;email&gt;test@edit.de&lt;/email&gt;
+    &lt;properties&gt;
+        &lt;property key="keyname" value="value"/&gt;
+    &lt;/properties&gt;
+&lt;/user&gt;
 </code></pre>
 <h4 id="json-example">JSON Example</h4>
 <blockquote>
@@ -464,30 +468,30 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser">http://example.org:9090/plugins/restapi/v1/users/testuser</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"username"</span><span class="token punctuation">:</span> <span class="token string">"testuser"</span><span class="token punctuation">,</span>
-    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"Test User edit"</span><span class="token punctuation">,</span>
-    <span class="token string">"email"</span><span class="token punctuation">:</span> <span class="token string">"test@edit.de"</span><span class="token punctuation">,</span>
-    <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"property"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-            <span class="token string">"@key"</span><span class="token punctuation">:</span> <span class="token string">"keyname"</span><span class="token punctuation">,</span>
-            <span class="token string">"@value"</span><span class="token punctuation">:</span> <span class="token string">"value"</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "username": "testuser",
+    "name": "Test User edit",
+    "email": "test@edit.de",
+    "properties": {
+        "property": {
+            "@key": "keyname",
+            "@value": "value"
+        }
+    }
+}
 </code></pre>
 <p><strong>REST API Version 1.3.0 and later - Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"username"</span><span class="token punctuation">:</span> <span class="token string">"testuser"</span><span class="token punctuation">,</span>
-    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"Test User edit"</span><span class="token punctuation">,</span>
-    <span class="token string">"email"</span><span class="token punctuation">:</span> <span class="token string">"test@edit.de"</span><span class="token punctuation">,</span>
-    <span class="token string">"properties"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span>
-            <span class="token string">"key"</span><span class="token punctuation">:</span> <span class="token string">"keyname"</span><span class="token punctuation">,</span>
-            <span class="token string">"value"</span><span class="token punctuation">:</span> <span class="token string">"value"</span>
-        <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "username": "testuser",
+    "name": "Test User edit",
+    "email": "test@edit.de",
+    "properties": [
+        {
+            "key": "keyname",
+            "value": "value"
+        }
+    ]
+}
 </code></pre>
 <h2 id="retrieve-all-user-groups">Retrieve all user groups</h2>
 <p>Endpoint to get group names of a specific user</p>
@@ -497,25 +501,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Groups</p>
 <h3 id="possible-parameters-4">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-5">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-5">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -530,25 +534,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> Groups<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
 <h3 id="possible-parameters-5">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-6">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-6">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -557,11 +561,11 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser/groups">http://example.org:9090/plugins/restapi/v1/users/testuser/groups</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groups</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>Admins<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>Support<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groups</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;groups&gt;
+    &lt;groupname&gt;Admins&lt;/groupname&gt;
+    &lt;groupname&gt;Support&lt;/groupname&gt;
+&lt;/groups&gt;
 </code></pre>
 <h2 id="add-user-to-group">Add user to group</h2>
 <p>Endpoint to add user to a group</p>
@@ -571,31 +575,31 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
 <h3 id="possible-parameters-6">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-<tr>
-<td>groupName</td>
-<td>@Path</td>
-<td>Exact group name</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-7">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>groupName</td>
+            <td>@Path</td>
+            <td>Exact group name</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-7">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -611,25 +615,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> Groups<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-7">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-8">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-8">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -638,11 +642,11 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser/groups">http://example.org:9090/plugins/restapi/v1/users/testuser/groups</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groups</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>Admins<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>Support<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groups</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;groups&gt;
+    &lt;groupname&gt;Admins&lt;/groupname&gt;
+    &lt;groupname&gt;Support&lt;/groupname&gt;
+&lt;/groups&gt;
 </code></pre>
 <h2 id="delete-a-user-from-a-group">Delete a user from a group</h2>
 <p>Endpoint to remove a user from a group</p>
@@ -652,31 +656,31 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-8">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-<tr>
-<td>groupName</td>
-<td>@Path</td>
-<td>Exact group name</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-9">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>groupName</td>
+            <td>@Path</td>
+            <td>Exact group name</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-9">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -692,25 +696,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
 <h3 id="possible-parameters-9">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-10">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-10">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -725,25 +729,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-10">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-11">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-11">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -758,25 +762,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Roster</p>
 <h3 id="possible-parameters-11">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-12">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-12">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -791,25 +795,25 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 <p><strong>Payload:</strong> RosterItem<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
 <h3 id="possible-parameters-12">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-13">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-13">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -819,21 +823,21 @@ The secret key can be defined in Openfire Admin console under Server &gt; Server
 </blockquote>
 <p><strong>Payload:</strong><br>
 Payload Example 1 (required parameters):</p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>peter@pan.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;rosterItem&gt;
+	&lt;jid&gt;peter@pan.de&lt;/jid&gt;
+&lt;/rosterItem&gt;
 </code></pre>
 <p>Payload Example 2 (available parameters):</p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>peter@pan1.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nickname</span><span class="token punctuation">&gt;</span></span>Peter1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nickname</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subscriptionType</span><span class="token punctuation">&gt;</span></span>3<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subscriptionType</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groups</span><span class="token punctuation">&gt;</span></span>
-		<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>Friends<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groups</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;rosterItem&gt;
+	&lt;jid&gt;peter@pan1.de&lt;/jid&gt;
+	&lt;nickname&gt;Peter1&lt;/nickname&gt;
+	&lt;subscriptionType&gt;3&lt;/subscriptionType&gt;
+	&lt;groups&gt;
+		&lt;group&gt;Friends&lt;/group&gt;
+	&lt;/groups&gt;
+&lt;/rosterItem&gt;
 </code></pre>
 <h2 id="delete-a-user-roster-entry">Delete a user roster entry</h2>
 <p>Endpoint to remove a roster entry from a user</p>
@@ -843,31 +847,31 @@ Payload Example 1 (required parameters):</p>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-13">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-<tr>
-<td>jid</td>
-<td>@Path</td>
-<td>JID of the roster item</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-14">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>jid</td>
+            <td>@Path</td>
+            <td>JID of the roster item</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-14">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -882,31 +886,31 @@ Payload Example 1 (required parameters):</p>
 <p><strong>Payload:</strong> RosterItem<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
 <h3 id="possible-parameters-14">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>Exact username</td>
-<td></td>
-</tr>
-<tr>
-<td>jid</td>
-<td>@Path</td>
-<td>JID of the roster item</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-15">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>Exact username</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>jid</td>
+            <td>@Path</td>
+            <td>JID of the roster item</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-15">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -915,15 +919,15 @@ Payload Example 1 (required parameters):</p>
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/users/testuser/roster/peter@pan.de">http://example.org:9090/plugins/restapi/v1/users/testuser/roster/peter@pan.de</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>peter@pan.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nickname</span><span class="token punctuation">&gt;</span></span>Peter Pan<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nickname</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subscriptionType</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subscriptionType</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groups</span><span class="token punctuation">&gt;</span></span>
-		<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>Support<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groups</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;rosterItem&gt;
+	&lt;jid&gt;peter@pan.de&lt;/jid&gt;
+	&lt;nickname&gt;Peter Pan&lt;/nickname&gt;
+	&lt;subscriptionType&gt;0&lt;/subscriptionType&gt;
+	&lt;groups&gt;
+		&lt;group&gt;Support&lt;/group&gt;
+	&lt;/groups&gt;
+&lt;/rosterItem&gt;
 </code></pre>
 <h1 id="chat-room-related-rest-endpoints">Chat room related REST Endpoints</h1>
 <h2 id="retrieve-all-chat-rooms">Retrieve all chat rooms</h2>
@@ -934,37 +938,39 @@ Payload Example 1 (required parameters):</p>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Chatrooms</p>
 <h3 id="possible-parameters-15">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-<tr>
-<td>type</td>
-<td>@QueryParam</td>
-<td><strong>public:</strong> Only as List Room in Directory set rooms <br> <strong>all:</strong> All rooms.</td>
-<td>public</td>
-</tr>
-<tr>
-<td>search</td>
-<td>@QueryParam</td>
-<td>Search/Filter by room name. <br> This act like the wildcard search %String%</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-16">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>@QueryParam</td>
+            <td>**public:** Only as List Room in Directory set rooms  
+**all:** All rooms.</td>
+            <td>public</td>
+        </tr>
+        <tr>
+            <td>search</td>
+            <td>@QueryParam</td>
+            <td>Search/Filter by room name.  
+This act like the wildcard search %String%</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-16">Examples</h3>
 <blockquote>
 <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -982,31 +988,31 @@ Payload Example 1 (required parameters):</p>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Chatroom</p>
 <h3 id="possible-parameters-16">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-17">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-17">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -1022,31 +1028,31 @@ Payload Example 1 (required parameters):</p>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Participants</p>
 <h3 id="possible-parameters-17">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-18">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-18">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -1061,74 +1067,69 @@ Payload Example 1 (required parameters):</p>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Occupants</p>
 <h3 id="possible-parameters-18">Possible parameters</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-19">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-19">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
 <blockquote>
 <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/room1/occupants">http://example.org:9090/plugins/restapi/v1/chatrooms/room1/occupants</a></p>
 </blockquote>
-        <h2 id="retrieve-chat-room-history">Retrieve chat room message history</h2>
-        <p>Endpoint to get the chat message history of a specified room.</p>
-        <blockquote>
-            <p>
-                <strong>GET</strong> /chatrooms/{roomName}/chathistory</p>
-        </blockquote>
-        <p>
-            <strong>Payload:</strong> none<br>
-            <strong>Return value:</strong> Chat History</p>
-        <h3 id="possible-parameters-18">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>roomname</td>
-                <td>@Path</td>
-                <td>Exact room name</td>
-                <td/>
-            </tr>
-            <tr>
-                <td>servicename</td>
-                <td>@QueryParam</td>
-                <td>The name of the Group Chat Service</td>
-                <td>conference</td>
-            </tr>
-            </tbody>
-        </table>
-        </p>
-
+<h2 id="retrieve-chat-room-message-history">Retrieve chat room message history</h2>
+<p>Endpoint to get the chat message history of a specified room.</p>
+<blockquote>
+<p><strong>GET</strong> /chatrooms/{roomName}/chathistory</p>
+</blockquote>
+<p><strong>Payload:</strong> none<br>
+<strong>Return value:</strong> Chat History</p>
+<h3 id="possible-parameters-19">Possible parameters</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
 <h2 id="create-a-chat-room">Create a chat room</h2>
 <p>Endpoint to create a new chat room.</p>
 <blockquote>
@@ -1136,26 +1137,26 @@ Payload Example 1 (required parameters):</p>
 </blockquote>
 <p><strong>Payload:</strong> Chatroom<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
-<h3 id="possible-parameters-19">Possible parameters</h3>
-
+<h3 id="possible-parameters-20">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="xml-examples-1">XML Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="xml-examples-1">XML Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type: application/xml</p>
@@ -1164,51 +1165,51 @@ Payload Example 1 (required parameters):</p>
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms">http://example.org:9090/plugins/restapi/v1/chatrooms</a></p>
 </blockquote>
 <p><strong>Payload Example 1 (required parameters):</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>naturalName</span><span class="token punctuation">&gt;</span></span>global-1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>naturalName</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>global<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Global Chat Room<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;chatRoom&gt;
+    &lt;naturalName&gt;global-1&lt;/naturalName&gt;
+    &lt;roomName&gt;global&lt;/roomName&gt;
+    &lt;description&gt;Global Chat Room&lt;/description&gt;
+&lt;/chatRoom&gt;
 </code></pre>
 <p><strong>Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>global<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>naturalName</span><span class="token punctuation">&gt;</span></span>global-2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>naturalName</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Global Chat Room<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subject</span><span class="token punctuation">&gt;</span></span>global-2 Subject<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subject</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationDate</span><span class="token punctuation">&gt;</span></span>2014-02-12T15:52:37.592+01:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationDate</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modificationDate</span><span class="token punctuation">&gt;</span></span>2014-09-12T15:35:54.702+02:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modificationDate</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maxUsers</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maxUsers</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>persistent</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>persistent</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>publicRoom</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>publicRoom</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>logEnabled</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>logEnabled</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>membersOnly</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>membersOnly</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>moderated</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>moderated</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRoles</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>moderator<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>participant<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>visitor<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRoles</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owners</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owner</span><span class="token punctuation">&gt;</span></span>owner@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owner</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owners</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admins</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admin</span><span class="token punctuation">&gt;</span></span>admin@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admin</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admins</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcasts</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcast</span><span class="token punctuation">&gt;</span></span>outcast1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcast</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcasts</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;chatRoom&gt;
+    &lt;roomName&gt;global&lt;/roomName&gt;
+    &lt;naturalName&gt;global-2&lt;/naturalName&gt;
+    &lt;description&gt;Global Chat Room&lt;/description&gt;
+    &lt;subject&gt;global-2 Subject&lt;/subject&gt;
+    &lt;creationDate&gt;2014-02-12T15:52:37.592+01:00&lt;/creationDate&gt;
+    &lt;modificationDate&gt;2014-09-12T15:35:54.702+02:00&lt;/modificationDate&gt;
+    &lt;maxUsers&gt;0&lt;/maxUsers&gt;
+    &lt;persistent&gt;true&lt;/persistent&gt;
+    &lt;publicRoom&gt;true&lt;/publicRoom&gt;
+    &lt;registrationEnabled&gt;false&lt;/registrationEnabled&gt;
+    &lt;canAnyoneDiscoverJID&gt;false&lt;/canAnyoneDiscoverJID&gt;
+    &lt;canOccupantsChangeSubject&gt;false&lt;/canOccupantsChangeSubject&gt;
+    &lt;canOccupantsInvite&gt;false&lt;/canOccupantsInvite&gt;
+    &lt;canChangeNickname&gt;false&lt;/canChangeNickname&gt;
+    &lt;logEnabled&gt;true&lt;/logEnabled&gt;
+    &lt;loginRestrictedToNickname&gt;false&lt;/loginRestrictedToNickname&gt;
+    &lt;membersOnly&gt;false&lt;/membersOnly&gt;
+    &lt;moderated&gt;false&lt;/moderated&gt;
+    &lt;broadcastPresenceRoles&gt;
+        &lt;broadcastPresenceRole&gt;moderator&lt;/broadcastPresenceRole&gt;
+        &lt;broadcastPresenceRole&gt;participant&lt;/broadcastPresenceRole&gt;
+        &lt;broadcastPresenceRole&gt;visitor&lt;/broadcastPresenceRole&gt;
+    &lt;/broadcastPresenceRoles&gt;
+    &lt;owners&gt;
+        &lt;owner&gt;owner@localhost&lt;/owner&gt;
+    &lt;/owners&gt;
+    &lt;admins&gt;
+        &lt;admin&gt;admin@localhost&lt;/admin&gt;
+    &lt;/admins&gt;
+    &lt;members&gt;
+        &lt;member&gt;member2@localhost&lt;/member&gt;
+        &lt;member&gt;member1@localhost&lt;/member&gt;
+    &lt;/members&gt;
+    &lt;outcasts&gt;
+        &lt;outcast&gt;outcast1@localhost&lt;/outcast&gt;
+    &lt;/outcasts&gt;
+&lt;/chatRoom&gt;
 </code></pre>
 <h3 id="json-examples-1">JSON Examples</h3>
 <blockquote>
@@ -1219,100 +1220,100 @@ Payload Example 1 (required parameters):</p>
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms">http://example.org:9090/plugins/restapi/v1/chatrooms</a></p>
 </blockquote>
 <p><strong>Payload Example 1 (required parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-	<span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"global"</span><span class="token punctuation">,</span>
-	<span class="token string">"naturalName"</span><span class="token punctuation">:</span> <span class="token string">"global-2"</span><span class="token punctuation">,</span>
-	<span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room"</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+	"roomName": "global",
+	"naturalName": "global-2",
+	"description": "Global chat room"
+}
 </code></pre>
 <p><strong>Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"global-1"</span><span class="token punctuation">,</span>
-    <span class="token string">"naturalName"</span><span class="token punctuation">:</span> <span class="token string">"global-1_test_hello"</span><span class="token punctuation">,</span>
-    <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room"</span><span class="token punctuation">,</span>
-    <span class="token string">"subject"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room subject"</span><span class="token punctuation">,</span>
-    <span class="token string">"creationDate"</span><span class="token punctuation">:</span> <span class="token string">"2012-10-18T16:55:12.803+02:00"</span><span class="token punctuation">,</span>
-    <span class="token string">"modificationDate"</span><span class="token punctuation">:</span> <span class="token string">"2014-07-10T09:49:12.411+02:00"</span><span class="token punctuation">,</span>
-    <span class="token string">"maxUsers"</span><span class="token punctuation">:</span> <span class="token string">"0"</span><span class="token punctuation">,</span>
-    <span class="token string">"persistent"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"publicRoom"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"registrationEnabled"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"canAnyoneDiscoverJID"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"canOccupantsChangeSubject"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"canOccupantsInvite"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"canChangeNickname"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"logEnabled"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"loginRestrictedToNickname"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"membersOnly"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"moderated"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"broadcastPresenceRoles"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"broadcastPresenceRole"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-            <span class="token string">"moderator"</span><span class="token punctuation">,</span>
-            <span class="token string">"participant"</span><span class="token punctuation">,</span>
-            <span class="token string">"visitor"</span>
-        <span class="token punctuation">]</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token string">"owners"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"owner"</span><span class="token punctuation">:</span> <span class="token string">"owner@localhost"</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token string">"admins"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"admin"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-            <span class="token string">"admin@localhost"</span><span class="token punctuation">,</span>
-            <span class="token string">"admin2@localhost"</span>
-        <span class="token punctuation">]</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token string">"members"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"member"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-            <span class="token string">"member@localhost"</span><span class="token punctuation">,</span>
-            <span class="token string">"member2@localhost"</span>
-        <span class="token punctuation">]</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token string">"outcasts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
-        <span class="token string">"outcast"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-            <span class="token string">"outcast@localhost"</span><span class="token punctuation">,</span>
-            <span class="token string">"outcast2@localhost"</span>
-        <span class="token punctuation">]</span>
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "roomName": "global-1",
+    "naturalName": "global-1_test_hello",
+    "description": "Global chat room",
+    "subject": "Global chat room subject",
+    "creationDate": "2012-10-18T16:55:12.803+02:00",
+    "modificationDate": "2014-07-10T09:49:12.411+02:00",
+    "maxUsers": "0",
+    "persistent": "true",
+    "publicRoom": "true",
+    "registrationEnabled": "false",
+    "canAnyoneDiscoverJID": "true",
+    "canOccupantsChangeSubject": "false",
+    "canOccupantsInvite": "false",
+    "canChangeNickname": "false",
+    "logEnabled": "true",
+    "loginRestrictedToNickname": "true",
+    "membersOnly": "false",
+    "moderated": "false",
+    "broadcastPresenceRoles": {
+        "broadcastPresenceRole": [
+            "moderator",
+            "participant",
+            "visitor"
+        ]
+    },
+    "owners": {
+        "owner": "owner@localhost"
+    },
+    "admins": {
+        "admin": [
+            "admin@localhost",
+            "admin2@localhost"
+        ]
+    },
+    "members": {
+        "member": [
+            "member@localhost",
+            "member2@localhost"
+        ]
+    },
+    "outcasts": {
+        "outcast": [
+            "outcast@localhost",
+            "outcast2@localhost"
+        ]
+    }
+}
 </code></pre>
 <p><strong>REST API Version 1.3.0 and later - Payload Example 2 (available parameters):</strong></p>
-<pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
-    <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"global-1"</span><span class="token punctuation">,</span>
-    <span class="token string">"naturalName"</span><span class="token punctuation">:</span> <span class="token string">"global-1_test_hello"</span><span class="token punctuation">,</span>
-    <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room"</span><span class="token punctuation">,</span>
-    <span class="token string">"subject"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room subject"</span><span class="token punctuation">,</span>
-    <span class="token string">"creationDate"</span><span class="token punctuation">:</span> <span class="token string">"2012-10-18T16:55:12.803+02:00"</span><span class="token punctuation">,</span>
-    <span class="token string">"modificationDate"</span><span class="token punctuation">:</span> <span class="token string">"2014-07-10T09:49:12.411+02:00"</span><span class="token punctuation">,</span>
-    <span class="token string">"maxUsers"</span><span class="token punctuation">:</span> <span class="token string">"0"</span><span class="token punctuation">,</span>
-    <span class="token string">"persistent"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"publicRoom"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"registrationEnabled"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"canAnyoneDiscoverJID"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"canOccupantsChangeSubject"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"canOccupantsInvite"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"canChangeNickname"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"logEnabled"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"loginRestrictedToNickname"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span>
-    <span class="token string">"membersOnly"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"moderated"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span>
-    <span class="token string">"broadcastPresenceRoles"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-	    <span class="token string">"moderator"</span><span class="token punctuation">,</span>
-	    <span class="token string">"participant"</span><span class="token punctuation">,</span>
-	    <span class="token string">"visitor"</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-    <span class="token string">"owners"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-	   <span class="token string">"owner@localhost"</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-    <span class="token string">"admins"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-       <span class="token string">"admin@localhost"</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-    <span class="token string">"members"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-		<span class="token string">"member@localhost"</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-    <span class="token string">"outcasts"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
-		<span class="token string">"outcast@localhost"</span>
-	<span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
+<pre><code>{
+    "roomName": "global-1",
+    "naturalName": "global-1_test_hello",
+    "description": "Global chat room",
+    "subject": "Global chat room subject",
+    "creationDate": "2012-10-18T16:55:12.803+02:00",
+    "modificationDate": "2014-07-10T09:49:12.411+02:00",
+    "maxUsers": "0",
+    "persistent": "true",
+    "publicRoom": "true",
+    "registrationEnabled": "false",
+    "canAnyoneDiscoverJID": "true",
+    "canOccupantsChangeSubject": "false",
+    "canOccupantsInvite": "false",
+    "canChangeNickname": "false",
+    "logEnabled": "true",
+    "loginRestrictedToNickname": "true",
+    "membersOnly": "false",
+    "moderated": "false",
+    "broadcastPresenceRoles": [
+	    "moderator",
+	    "participant",
+	    "visitor"
+    ],
+    "owners": [
+	   "owner@localhost"
+    ],
+    "admins": [
+       "admin@localhost"
+    ],
+    "members": [
+		"member@localhost"
+    ],
+    "outcasts": [
+		"outcast@localhost"
+	]
+}
 </code></pre>
 <h2 id="delete-a-chat-room">Delete a chat room</h2>
 <p>Endpoint to delete a chat room.</p>
@@ -1321,32 +1322,32 @@ Payload Example 1 (required parameters):</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-20">Possible parameters</h3>
-
+<h3 id="possible-parameters-21">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-20">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-20">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -1361,32 +1362,32 @@ Payload Example 1 (required parameters):</p>
 </blockquote>
 <p><strong>Payload:</strong> Chatroom<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-21">Possible parameters</h3>
-
+<h3 id="possible-parameters-22">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-21">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-21">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -1395,42 +1396,81 @@ Payload Example 1 (required parameters):</p>
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global">http://example.org:9090/plugins/restapi/v1/chatrooms/global</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>global<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>naturalName</span><span class="token punctuation">&gt;</span></span>global-2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>naturalName</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Global Chat Room edit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subject</span><span class="token punctuation">&gt;</span></span>New subject<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subject</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>password</span><span class="token punctuation">&gt;</span></span>test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>password</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationDate</span><span class="token punctuation">&gt;</span></span>2014-02-12T15:52:37.592+01:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationDate</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modificationDate</span><span class="token punctuation">&gt;</span></span>2014-09-12T14:20:56.286+02:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modificationDate</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maxUsers</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maxUsers</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>persistent</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>persistent</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>publicRoom</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>publicRoom</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>logEnabled</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>logEnabled</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>membersOnly</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>membersOnly</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>moderated</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>moderated</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRoles</span><span class="token punctuation">/&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owners</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owner</span><span class="token punctuation">&gt;</span></span>owner@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owner</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owners</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admins</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admin</span><span class="token punctuation">&gt;</span></span>admin@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admin</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admins</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcasts</span><span class="token punctuation">&gt;</span></span>
-        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcast</span><span class="token punctuation">&gt;</span></span>outcast1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcast</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcasts</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;chatRoom&gt;
+    &lt;roomName&gt;global&lt;/roomName&gt;
+    &lt;naturalName&gt;global-2&lt;/naturalName&gt;
+    &lt;description&gt;Global Chat Room edit&lt;/description&gt;
+    &lt;subject&gt;New subject&lt;/subject&gt;
+    &lt;password&gt;test&lt;/password&gt;
+    &lt;creationDate&gt;2014-02-12T15:52:37.592+01:00&lt;/creationDate&gt;
+    &lt;modificationDate&gt;2014-09-12T14:20:56.286+02:00&lt;/modificationDate&gt;
+    &lt;maxUsers&gt;0&lt;/maxUsers&gt;
+    &lt;persistent&gt;true&lt;/persistent&gt;
+    &lt;publicRoom&gt;true&lt;/publicRoom&gt;
+    &lt;registrationEnabled&gt;false&lt;/registrationEnabled&gt;
+    &lt;canAnyoneDiscoverJID&gt;false&lt;/canAnyoneDiscoverJID&gt;
+    &lt;canOccupantsChangeSubject&gt;false&lt;/canOccupantsChangeSubject&gt;
+    &lt;canOccupantsInvite&gt;false&lt;/canOccupantsInvite&gt;
+    &lt;canChangeNickname&gt;false&lt;/canChangeNickname&gt;
+    &lt;logEnabled&gt;true&lt;/logEnabled&gt;
+    &lt;loginRestrictedToNickname&gt;false&lt;/loginRestrictedToNickname&gt;
+    &lt;membersOnly&gt;false&lt;/membersOnly&gt;
+    &lt;moderated&gt;false&lt;/moderated&gt;
+    &lt;broadcastPresenceRoles/&gt;
+    &lt;owners&gt;
+        &lt;owner&gt;owner@localhost&lt;/owner&gt;
+    &lt;/owners&gt;
+    &lt;admins&gt;
+        &lt;admin&gt;admin@localhost&lt;/admin&gt;
+    &lt;/admins&gt;
+    &lt;members&gt;
+        &lt;member&gt;member2@localhost&lt;/member&gt;
+        &lt;member&gt;member1@localhost&lt;/member&gt;
+    &lt;/members&gt;
+    &lt;outcasts&gt;
+        &lt;outcast&gt;outcast1@localhost&lt;/outcast&gt;
+    &lt;/outcasts&gt;
+&lt;/chatRoom&gt;
 </code></pre>
+<h2 id="invite-user-to-a-chat-room">Invite user to a chat Room</h2>
+<p>Endpoint to invite a user to a room.</p>
+<blockquote>
+<p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
+<strong>Header:</strong> Content-Type: application/xml<br>
+<strong>POST</strong> <a href="http://localhost:9090/plugins/restapi/v1/chatrooms/%7BroomName%7D/invite/%7Bname%7D">http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite/{name}</a></p>
+</blockquote>
+<p><strong>Payload Example:</strong></p>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;mucInvitation&gt;
+    &lt;reason&gt;Hello, come to this room, it is nice&lt;/reason&gt;
+&lt;/mucInvitation&gt;
+</code></pre>
+<p><strong>Return value:</strong> HTTP status 200 (Ok)</p>
+<h3 id="possible-parameters-23">Possible parameters</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>@Path</td>
+            <td>The local username or the user JID</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
 <h2 id="add-user-with-role-to-chat-room">Add user with role to chat room</h2>
 <p>Endpoint to add a new user with role to a room.</p>
 <blockquote>
@@ -1438,44 +1478,48 @@ Payload Example 1 (required parameters):</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
-<h3 id="possible-parameters-22">Possible parameters</h3>
-
+<h3 id="possible-parameters-24">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>name</td>
-<td>@Path</td>
-<td>The local username or the user JID</td>
-<td></td>
-</tr>
-<tr>
-<td>roles</td>
-<td>@Path</td>
-<td>Available roles: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-22">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>@Path</td>
+            <td>The local username or the user JID</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>roles</td>
+            <td>@Path</td>
+            <td>Available roles:  
+**owners**  
+**admins**  
+**members**  
+**outcasts**</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-22">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -1495,44 +1539,48 @@ Payload Example 1 (required parameters):</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 201 (Created)</p>
-<h3 id="possible-parameters-23">Possible parameters</h3>
-
+<h3 id="possible-parameters-25">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>name</td>
-<td>@Path</td>
-<td>The group name</td>
-<td></td>
-</tr>
-<tr>
-<td>roles</td>
-<td>@Path</td>
-<td>Available roles: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-23">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>@Path</td>
+            <td>The group name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>roles</td>
+            <td>@Path</td>
+            <td>Available roles:  
+**owners**  
+**admins**  
+**members**  
+**outcasts**</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-23">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -1549,44 +1597,48 @@ Payload Example 1 (required parameters):</p>
 DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-24">Possible parameters</h3>
-
+<h3 id="possible-parameters-26">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomname</td>
-<td>@Path</td>
-<td>Exact room name</td>
-<td></td>
-</tr>
-<tr>
-<td>name</td>
-<td>@Path</td>
-<td>The local username or the user JID</td>
-<td></td>
-</tr>
-<tr>
-<td>roles</td>
-<td>@Path</td>
-<td>Available roles: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
-<td></td>
-</tr>
-<tr>
-<td>servicename</td>
-<td>@QueryParam</td>
-<td>The name of the Group Chat Service</td>
-<td>conference</td>
-</tr>
-</tbody>
-</table><h3 id="examples-24">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomname</td>
+            <td>@Path</td>
+            <td>Exact room name</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>@Path</td>
+            <td>The local username or the user JID</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>roles</td>
+            <td>@Path</td>
+            <td>Available roles:  
+**owners**  
+**admins**  
+**members**  
+**outcasts**</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>servicename</td>
+            <td>@QueryParam</td>
+            <td>The name of the Group Chat Service</td>
+            <td>conference</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-24">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -1621,26 +1673,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> System property</p>
-<h3 id="possible-parameters-25">Possible parameters</h3>
-
+<h3 id="possible-parameters-27">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>propertyName</td>
-<td>@Path</td>
-<td>The name of system property</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-26">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>propertyName</td>
+            <td>@Path</td>
+            <td>The name of system property</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-26">Examples</h3>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain">http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain</a></p>
 <h2 id="create-a-system-property">Create a system property</h2>
@@ -1659,8 +1711,8 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties">http://example.org:9090/plugins/restapi/v1/system/properties</a></p>
 </blockquote>
 <p><strong>Payload Example:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyName<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyValue<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;property key="propertyName" value="propertyValue"/&gt;
 </code></pre>
 <h2 id="delete-a-system-property">Delete a system property</h2>
 <p>Endpoint to delete a system property</p>
@@ -1669,26 +1721,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-26">Possible parameters</h3>
-
+<h3 id="possible-parameters-28">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>propertyName</td>
-<td>@Path</td>
-<td>The name of system property</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-28">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>propertyName</td>
+            <td>@Path</td>
+            <td>The name of system property</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-28">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -1702,26 +1754,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> System property<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-27">Possible parameters</h3>
-
+<h3 id="possible-parameters-29">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>propertyName</td>
-<td>@Path</td>
-<td>The name of system property</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-29">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>propertyName</td>
+            <td>@Path</td>
+            <td>The name of system property</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-29">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -1730,8 +1782,8 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyName<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>anotherValue<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;property key="propertyName" value="anotherValue"/&gt;
 </code></pre>
 <h2 id="retrieve-concurrent-sessions">Retrieve concurrent sessions</h2>
 <p>Endpoint to get count of concurrent sessions</p>
@@ -1765,26 +1817,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Group</p>
-<h3 id="possible-parameters-28">Possible parameters</h3>
-
+<h3 id="possible-parameters-30">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>groupName</td>
-<td>@Path</td>
-<td>The name of the group</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-32">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>groupName</td>
+            <td>@Path</td>
+            <td>The name of the group</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-32">Examples</h3>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/moderators">http://example.org:9090/plugins/restapi/v1/groups/moderators</a></p>
 <h2 id="create-a-group">Create a group</h2>
@@ -1803,11 +1855,11 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups">http://example.org:9090/plugins/restapi/v1/groups</a></p>
 </blockquote>
 <p><strong>Payload Example:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>GroupName<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Some description<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;group&gt;
+	&lt;name&gt;GroupName&lt;/name&gt;
+	&lt;description&gt;Some description&lt;/description&gt;
+&lt;/group&gt;
 </code></pre>
 <h2 id="delete-a-group">Delete a group</h2>
 <p>Endpoint to delete a group</p>
@@ -1816,26 +1868,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-29">Possible parameters</h3>
-
+<h3 id="possible-parameters-31">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>groupName</td>
-<td>@Path</td>
-<td>The name of the group</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-34">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>groupName</td>
+            <td>@Path</td>
+            <td>The name of the group</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-34">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -1849,26 +1901,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> Group<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-30">Possible parameters</h3>
-
+<h3 id="possible-parameters-32">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>groupName</td>
-<td>@Path</td>
-<td>The name of the group</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-35">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>groupName</td>
+            <td>@Path</td>
+            <td>The name of the group</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-35">Examples</h3>
 <blockquote>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=<br>
 <strong>Header:</strong> Content-Type application/xml</p>
@@ -1877,11 +1929,11 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate">http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>groupNameToUpdate<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>New description<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;group&gt;
+	&lt;name&gt;groupNameToUpdate&lt;/name&gt;
+	&lt;description&gt;New description&lt;/description&gt;
+&lt;/group&gt;
 </code></pre>
 <h1 id="session-related-rest-endpoints">Session related REST Endpoints</h1>
 <h2 id="retrieve-all-user-session">Retrieve all user session</h2>
@@ -1905,26 +1957,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Sessions</p>
-<h3 id="possible-parameters-31">Possible parameters</h3>
-
+<h3 id="possible-parameters-33">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>The username of the user</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-37">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>The username of the user</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-37">Examples</h3>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
 <h2 id="close-all-user-sessions">Close all user sessions</h2>
@@ -1934,26 +1986,26 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> HTTP status 200 (OK)</p>
-<h3 id="possible-parameters-32">Possible parameters</h3>
-
+<h3 id="possible-parameters-34">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@Path</td>
-<td>The username of the user</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-38">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@Path</td>
+            <td>The username of the user</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-38">Examples</h3>
 <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
 <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
 <h1 id="message-related-rest-endpoints">Message related REST Endpoints</h1>
@@ -1972,10 +2024,10 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/messages/users">http://example.org:9090/plugins/restapi/v1/messages/users</a></p>
 </blockquote>
 <p><strong>Payload:</strong></p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">&gt;</span></span>
-	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>Your message<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;message&gt;
+	&lt;body&gt;Your message&lt;/body&gt;
+&lt;/message&gt;
 </code></pre>
 <h1 id="security-audit-related-rest-endpoints">Security Audit related REST Endpoints</h1>
 <h2 id="retrieve-the-security-audit-logs">Retrieve the Security audit logs</h2>
@@ -1985,50 +2037,50 @@ DELETE /chatrooms/{roomName}/{roles}/{name}</p>
 </blockquote>
 <p><strong>Payload:</strong> none<br>
 <strong>Return value:</strong> Security Audit Logs</p>
-<h3 id="possible-parameters-33">Possible parameters</h3>
-
+<h3 id="possible-parameters-35">Possible parameters</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Parameter Type</th>
-<th>Description</th>
-<th>Default value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>@QueryParam</td>
-<td>Username of user to look up</td>
-<td></td>
-</tr>
-<tr>
-<td>startTime</td>
-<td>@QueryParam</td>
-<td>Oldest timestamp of range of logs to retrieve</td>
-<td></td>
-</tr>
-<tr>
-<td>endTime</td>
-<td>@QueryParam</td>
-<td>Most recent timestamp of range of logs to retrieve</td>
-<td>0 (until now)</td>
-</tr>
-<tr>
-<td>offset</td>
-<td>@QueryParam</td>
-<td>Number of logs to skip</td>
-<td></td>
-</tr>
-<tr>
-<td>limit</td>
-<td>@QueryParam</td>
-<td>Number of logs to retrieve</td>
-<td></td>
-</tr>
-</tbody>
-</table><h3 id="examples-40">Examples</h3>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Parameter Type</th>
+            <th>Description</th>
+            <th>Default value</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>@QueryParam</td>
+            <td>Username of user to look up</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>startTime</td>
+            <td>@QueryParam</td>
+            <td>Oldest timestamp of range of logs to retrieve</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>endTime</td>
+            <td>@QueryParam</td>
+            <td>Most recent timestamp of range of logs to retrieve</td>
+            <td>0 (until now)</td>
+        </tr>
+        <tr>
+            <td>offset</td>
+            <td>@QueryParam</td>
+            <td>Number of logs to skip</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>limit</td>
+            <td>@QueryParam</td>
+            <td>Number of logs to retrieve</td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="examples-40">Examples</h3>
 <blockquote>
 <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
 </blockquote>
@@ -2043,417 +2095,418 @@ Since version RESP API 1.3.2 you can also use GZIP to compress the payload of th
 “<strong>Content-Encoding: gzip</strong>” for the request. “<strong>Accept-Encoding: gzip</strong>” for the response.</p>
 <h2 id="data-types">Data types</h2>
 <h3 id="user">User</h3>
-
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>username</td>
-<td>No</td>
-<td>The username of the user</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Yes</td>
-<td>The name of the user</td>
-</tr>
-<tr>
-<td>email</td>
-<td>Yes</td>
-<td>The email of the user</td>
-</tr>
-<tr>
-<td>password</td>
-<td>No</td>
-<td>The password of the user</td>
-</tr>
-<tr>
-<td>properties</td>
-<td>Yes</td>
-<td>List of properties. Property is a key / value object. The key must to be per user unique</td>
-</tr>
-</tbody>
-</table><h3 id="rosteritem">RosterItem</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>username</td>
+            <td>No</td>
+            <td>The username of the user</td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>Yes</td>
+            <td>The name of the user</td>
+        </tr>
+        <tr>
+            <td>email</td>
+            <td>Yes</td>
+            <td>The email of the user</td>
+        </tr>
+        <tr>
+            <td>password</td>
+            <td>No</td>
+            <td>The password of the user</td>
+        </tr>
+        <tr>
+            <td>properties</td>
+            <td>Yes</td>
+            <td>List of properties. Property is a key / value object. The key must to be per user unique</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="rosteritem">RosterItem</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>jid</td>
-<td>No</td>
-<td>The JID of the roster item</td>
-</tr>
-<tr>
-<td>nickname</td>
-<td>Yes</td>
-<td>The nickname for the user when used in this roster</td>
-</tr>
-<tr>
-<td>subscriptionType</td>
-<td>Yes</td>
-<td>The subscription type <br> Possible numeric values are: -1 (remove), 0 (none), 1 (to), 2 (from), 3 (both)</td>
-</tr>
-<tr>
-<td>groups</td>
-<td>No</td>
-<td>A list of groups to organize roster entries under (e.g. friends, co-workers, etc.)</td>
-</tr>
-</tbody>
-</table><h3 id="chatroom">Chatroom</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>jid</td>
+            <td>No</td>
+            <td>The JID of the roster item</td>
+        </tr>
+        <tr>
+            <td>nickname</td>
+            <td>Yes</td>
+            <td>The nickname for the user when used in this roster</td>
+        </tr>
+        <tr>
+            <td>subscriptionType</td>
+            <td>Yes</td>
+            <td>The subscription type  
+Possible numeric values are: -1 (remove), 0 (none), 1 (to), 2 (from), 3 (both)</td>
+        </tr>
+        <tr>
+            <td>groups</td>
+            <td>No</td>
+            <td>A list of groups to organize roster entries under (e.g. friends, co-workers, etc.)</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="chatroom">Chatroom</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>roomName</td>
-<td>No</td>
-<td>The name/id of the room. Can only contains lowercase and alphanumeric characters.</td>
-</tr>
-<tr>
-<td>naturalName</td>
-<td>No</td>
-<td>Also the name of the room, but can contains non alphanumeric characters. It’s mainly used for users while discovering rooms hosted by the Multi-User Chat service.</td>
-</tr>
-<tr>
-<td>description</td>
-<td>No</td>
-<td>Description text of the room.</td>
-</tr>
-<tr>
-<td>subject</td>
-<td>Yes</td>
-<td>Subject of the room.</td>
-</tr>
-<tr>
-<td>password</td>
-<td>Yes</td>
-<td>The password that the user must provide to enter the room</td>
-</tr>
-<tr>
-<td>creationDate</td>
-<td>Yes</td>
-<td>The date when the room was created. Will be automatically set by creation. Example: 2014-07-10T09:49:12.411+02:00</td>
-</tr>
-<tr>
-<td>modificationDate</td>
-<td>Yes</td>
-<td>The last date when the room’s configuration was modified. If the room’s configuration  was never modified then the initial value will be the same as the creation date. Will be automatically set by update. Example: 2014-07-10T09:49:12.411+02:00</td>
-</tr>
-<tr>
-<td>maxUsers</td>
-<td>Yes</td>
-<td>the maximum number of occupants that can be simultaneously in the room. 0 means unlimited number of occupants.</td>
-</tr>
-<tr>
-<td>persistent</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. Persistent rooms are saved to the database to make their configurations persistent together with the affiliation of the users. Otherwise the room will be destroyed if the last occupant leave the room.</td>
-</tr>
-<tr>
-<td>publicRoom</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if the room is searchable and visible through service discovery.</td>
-</tr>
-<tr>
-<td>registrationEnabled</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if users are allowed to register with the room. By default, room registration is enabled.</td>
-</tr>
-<tr>
-<td>canAnyoneDiscoverJID</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if every presence packet will include the JID of every occupant.</td>
-</tr>
-<tr>
-<td>canOccupantsChangeSubject</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if participants are allowed to change the room’s subject.</td>
-</tr>
-<tr>
-<td>canOccupantsInvite</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if occupants can invite other users to the room. If the room does not require an invitation to enter (i.e. is not members-only) then any occupant can send invitations. On the other hand, if the room is members-only and occupants cannot send invitation then only the room owners and admins are allowed to send invitations.</td>
-</tr>
-<tr>
-<td>canChangeNickname</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if room occupants are allowed to change their nicknames in the room. By default, occupants are allowed to change their nicknames.</td>
-</tr>
-<tr>
-<td>logEnabled</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if the room’s conversation is being logged. If logging is activated the room conversation will be saved to the database every couple of minutes. The saving frequency is the same for all the rooms and can be configured by changing the property “xmpp.muc.tasks.log.timeout”.</td>
-</tr>
-<tr>
-<td>loginRestrictedToNickname</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if registered users can only join the room using their registered nickname. By default, registered users can join the room using any nickname.</td>
-</tr>
-<tr>
-<td>membersOnly</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if the room requires an invitation to enter. That is if the room is members-only.</td>
-</tr>
-<tr>
-<td>moderated</td>
-<td>Yes</td>
-<td>Can be “true” or “false”. True if the room in which only those with “voice” may send messages to all occupants.</td>
-</tr>
-<tr>
-<td>broadcastPresenceRoles</td>
-<td>Yes</td>
-<td>The list of roles of which presence will be broadcasted to the rest of the occupants.</td>
-</tr>
-<tr>
-<td>owners</td>
-<td>Yes</td>
-<td>A collection with the current list of owners. The collection contains the bareJID of the users with owner affiliation.</td>
-</tr>
-<tr>
-<td>admins</td>
-<td>Yes</td>
-<td>A collection with the current list of admins. The collection contains the bareJID of the users with admin affiliation.</td>
-</tr>
-<tr>
-<td>members</td>
-<td>Yes</td>
-<td>A collection with the current list of room members. The collection contains the bareJID of the users with member affiliation. If the room is not members-only then the list  will contain the users that registered with the room and therefore they may have reserved a nickname.</td>
-</tr>
-<tr>
-<td>outcasts</td>
-<td>Yes</td>
-<td>A collection with the current list of outcast users. An outcast user is not allowed to join the room again. The collection contains the bareJID of the users with outcast affiliation.</td>
-</tr>
-<tr>
-<td>ownerGroups</td>
-<td>Yes</td>
-<td>A collection with the current list of groups with owner affiliation. The collection contains the name only.</td>
-</tr>
-<tr>
-<td>adminGroups</td>
-<td>Yes</td>
-<td>A collection with the current list of groups with admin affiliation. The collection contains the name only.</td>
-</tr>
-<tr>
-<td>memberGroups</td>
-<td>Yes</td>
-<td>A collection with the current list of groups with member affiliation. The collection contains the name only.</td>
-</tr>
-<tr>
-<td>outcastGroups</td>
-<td>Yes</td>
-<td>A collection with the current list of groups with outcast affiliation. The collection contains the name only.</td>
-</tr>
-</tbody>
-</table><h3 id="group">Group</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>roomName</td>
+            <td>No</td>
+            <td>The name/id of the room. Can only contains lowercase and alphanumeric characters.</td>
+        </tr>
+        <tr>
+            <td>naturalName</td>
+            <td>No</td>
+            <td>Also the name of the room, but can contains non alphanumeric characters. It’s mainly used for users while discovering rooms hosted by the Multi-User Chat service.</td>
+        </tr>
+        <tr>
+            <td>description</td>
+            <td>No</td>
+            <td>Description text of the room.</td>
+        </tr>
+        <tr>
+            <td>subject</td>
+            <td>Yes</td>
+            <td>Subject of the room.</td>
+        </tr>
+        <tr>
+            <td>password</td>
+            <td>Yes</td>
+            <td>The password that the user must provide to enter the room</td>
+        </tr>
+        <tr>
+            <td>creationDate</td>
+            <td>Yes</td>
+            <td>The date when the room was created. Will be automatically set by creation. Example: 2014-07-10T09:49:12.411+02:00</td>
+        </tr>
+        <tr>
+            <td>modificationDate</td>
+            <td>Yes</td>
+            <td>The last date when the room’s configuration was modified. If the room’s configuration was never modified then the initial value will be the same as the creation date. Will be automatically set by update. Example: 2014-07-10T09:49:12.411+02:00</td>
+        </tr>
+        <tr>
+            <td>maxUsers</td>
+            <td>Yes</td>
+            <td>the maximum number of occupants that can be simultaneously in the room. 0 means unlimited number of occupants.</td>
+        </tr>
+        <tr>
+            <td>persistent</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. Persistent rooms are saved to the database to make their configurations persistent together with the affiliation of the users. Otherwise the room will be destroyed if the last occupant leave the room.</td>
+        </tr>
+        <tr>
+            <td>publicRoom</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if the room is searchable and visible through service discovery.</td>
+        </tr>
+        <tr>
+            <td>registrationEnabled</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if users are allowed to register with the room. By default, room registration is enabled.</td>
+        </tr>
+        <tr>
+            <td>canAnyoneDiscoverJID</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if every presence packet will include the JID of every occupant.</td>
+        </tr>
+        <tr>
+            <td>canOccupantsChangeSubject</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if participants are allowed to change the room’s subject.</td>
+        </tr>
+        <tr>
+            <td>canOccupantsInvite</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if occupants can invite other users to the room. If the room does not require an invitation to enter (i.e. is not members-only) then any occupant can send invitations. On the other hand, if the room is members-only and occupants cannot send invitation then only the room owners and admins are allowed to send invitations.</td>
+        </tr>
+        <tr>
+            <td>canChangeNickname</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if room occupants are allowed to change their nicknames in the room. By default, occupants are allowed to change their nicknames.</td>
+        </tr>
+        <tr>
+            <td>logEnabled</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if the room’s conversation is being logged. If logging is activated the room conversation will be saved to the database every couple of minutes. The saving frequency is the same for all the rooms and can be configured by changing the property “xmpp.muc.tasks.log.timeout”.</td>
+        </tr>
+        <tr>
+            <td>loginRestrictedToNickname</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if registered users can only join the room using their registered nickname. By default, registered users can join the room using any nickname.</td>
+        </tr>
+        <tr>
+            <td>membersOnly</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if the room requires an invitation to enter. That is if the room is members-only.</td>
+        </tr>
+        <tr>
+            <td>moderated</td>
+            <td>Yes</td>
+            <td>Can be “true” or “false”. True if the room in which only those with “voice” may send messages to all occupants.</td>
+        </tr>
+        <tr>
+            <td>broadcastPresenceRoles</td>
+            <td>Yes</td>
+            <td>The list of roles of which presence will be broadcasted to the rest of the occupants.</td>
+        </tr>
+        <tr>
+            <td>owners</td>
+            <td>Yes</td>
+            <td>A collection with the current list of owners. The collection contains the bareJID of the users with owner affiliation.</td>
+        </tr>
+        <tr>
+            <td>admins</td>
+            <td>Yes</td>
+            <td>A collection with the current list of admins. The collection contains the bareJID of the users with admin affiliation.</td>
+        </tr>
+        <tr>
+            <td>members</td>
+            <td>Yes</td>
+            <td>A collection with the current list of room members. The collection contains the bareJID of the users with member affiliation. If the room is not members-only then the list will contain the users that registered with the room and therefore they may have reserved a nickname.</td>
+        </tr>
+        <tr>
+            <td>outcasts</td>
+            <td>Yes</td>
+            <td>A collection with the current list of outcast users. An outcast user is not allowed to join the room again. The collection contains the bareJID of the users with outcast affiliation.</td>
+        </tr>
+        <tr>
+            <td>ownerGroups</td>
+            <td>Yes</td>
+            <td>A collection with the current list of groups with owner affiliation. The collection contains the name only.</td>
+        </tr>
+        <tr>
+            <td>adminGroups</td>
+            <td>Yes</td>
+            <td>A collection with the current list of groups with admin affiliation. The collection contains the name only.</td>
+        </tr>
+        <tr>
+            <td>memberGroups</td>
+            <td>Yes</td>
+            <td>A collection with the current list of groups with member affiliation. The collection contains the name only.</td>
+        </tr>
+        <tr>
+            <td>outcastGroups</td>
+            <td>Yes</td>
+            <td>A collection with the current list of groups with outcast affiliation. The collection contains the name only.</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="group">Group</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>name</td>
-<td>No</td>
-<td>The name of the group</td>
-</tr>
-<tr>
-<td>description</td>
-<td>No</td>
-<td>The description of the group</td>
-</tr>
-<tr>
-<td>admins</td>
-<td>Yes</td>
-<td>A collection with current admins of the group</td>
-</tr>
-<tr>
-<td>members</td>
-<td>Yes</td>
-<td>A collection with current members of the group</td>
-</tr>
-</tbody>
-</table><h3 id="system-property">System Property</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>name</td>
+            <td>No</td>
+            <td>The name of the group</td>
+        </tr>
+        <tr>
+            <td>description</td>
+            <td>No</td>
+            <td>The description of the group</td>
+        </tr>
+        <tr>
+            <td>admins</td>
+            <td>Yes</td>
+            <td>A collection with current admins of the group</td>
+        </tr>
+        <tr>
+            <td>members</td>
+            <td>Yes</td>
+            <td>A collection with current members of the group</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="system-property">System Property</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>key</td>
-<td>No</td>
-<td>The name of the system property</td>
-</tr>
-<tr>
-<td>value</td>
-<td>No</td>
-<td>The value of the system property</td>
-</tr>
-</tbody>
-</table><h3 id="session">Session</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>key</td>
+            <td>No</td>
+            <td>The name of the system property</td>
+        </tr>
+        <tr>
+            <td>value</td>
+            <td>No</td>
+            <td>The value of the system property</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="session">Session</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>sessionId</td>
-<td>No</td>
-<td>Full JID of a user e.g. (<a href="mailto:testUser@testserver.de">testUser@testserver.de</a>/SomeRessource)</td>
-</tr>
-<tr>
-<td>username</td>
-<td>No</td>
-<td>The username associated with this session. Can be also “Anonymous”.</td>
-</tr>
-<tr>
-<td>ressource</td>
-<td>Yes</td>
-<td>Ressource name</td>
-</tr>
-<tr>
-<td>node</td>
-<td>No</td>
-<td>Can be “Local” or “Remote”</td>
-</tr>
-<tr>
-<td>sessionStatus</td>
-<td>No</td>
-<td>The current status of this session. Can be “Closed”, “Connected”, “Authenticated” or “Unknown”.</td>
-</tr>
-<tr>
-<td>presenceStatus</td>
-<td>No</td>
-<td>The status of this presence packet, a natural-language description of availability status.</td>
-</tr>
-<tr>
-<td>priority</td>
-<td>No</td>
-<td>The priority of the session. The valid priority range is -128 through 128.</td>
-</tr>
-<tr>
-<td>hostAddress</td>
-<td>No</td>
-<td>Tthe IP address string in textual presentation.</td>
-</tr>
-<tr>
-<td>hostName</td>
-<td>No</td>
-<td>The host name for this IP address.</td>
-</tr>
-<tr>
-<td>creationDate</td>
-<td>No</td>
-<td>The date the session was created.</td>
-</tr>
-<tr>
-<td>lastActionDate</td>
-<td>No</td>
-<td>The time the session last had activity.</td>
-</tr>
-<tr>
-<td>secure</td>
-<td>No</td>
-<td>Is “true” if this connection is secure.</td>
-</tr>
-</tbody>
-</table><h3 id="sessions-count">Sessions count</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>sessionId</td>
+            <td>No</td>
+            <td>Full JID of a user e.g. ([testUser@testserver.de](mailto:testUser@testserver.de)/SomeRessource)</td>
+        </tr>
+        <tr>
+            <td>username</td>
+            <td>No</td>
+            <td>The username associated with this session. Can be also “Anonymous”.</td>
+        </tr>
+        <tr>
+            <td>ressource</td>
+            <td>Yes</td>
+            <td>Ressource name</td>
+        </tr>
+        <tr>
+            <td>node</td>
+            <td>No</td>
+            <td>Can be “Local” or “Remote”</td>
+        </tr>
+        <tr>
+            <td>sessionStatus</td>
+            <td>No</td>
+            <td>The current status of this session. Can be “Closed”, “Connected”, “Authenticated” or “Unknown”.</td>
+        </tr>
+        <tr>
+            <td>presenceStatus</td>
+            <td>No</td>
+            <td>The status of this presence packet, a natural-language description of availability status.</td>
+        </tr>
+        <tr>
+            <td>priority</td>
+            <td>No</td>
+            <td>The priority of the session. The valid priority range is -128 through 128.</td>
+        </tr>
+        <tr>
+            <td>hostAddress</td>
+            <td>No</td>
+            <td>Tthe IP address string in textual presentation.</td>
+        </tr>
+        <tr>
+            <td>hostName</td>
+            <td>No</td>
+            <td>The host name for this IP address.</td>
+        </tr>
+        <tr>
+            <td>creationDate</td>
+            <td>No</td>
+            <td>The date the session was created.</td>
+        </tr>
+        <tr>
+            <td>lastActionDate</td>
+            <td>No</td>
+            <td>The time the session last had activity.</td>
+        </tr>
+        <tr>
+            <td>secure</td>
+            <td>No</td>
+            <td>Is “true” if this connection is secure.</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="sessions-count">Sessions count</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>clusterSessions</td>
-<td>No</td>
-<td>Number of client sessions that are authenticated with the server. This includes anonymous and non-anoymous users from the whole cluster.</td>
-</tr>
-<tr>
-<td>localSessions</td>
-<td>No</td>
-<td>Number of client sessions that are authenticated with the server. This includes anonymous and non-anoymous users.</td>
-</tr>
-</tbody>
-</table><h3 id="security-audit-logs">Security Audit Logs</h3>
-
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>clusterSessions</td>
+            <td>No</td>
+            <td>Number of client sessions that are authenticated with the server. This includes anonymous and non-anoymous users from the whole cluster.</td>
+        </tr>
+        <tr>
+            <td>localSessions</td>
+            <td>No</td>
+            <td>Number of client sessions that are authenticated with the server. This includes anonymous and non-anoymous users.</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id="security-audit-logs">Security Audit Logs</h3>
 <table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Optional</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>logId</td>
-<td>No</td>
-<td>unique ID of this log</td>
-</tr>
-<tr>
-<td>username</td>
-<td>No</td>
-<td>the username of the user who performed this event</td>
-</tr>
-<tr>
-<td>timestamp</td>
-<td>No</td>
-<td>the time stamp of when this event occurred</td>
-</tr>
-<tr>
-<td>summary</td>
-<td>No</td>
-<td>the summary, or short description of what transpired in the event</td>
-</tr>
-<tr>
-<td>node</td>
-<td>No</td>
-<td>the node that triggered the event, usually a hostname or IP address</td>
-</tr>
-<tr>
-<td>details</td>
-<td>No</td>
-<td>detailed information about what occurred in the event</td>
-</tr>
-</tbody>
-</table><h1 id="deprecated-user-service-plugin-readme">(Deprecated) User Service Plugin Readme</h1>
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Optional</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>logId</td>
+            <td>No</td>
+            <td>unique ID of this log</td>
+        </tr>
+        <tr>
+            <td>username</td>
+            <td>No</td>
+            <td>the username of the user who performed this event</td>
+        </tr>
+        <tr>
+            <td>timestamp</td>
+            <td>No</td>
+            <td>the time stamp of when this event occurred</td>
+        </tr>
+        <tr>
+            <td>summary</td>
+            <td>No</td>
+            <td>the summary, or short description of what transpired in the event</td>
+        </tr>
+        <tr>
+            <td>node</td>
+            <td>No</td>
+            <td>the node that triggered the event, usually a hostname or IP address</td>
+        </tr>
+        <tr>
+            <td>details</td>
+            <td>No</td>
+            <td>detailed information about what occurred in the event</td>
+        </tr>
+    </tbody>
+</table>
+<h1 id="deprecated-user-service-plugin-readme">(Deprecated) User Service Plugin Readme</h1>
 <h2 id="overview">Overview</h2>
 <p>The User Service Plugin provides the ability to add,edit,delete users and manage their rosters by sending an http request to the server. It is intended to be used by applications automating the user administration process. This plugin’s functionality is useful for applications that need to administer users outside of the Openfire admin console. An example of such an application might be a live sports reporting application that uses XMPP as its transport, and creates/deletes users according to the receipt, or non receipt, of a subscription fee.</p>
 <h2 id="installation-1">Installation</h2>
@@ -2463,63 +2516,63 @@ Since version RESP API 1.3.2 you can also use GZIP to compress the payload of th
 <h2 id="using-the-plugin">Using the Plugin</h2>
 <p>To administer users, submit HTTP requests to the userservice service. The service address is [hostname]plugins/restapi/userservice. For example, if your server name is “<a href="http://example.com">example.com</a>”, the URL is <a href="http://example.com/plugins/restapi/userservice">http://example.com/plugins/restapi/userservice</a></p>
 <p>The following parameters can be passed into the request:</p>
-
 <table>
-<thead>
-<tr>
-<th>Name</th>
-<th></th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>type</td>
-<td>Required</td>
-<td>The admin service required. Possible values are ‘add’, ‘delete’, ‘update’, ‘enable’, ‘disable’, ‘add_roster’, ‘update_roster’, ‘delete_roster’, ‘grouplist’, ‘usergrouplist’.</td>
-</tr>
-<tr>
-<td>secret</td>
-<td>Required</td>
-<td>The secret key that allows access to the User Service.</td>
-</tr>
-<tr>
-<td>username</td>
-<td>Required</td>
-<td>The username of the user to ‘add’, ‘delete’, ‘update’, ‘enable’, ‘disable’, ‘add_roster’, ‘update_roster’, ‘delete_roster’. ie the part before the @ symbol.</td>
-</tr>
-<tr>
-<td>password</td>
-<td>Required for ‘add’ operation</td>
-<td>The password of the new user or the user being updated.</td>
-</tr>
-<tr>
-<td>name</td>
-<td>Optional</td>
-<td>The display name of the new user or the user being updated. For ‘add_roster’, ‘update_roster’ operations specifies the nickname of the roster item.</td>
-</tr>
-<tr>
-<td>email</td>
-<td>Optional</td>
-<td>The email address of the new user or the user being updated.</td>
-</tr>
-<tr>
-<td>groups</td>
-<td>Optional</td>
-<td>List of groups where the user is a member. Values are comma delimited. When used with types “add” or “update”, it adds the user to shared groups and auto-creates new groups. When used with ‘add_roster’ and ‘update_roster’, it adds the user to roster groups provided the group name does not clash with an existing shared group.</td>
-</tr>
-<tr>
-<td>item_jid</td>
-<td>Required for ‘add_roster’, ‘update_roster’, ‘delete_roster’ operations.</td>
-<td>The JID of the roster item</td>
-</tr>
-<tr>
-<td>subscription</td>
-<td>Optional</td>
-<td>Type of subscription for ‘add_roster’, ‘update_roster’ operations. Possible numeric values are: -1(remove), 0(none), 1(to), 2(from), 3(both).</td>
-</tr>
-</tbody>
-</table><h2 id="sample-html">Sample HTML</h2>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th></th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>type</td>
+            <td>Required</td>
+            <td>The admin service required. Possible values are ‘add’, ‘delete’, ‘update’, ‘enable’, ‘disable’, ‘add_roster’, ‘update_roster’, ‘delete_roster’, ‘grouplist’, ‘usergrouplist’.</td>
+        </tr>
+        <tr>
+            <td>secret</td>
+            <td>Required</td>
+            <td>The secret key that allows access to the User Service.</td>
+        </tr>
+        <tr>
+            <td>username</td>
+            <td>Required</td>
+            <td>The username of the user to ‘add’, ‘delete’, ‘update’, ‘enable’, ‘disable’, ‘add_roster’, ‘update_roster’, ‘delete_roster’. ie the part before the @ symbol.</td>
+        </tr>
+        <tr>
+            <td>password</td>
+            <td>Required for ‘add’ operation</td>
+            <td>The password of the new user or the user being updated.</td>
+        </tr>
+        <tr>
+            <td>name</td>
+            <td>Optional</td>
+            <td>The display name of the new user or the user being updated. For ‘add_roster’, ‘update_roster’ operations specifies the nickname of the roster item.</td>
+        </tr>
+        <tr>
+            <td>email</td>
+            <td>Optional</td>
+            <td>The email address of the new user or the user being updated.</td>
+        </tr>
+        <tr>
+            <td>groups</td>
+            <td>Optional</td>
+            <td>List of groups where the user is a member. Values are comma delimited. When used with types “add” or “update”, it adds the user to shared groups and auto-creates new groups. When used with ‘add_roster’ and ‘update_roster’, it adds the user to roster groups provided the group name does not clash with an existing shared group.</td>
+        </tr>
+        <tr>
+            <td>item_jid</td>
+            <td>Required for ‘add_roster’, ‘update_roster’, ‘delete_roster’ operations.</td>
+            <td>The JID of the roster item</td>
+        </tr>
+        <tr>
+            <td>subscription</td>
+            <td>Optional</td>
+            <td>Type of subscription for ‘add_roster’, ‘update_roster’ operations. Possible numeric values are: -1(remove), 0(none), 1(to), 2(from), 3(both).</td>
+        </tr>
+    </tbody>
+</table>
+<h2 id="sample-html">Sample HTML</h2>
 <p>The following example adds a user</p>
 <p><a href="http://example.com:9090/plugins/restapi/userservice?type=add&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=franz@kafka.com">http://example.com:9090/plugins/restapi/userservice?type=add&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=franz@kafka.com</a></p>
 <p>The following example adds a user, adds two shared groups (if not existing) and adds the user to both groups.</p>
@@ -2543,60 +2596,62 @@ Since version RESP API 1.3.2 you can also use GZIP to compress the payload of th
 <p>The following example gets all groups</p>
 <p><a href="http://example.com:9090/plugins/restapi/userservice?type=grouplist&amp;secret=bigsecret">http://example.com:9090/plugins/restapi/userservice?type=grouplist&amp;secret=bigsecret</a><br>
 Which replies an XML group list formatted like this:</p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>group1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>group2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;result&gt;
+    &lt;groupname&gt;group1&lt;/groupname&gt;
+    &lt;groupname&gt;group2&lt;/groupname&gt;
+&lt;/result&gt;
 </code></pre>
 <p>The following example gets all groups for a specific user</p>
 <p><a href="http://example.com:9090/plugins/restapi/userservice?type=usergrouplist&amp;secret=bigsecret&amp;username=kafka">http://example.com:9090/plugins/restapi/userservice?type=usergrouplist&amp;secret=bigsecret&amp;username=kafka</a><br>
 Which replies an XML group list formatted like this:</p>
-<pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>usergroup1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>usergroup2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span>
+<pre><code>&lt;result&gt;
+    &lt;groupname&gt;usergroup1&lt;/groupname&gt;
+    &lt;groupname&gt;usergroup2&lt;/groupname&gt;
+&lt;/result&gt;
 </code></pre>
-<p>* When sending double characters (Chinese/Japanese/Korean etc) you should URLEncode the string as utf8.<br>
+<ul>
+<li>When sending double characters (Chinese/Japanese/Korean etc) you should URLEncode the string as utf8.<br>
 In Java this is done like this<br>
 URLEncoder.encode(username, “UTF-8”));<br>
-If the strings are encoded incorrectly, double byte characters will look garbeled in the Admin Console.</p>
+If the strings are encoded incorrectly, double byte characters will look garbeled in the Admin Console.</li>
+</ul>
 <h2 id="server-reply">Server Reply</h2>
 <p>The server will reply to all User Service requests with an XML result page. If the request was processed successfully the return will be a “result” element with a text body of “OK”, or an XML grouplist formatted like in the example for “grouplist” and “usergrouplist” above. If the request was unsuccessful, the return will be an “error” element with a text body of one of the following error strings.</p>
-
 <table>
-<thead>
-<tr>
-<th>Error String</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>IllegalArgumentException</td>
-<td>One of the parameters passed in to the User Service was bad.</td>
-</tr>
-<tr>
-<td>UserNotFoundException</td>
-<td>No user of the name specified, for a delete or update operation, exists on this server. For ‘update_roster’ operation, roster item to be updated was not found.</td>
-</tr>
-<tr>
-<td>UserAlreadyExistsException</td>
-<td>A user with the same name as the user about to be added, already exists. For ‘add_roster’ operation, roster item with the same JID already exists.</td>
-</tr>
-<tr>
-<td>RequestNotAuthorised</td>
-<td>The supplied secret does not match the secret specified in the Admin Console or the requester is not a valid IP address.</td>
-</tr>
-<tr>
-<td>UserServiceDisabled</td>
-<td>The User Service is currently set to disabled in the Admin Console.</td>
-</tr>
-<tr>
-<td>SharedGroupException</td>
-<td>Roster item can not be added/deleted to/from a shared group for operations with roster.</td>
-</tr>
-</tbody>
+    <thead>
+        <tr>
+            <th>Error String</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>IllegalArgumentException</td>
+            <td>One of the parameters passed in to the User Service was bad.</td>
+        </tr>
+        <tr>
+            <td>UserNotFoundException</td>
+            <td>No user of the name specified, for a delete or update operation, exists on this server. For ‘update_roster’ operation, roster item to be updated was not found.</td>
+        </tr>
+        <tr>
+            <td>UserAlreadyExistsException</td>
+            <td>A user with the same name as the user about to be added, already exists. For ‘add_roster’ operation, roster item with the same JID already exists.</td>
+        </tr>
+        <tr>
+            <td>RequestNotAuthorised</td>
+            <td>The supplied secret does not match the secret specified in the Admin Console or the requester is not a valid IP address.</td>
+        </tr>
+        <tr>
+            <td>UserServiceDisabled</td>
+            <td>The User Service is currently set to disabled in the Admin Console.</td>
+        </tr>
+        <tr>
+            <td>SharedGroupException</td>
+            <td>Roster item can not be added/deleted to/from a shared group for operations with roster.</td>
+        </tr>
+    </tbody>
 </table>
+
     </div>
   </div>
 </body>
