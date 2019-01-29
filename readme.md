@@ -84,8 +84,11 @@ propertyValue | @QueryParam   | Filter by user propertyKey and propertyValue. <b
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/users
+
 >**GET** http://example.org:9090/plugins/restapi/v1/users?search=testuser
+
 >**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname
+
 >**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname&propertyValue=keyvalue
 
 If you want to get a JSON format result, please add "**Accept: application/json**" to the **Header**.
@@ -552,8 +555,11 @@ search      | @QueryParam   | Search/Filter by room name. <br> This act like the
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms
+
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all
+
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all&servicename=privateconf
+
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?search=test
 
 ## Retrieve a chat room
@@ -575,6 +581,7 @@ servicename |	@QueryParam	 | The name of the Group Chat Service |	conference
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test
+
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test?servicename=privateconf
 
 ## Retrieve chat room participants 
