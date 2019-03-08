@@ -164,7 +164,7 @@
                     <br>
                     <label style="padding-left: 25px" for="text_secret">Secret
                         key:</label>
-                    <input type="text" name="secret" value="<%=secret%>"
+                    <input type="text" name="secret" value="<%=(secret != null ? secret : "")%>"
                         id="text_secret">
                     <br>
                     <input type="radio" name="authtype" value="custom"
@@ -175,7 +175,7 @@
                     <div style="margin-left: 20px; margin-top: 5px;"><strong>Note: changing back and forth from custom authentication filter forces the REST API plugin reloading</strong></div>
                     <label style="padding-left: 25px" for="text_secret">Filter 
                         classname:</label>
-                    <input type="text" name="customAuthFilterClassName" value="<%= customAuthFilterClassName %>"
+                    <input type="text" name="customAuthFilterClassName" value="<%= (customAuthFilterClassName != null ? customAuthFilterClassName : "") %>"
                         id="custom_auth_filter_class_name" style="width:70%;padding:4px;">
                     <br>
                     <br>
