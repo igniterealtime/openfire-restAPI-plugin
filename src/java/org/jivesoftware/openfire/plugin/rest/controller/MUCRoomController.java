@@ -292,7 +292,6 @@ public class MUCRoomController {
         
         // Fire RoomUpdateEvent if cluster is started
         if (ClusterManager.isClusteringStarted()) {
-          CacheFactory.doClusterTask(new RoomAvailableEvent((LocalMUCRoom) room));
           CacheFactory.doClusterTask(new RoomUpdatedEvent((LocalMUCRoom) room));
         }
 
