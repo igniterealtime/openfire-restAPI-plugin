@@ -392,7 +392,7 @@ public class MUCRoomController {
                 mucMsgEntity.setTo(message.getTo().toString());
             if (message.getFrom()!=null && message.getFrom().toString().length()!=0)
                 mucMsgEntity.setFrom(message.getFrom().toFullJID());
-            if (message.getType()!=null && message.getTo().toString().length()!=0)
+            if (message.getType()!=null && message.getType().toString().length()!=0)
                 mucMsgEntity.setType(message.getType().name());
             if (message.getBody()!=null && message.getBody().length()!=0)
                 mucMsgEntity.setBody(message.getBody());
