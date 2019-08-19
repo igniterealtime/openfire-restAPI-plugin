@@ -14,7 +14,6 @@ import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.group.ConcurrentGroupList;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.muc.*;
-import org.jivesoftware.openfire.muc.cluster.RoomAvailableEvent;
 import org.jivesoftware.openfire.muc.cluster.RoomUpdatedEvent;
 import org.jivesoftware.openfire.muc.cluster.RoomRemovedEvent;
 import org.jivesoftware.openfire.muc.spi.LocalMUCRoom;
@@ -351,6 +350,7 @@ public class MUCRoomController {
         for (MUCRole role : serverOccupants) {
             OccupantEntity occupantEntity = new OccupantEntity();
             occupantEntity.setJid(role.getRoleAddress().toFullJID());
+            occupantEntity.setUserAddress(role.getUserAddress().toFullJID());
             occupantEntity.setRole(role.getRole().name());
             occupantEntity.setAffiliation(role.getAffiliation().name());
 
