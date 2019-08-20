@@ -7,6 +7,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class OccupantEntity {
 
     private String jid;
+    private String userAddress;
     private String role;
     private String affiliation;
 
@@ -40,4 +41,11 @@ public class OccupantEntity {
         this.affiliation = affiliation;
     }
 
+    public String getUserAddress() {
+        return userAddress;
+    }
+
+    public void setUserAddress(String userAddress) {
+        this.userAddress = userAddress;
+    }
 }
