@@ -185,7 +185,7 @@
                     <br>
                     <br>
 
-                    <P>Logging</P>
+                    <P>Additional Logging</P>
                     <input type="radio" name="loggingEnabled" value="true" id="loggingEnabledInputEnabled"
                         <%=((loggingEnabled) ? "checked" : "")%>>
                     <label for="loggingEnabledInputEnabled"><b>Enabled</b> - Logging Enabled</label>

@@ -34,7 +34,7 @@ public class ErrorResponse {
 	/**
 	 * Sets the resource.
 	 *
-	 * @param ressource the new resource
+	 * @param resource the new resource
 	 */
 	public void setResource(String resource) {
 		this.resource = resource;

@@ -14,6 +14,7 @@ The REST API Plugin provides the ability to manage Openfire by sending an REST/H
 * Get overview over all or specific user sessions
 * Send broadcast message to all online users
 * Get overview of all or specific security audit logs
+* Get chat message history from a multi user chat room
 
 ## Available REST API clients
 REST API clients are implementations of the REST API in a specific programming language.
@@ -84,11 +85,8 @@ propertyValue | @QueryParam   | Filter by user propertyKey and propertyValue. <b
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/users
-
 >**GET** http://example.org:9090/plugins/restapi/v1/users?search=testuser
-
 >**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname
-
 >**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname&propertyValue=keyvalue
 
 If you want to get a JSON format result, please add "**Accept: application/json**" to the **Header**.
@@ -186,6 +184,31 @@ Endpoint to create a new user
 }
 ```
 
+**REST API Version 1.3.0 and later - Payload Example 3 (available parameters):**
+```json
+{
+    "users": [
+        {
+            "username": "admin",
+            "name": "Administrator",
+            "email": "admin@example.com",
+            "password": "p4ssword",
+            "properties": [
+                {
+                    "key": "console.order",
+                    "value": "session-summary=0"
+                }
+            ]
+        },
+        {
+            "username": "test",
+            "name": "Test",
+            "password": "p4ssword"
+        }
+    ]
+}
+```
+
 ## Delete a user
 Endpoint to delete a user
 > **DELETE** /users/{username}
@@ -274,6 +297,21 @@ username |	@Path	 | Exact username |
             "@value": "value"
         }
     }
+}
+```
+
+**REST API Version 1.3.0 and later - Payload Example 2 (available parameters):**
+```json
+{
+    "username": "testuser",
+    "name": "Test User edit",
+    "email": "test@edit.de",
+    "properties": [
+        {
+            "key": "keyname",
+            "value": "value"
+        }
+    ]
 }
 ```
 
@@ -555,11 +593,8 @@ search      | @QueryParam   | Search/Filter by room name. <br> This act like the
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms
-
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all
-
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all&servicename=privateconf
-
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?search=test
 
 ## Retrieve a chat room
@@ -581,7 +616,6 @@ servicename |	@QueryParam	 | The name of the Group Chat Service |	conference
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test
-
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test?servicename=privateconf
 
 ## Retrieve chat room participants 
@@ -624,6 +658,21 @@ servicename | @QueryParam       | The name of the Group Chat Service | conferenc
 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/room1/occupants
 
+## Retrieve chat room message history
+Endpoint to get the chat message history of a specified room.
+
+>**GET** /chatrooms/{roomName}/chathistory
+
+**Payload:** none  
+**Return value:** Chat History
+
+### Possible parameters
+
+Parameter   | Parameter Type	| Description	  | Default value
+---------   | -------------     | --------------- | ------------
+roomname    | @Path             | Exact room name|
+servicename    | @QueryParam    | The name of the Group Chat Service | conference
+
 ## Create a chat room 
 Endpoint to create a new chat room.
 >**POST** /chatrooms
@@ -646,6 +695,7 @@ servicename | @QueryParam |	The name of the Group Chat Service | conference
 
 **Payload Example 1 (required parameters):**
 ```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <chatRoom>
     <naturalName>global-1</naturalName>
     <roomName>global</roomName>
@@ -655,6 +705,7 @@ servicename | @QueryParam |	The name of the Group Chat Service | conference
 
 **Payload Example 2 (available parameters):**
 ```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <chatRoom>
     <roomName>global</roomName>
     <naturalName>global-2</naturalName>
@@ -763,6 +814,47 @@ servicename | @QueryParam |	The name of the Group Chat Service | conference
 }
 ```
 
+**REST API Version 1.3.0 and later - Payload Example 2 (available parameters):**
+```json
+{
+    "roomName": "global-1",
+    "naturalName": "global-1_test_hello",
+    "description": "Global chat room",
+    "subject": "Global chat room subject",
+    "creationDate": "2012-10-18T16:55:12.803+02:00",
+    "modificationDate": "2014-07-10T09:49:12.411+02:00",
+    "maxUsers": "0",
+    "persistent": "true",
+    "publicRoom": "true",
+    "registrationEnabled": "false",
+    "canAnyoneDiscoverJID": "true",
+    "canOccupantsChangeSubject": "false",
+    "canOccupantsInvite": "false",
+    "canChangeNickname": "false",
+    "logEnabled": "true",
+    "loginRestrictedToNickname": "true",
+    "membersOnly": "false",
+    "moderated": "false",
+    "broadcastPresenceRoles": [
+        "moderator",
+        "participant",
+        "visitor"
+    ],
+    "owners": [
+       "owner@localhost"
+    ],
+    "admins": [
+       "admin@localhost"
+    ],
+    "members": [
+        "member@localhost"
+    ],
+    "outcasts": [
+        "outcast@localhost"
+    ]
+}
+```
+
 ## Delete a chat room 
 Endpoint to delete a chat room.
 >**DELETE** /chatrooms/{roomName}
@@ -806,6 +898,7 @@ servicename |	@QueryParam	| The name of the Group Chat Service | conference
 
 **Payload:**
 ```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <chatRoom>
     <roomName>global</roomName>
     <naturalName>global-2</naturalName>
@@ -842,6 +935,29 @@ servicename |	@QueryParam	| The name of the Group Chat Service | conference
     </outcasts>
 </chatRoom>
 ```
+
+## Invite user to a chat Room
+
+Endpoint to invite a user to a room.
+> **Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> **Header:** Content-Type: application/xml
+> **POST** http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite/{name}
+**Payload Example:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mucInvitation>
+    <reason>Hello, come to this room, it is nice</reason>
+</mucInvitation>
+```
+**Return value:** HTTP status 200 (OK)
+
+### Possible parameters
+Parameter |	Parameter Type | Description | Default value
+--------- | -------------- | -------------- | ----------
+roomname  |	@Path	       | Exact room name |	
+name  | @Path	       | The local username or the user JID |	
+
 ##  Add user with role to chat room
 Endpoint to add a new user with role to a room.
 >**POST** /chatrooms/{roomName}/{roles}/{name}
@@ -1316,12 +1432,12 @@ Parameter   | Optional   | Description
 ---------   | --------------- | ------
 sessionId | No | Full JID of a user e.g. (testUser@testserver.de/SomeRessource)
 username| No | The username associated with this session. Can be also "Anonymous".
-ressource | Yes | Ressource name
+resource | Yes | Resource name
 node | No | Can be "Local" or "Remote"
 sessionStatus | No | The current status of this session. Can be "Closed", "Connected", "Authenticated" or "Unknown".
 presenceStatus| No | The status of this presence packet, a natural-language description of availability status.
 priority| No | The priority of the session. The valid priority range is -128 through 128.
-hostAddress| No | Tthe IP address string in textual presentation.
+hostAddress| No | The IP address string in textual presentation.
 hostName| No | The host name for this IP address.
 creationDate| No | The date the session was created.
 lastActionDate| No | The time the session last had activity.
@@ -1336,12 +1452,20 @@ localSessions | No | Number of client sessions that are authenticated with the s
 ### Security Audit Logs
 Parameter   | Optional   | Description 
 ---------   | --------------- | ------
-logId| No | unique ID of this log
-username| No |  the username of the user who performed this event
-timestamp | No | the time stamp of when this event occurred
-summary| No |  the summary, or short description of what transpired in the event
-node| No | the node that triggered the event, usually a hostname or IP address
-details| No | detailed information about what occurred in the event
+logId| No | Unique ID of this log
+username| No |  The username of the user who performed this event
+timestamp | No | The time stamp of when this event occurred
+summary| No |  The summary, or short description of what transpired in the event
+node| No | The node that triggered the event, usually a hostname or IP address
+details| No | Detailed information about what occurred in the event
+
+### Occupants
+Parameter   | Optional   | Description 
+---------   | --------------- | ------
+jid| No | The JID of the MUC room
+userAddress| No |  The JID of the user
+role| No | Role of the user
+affiliation| No | Affiliation of the user
 
 # (Deprecated) User Service Plugin Readme
 

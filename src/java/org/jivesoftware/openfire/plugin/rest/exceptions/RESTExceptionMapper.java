@@ -49,13 +49,22 @@ public class RESTExceptionMapper implements ExceptionMapper<ServiceException> {
         
         ResponseBuilder responseBuilder = Response.status(exception.getStatus()).entity(errorResponse);
         List<MediaType> accepts = headers.getAcceptableMediaTypes();
-        if (accepts!=null && accepts.size() > 0) {
+
+        // If accepts header is given, respect it
+        if (accepts.size() == 1 && !accepts.get(0).isWildcardType()) {
             MediaType mediaType = accepts.get(0);
             responseBuilder = responseBuilder.type(mediaType);
         }
         else {
-            responseBuilder = responseBuilder.type(headers.getMediaType());
+            if (headers.getMediaType() != null) {
+                // if accept header is not given, take the content type media type
+                responseBuilder = responseBuilder.type(headers.getMediaType());
+            } else {
+                // if nothing is provided, take XML
+                responseBuilder = responseBuilder.type(MediaType.APPLICATION_XML);
+            }
         }
+
         return responseBuilder.build();
     }
 

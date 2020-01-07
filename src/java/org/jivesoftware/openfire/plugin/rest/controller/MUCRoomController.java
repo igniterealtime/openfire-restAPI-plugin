@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * The Class MUCRoomController.
  */
 public class MUCRoomController {
-    private static Logger logger = LoggerFactory.getLogger(MUCRoomController.class);
+    private static Logger LOG = LoggerFactory.getLogger(MUCRoomController.class);
 
     /** The Constant INSTANCE. */
     public static final MUCRoomController INSTANCE = new MUCRoomController();
@@ -57,7 +57,7 @@ public class MUCRoomController {
 
     public static void log(String logMessage) {
         if (plugin.isServiceLoggingEnabled())
-            logger.info(logMessage);
+            LOG.info(logMessage);
     }
 
     /**
@@ -72,7 +72,7 @@ public class MUCRoomController {
      * @return the chat rooms
      */
     public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) {
-        log("getChatRooms");
+        log("Get the chat rooms");
         List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
                 .getChatRooms();
 
@@ -107,7 +107,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public MUCRoomEntity getChatRoom(String roomName, String serviceName, boolean expand) throws ServiceException {
-        log("getChatRoom, "+roomName);
+        log("Get the chat room: " + roomName);
         MUCRoom chatRoom = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
                 .getChatRoom(roomName);
 
@@ -130,7 +130,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void deleteChatRoom(String roomName, String serviceName) throws ServiceException {
-        log("deleteChatRoom, "+roomName);
+        log("Delete the chat room: " + roomName);
         MUCRoom chatRoom = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
                 .getChatRoom(roomName.toLowerCase());
 
@@ -155,13 +155,10 @@ public class MUCRoomController {
      *             the service exception
      */
     public void createChatRoom(String serviceName, MUCRoomEntity mucRoomEntity) throws ServiceException {
-        log("createChatRoom, "+mucRoomEntity.getRoomName());
+        log("Create a chat room: " + mucRoomEntity.getRoomName());
         try {
             createRoom(mucRoomEntity, serviceName);
-        } catch (NotAllowedException e) {
-            throw new ServiceException("Could not create the channel", mucRoomEntity.getRoomName(),
-                    ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ForbiddenException e) {
+        } catch (NotAllowedException | ForbiddenException e) {
             throw new ServiceException("Could not create the channel", mucRoomEntity.getRoomName(),
                     ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
@@ -187,7 +184,7 @@ public class MUCRoomController {
      */
     public void updateChatRoom(String roomName, String serviceName, MUCRoomEntity mucRoomEntity)
             throws ServiceException {
-        log("updateChatRoom, "+mucRoomEntity.getRoomName());
+        log("Update a chat room: " + mucRoomEntity.getRoomName());
         try {
             // If the room name is different throw exception
             if (!roomName.equals(mucRoomEntity.getRoomName())) {
@@ -196,9 +193,7 @@ public class MUCRoomController {
                         ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
             }
             createRoom(mucRoomEntity, serviceName);
-        } catch (NotAllowedException e) {
-            throw new ServiceException("Could not update the channel", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ForbiddenException e) {
+        } catch (NotAllowedException | ForbiddenException e) {
             throw new ServiceException("Could not update the channel", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
             throw new ServiceException("Could not update the channel", roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
@@ -225,7 +220,7 @@ public class MUCRoomController {
      */
     private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName) throws NotAllowedException,
             ForbiddenException, ConflictException, AlreadyExistsException {
-        log("createRoom entry, "+mucRoomEntity.getRoomName());
+        log("Create a chat room: " + mucRoomEntity.getRoomName());
         // Set owner
         JID owner = XMPPServer.getInstance().createJID("admin", null);
         if (mucRoomEntity.getOwners() != null && mucRoomEntity.getOwners().size() > 0) {
@@ -311,7 +306,7 @@ public class MUCRoomController {
      * @return the room participants
      */
     public ParticipantEntities getRoomParticipants(String roomName, String serviceName) {
-        log("ParticipantEntities, "+roomName);
+        log("Get room participants for room: " + roomName);
         ParticipantEntities participantEntities = new ParticipantEntities();
         List<ParticipantEntity> participants = new ArrayList<ParticipantEntity>();
 
@@ -341,7 +336,7 @@ public class MUCRoomController {
      * @return the room occupants
      */
     public OccupantEntities getRoomOccupants(String roomName, String serviceName) {
-        log("getRoomOccupants, "+roomName);
+        log("Get room occupants for room: " + roomName);
         OccupantEntities occupantEntities = new OccupantEntities();
         List<OccupantEntity> occupants = new ArrayList<OccupantEntity>();
 
@@ -372,7 +367,7 @@ public class MUCRoomController {
      * @return the room chat history
      */
     public MUCRoomMessageEntities getRoomHistory(String roomName, String serviceName) throws ServiceException {
-        log("getRoomHistory, "+roomName);
+        log("Get room history for room: " + roomName);
         MUCRoomMessageEntities mucRoomMessageEntities = new MUCRoomMessageEntities();
         List<MUCRoomMessageEntity> listMessages = new ArrayList<>();
 
@@ -624,9 +619,7 @@ public class MUCRoomController {
                 .getChatRoom(roomName.toLowerCase());
         try {
             room.addMember(UserUtils.checkAndGetJID(jid), null, room.getRole());
-        } catch (ForbiddenException e) {
-            throw new ServiceException("Could not add member", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ConflictException e) {
+        } catch (ForbiddenException | ConflictException e) {
             throw new ServiceException("Could not add member", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         }
     }
@@ -648,9 +641,7 @@ public class MUCRoomController {
                 .getChatRoom(roomName.toLowerCase());
         try {
             room.addOutcast(UserUtils.checkAndGetJID(jid), null, room.getRole());
-        } catch (NotAllowedException e) {
-            throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ForbiddenException e) {
+        } catch (NotAllowedException | ForbiddenException e) {
             throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
             throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);

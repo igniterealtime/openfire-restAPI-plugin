@@ -43,16 +43,19 @@ public class AuthFilter implements ContainerRequestFilter {
     @Override
     public ContainerRequest filter(ContainerRequest containerRequest) throws WebApplicationException {
         if (!plugin.isEnabled()) {
+            LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);
         }
         
         // Let the preflight request through the authentication
         if ("OPTIONS".equals(containerRequest.getMethod())) {
+            LOG.debug("Authentication was bypassed because of OPTIONS request");
             return containerRequest;
         }
         
         // To be backwards compatible to userservice 1.*
         if ("restapi/v1/userservice".equals(containerRequest.getPath())) {
+            LOG.info("Deprecated 'userservice' endpoint was used. Please switch to the new endpoints");
             return containerRequest;
         }
 
@@ -69,12 +72,12 @@ public class AuthFilter implements ContainerRequestFilter {
                 }
             }
             if (!plugin.getAllowedIPs().contains(ipAddress)) {
-                LOG.warn("REST API rejected service to IP address: " + ipAddress);
+                LOG.warn("REST API rejected service for IP address: " + ipAddress);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         }
         
-        // Get the authentification passed in HTTP headers parameters
+        // Get the authentication passed in HTTP headers parameters
         String auth = containerRequest.getHeaderValue("authorization");
 
         if (auth == null) {
@@ -87,12 +90,14 @@ public class AuthFilter implements ContainerRequestFilter {
 
             // If username or password fail
             if (usernameAndPassword == null || usernameAndPassword.length != 2) {
+                LOG.warn("Username or password is not set");
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
 
             boolean userAdmin = AdminManager.getInstance().isUserAdmin(usernameAndPassword[0], true);
 
             if (!userAdmin) {
+                LOG.warn("Provided User is not an admin");
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
 
@@ -102,8 +107,10 @@ public class AuthFilter implements ContainerRequestFilter {
                 LOG.warn("Wrong HTTP Basic Auth authorization", e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             } catch (ConnectionException e) {
+                LOG.error("Authentication went wrong", e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             } catch (InternalUnauthenticatedException e) {
+                LOG.error("Authentication went wrong", e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         } else {

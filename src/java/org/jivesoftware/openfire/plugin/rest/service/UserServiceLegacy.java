@@ -26,7 +26,7 @@ import org.xmpp.packet.JID;
 
 @Path("restapi/v1")
 public class UserServiceLegacy {
-    private static Logger Log = LoggerFactory.getLogger(UserServiceLegacy.class);
+    private static Logger LOG = LoggerFactory.getLogger(UserServiceLegacy.class);
 
     @Context
     private HttpServletRequest request;
@@ -70,7 +70,7 @@ public class UserServiceLegacy {
                 }
             }
             if (!plugin.getAllowedIPs().contains(ipAddress)) {
-                Log.warn("User service rejected service to IP address: " + ipAddress);
+                LOG.warn("User service rejected service to IP address: " + ipAddress);
                 replyError("RequestNotAuthorised", response, out);
                 return Response.status(200).build();
             }
@@ -90,14 +90,14 @@ public class UserServiceLegacy {
 
         // Check that our plugin is enabled.
         if (!plugin.isEnabled()) {
-            Log.warn("User service plugin is disabled: " + request.getQueryString());
+            LOG.warn("User service plugin is disabled: " + request.getQueryString());
             replyError("UserServiceDisabled", response, out);
             return Response.status(200).build();
         }
 
         // Check this request is authorised
         if (secret == null || !secret.equals(plugin.getSecret())) {
-            Log.warn("An unauthorised user service request was received: " + request.getQueryString());
+            LOG.warn("An unauthorised user service request was received: " + request.getQueryString());
             replyError("RequestNotAuthorised", response, out);
             return Response.status(200).build();
         }
@@ -158,7 +158,7 @@ public class UserServiceLegacy {
                     }
                     replyMessage(message, response, out);
                 } else {
-                    Log.warn("The userService servlet received an invalid request of type: " + type);
+                    LOG.warn("The userService servlet received an invalid request of type: " + type);
                     // TODO Do something
                 }
             }
@@ -171,7 +171,7 @@ public class UserServiceLegacy {
         } catch (SharedGroupException e) {
             replyError("SharedGroupException", response, out);
         } catch (Exception e) {
-            Log.error("Error: ", e);
+            LOG.error("Error: ", e);
             replyError(e.toString(), response, out);
         }
         return Response.status(200).build();
