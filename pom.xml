@@ -8,10 +8,15 @@
     </parent>
     <groupId>org.igniterealtime.openfire.plugins</groupId>
     <artifactId>restAPI</artifactId>
-    <version>1.3.11-SNAPSHOT</version>
+    <version>1.4.0</version>
     <name>REST API Plugin</name>
     <description>Allows administration over a RESTful API.</description>
-    
+
+    <properties>
+        <jackson.version>1.9.11</jackson.version>
+        <jersey.version>1.19.4</jersey.version>
+    </properties>
+
     <developers>
 	    <developer>
 	    	<name>Roman Soldatow</name>
@@ -27,44 +32,45 @@
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-jspc-maven-plugin</artifactId>
-                <!-- Force the JSP compiler to an Openfire 4.2 compatible version -->
-                <version>9.2.14.v20151106</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.igniterealtime.openfire</groupId>
-                        <artifactId>xmppserver</artifactId>
-                        <version>${openfire.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-xc</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-jaxrs</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
    		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.19.4</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-core</artifactId>
-			<version>1.19.4</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>1.19.4</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-servlet</artifactId>
-			<version>1.19.4</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-json</artifactId>
-			<version>1.19.4</version>
+			<version>${jersey.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.ws.rs</groupId>
