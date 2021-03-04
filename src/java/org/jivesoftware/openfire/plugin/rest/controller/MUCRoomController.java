@@ -1,5 +1,6 @@
 package org.jivesoftware.openfire.plugin.rest.controller;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -18,7 +19,6 @@ import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.muc.cluster.RoomUpdatedEvent;
 import org.jivesoftware.openfire.muc.cluster.RoomRemovedEvent;
-import org.jivesoftware.openfire.muc.cluster.RoomAvailableEvent;
 import org.jivesoftware.openfire.muc.spi.LocalMUCRoom;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
@@ -48,7 +48,7 @@ public class MUCRoomController {
 
     /**
      * Gets the single instance of MUCRoomController.
-     * 
+     *
      * @return single instance of MUCRoomController
      */
     public static MUCRoomController getInstance() {
@@ -64,7 +64,7 @@ public class MUCRoomController {
 
     /**
      * Gets the chat rooms.
-     * 
+     *
      * @param serviceName
      *            the service name
      * @param channelType
@@ -99,7 +99,7 @@ public class MUCRoomController {
 
     /**
      * Gets the chat room.
-     * 
+     *
      * @param roomName
      *            the room name
      * @param serviceName
@@ -123,7 +123,7 @@ public class MUCRoomController {
 
     /**
      * Delete chat room.
-     * 
+     *
      * @param roomName
      *            the room name
      * @param serviceName
@@ -218,7 +218,7 @@ public class MUCRoomController {
      *             the forbidden exception
      * @throws ConflictException
      *             the conflict exception
-     * @throws AlreadyExistsException 
+     * @throws AlreadyExistsException
      */
     private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName) throws NotAllowedException,
             ForbiddenException, ConflictException, AlreadyExistsException {
@@ -238,7 +238,7 @@ public class MUCRoomController {
         if(!serviceRegistered) {
             XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(serviceName, serviceName, false);
         }
-        
+
         MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
                 .getChatRoom(mucRoomEntity.getRoomName().toLowerCase(), owner);
 
@@ -285,10 +285,10 @@ public class MUCRoomController {
         } else {
             room.setModificationDate(new Date());
         }
-        
+
         // Unlock the room, because the default configuration lock the room.  		
         room.unlock(room.getRole());
-        
+
         // Fire RoomUpdateEvent if cluster is started
         if (ClusterManager.isClusteringStarted()) {
           CacheFactory.doClusterTask(new RoomUpdatedEvent((LocalMUCRoom) room));
@@ -346,7 +346,7 @@ public class MUCRoomController {
         participantEntities.setParticipants(participants);
         return participantEntities;
     }
-    
+
     /**
      * Gets the room occupants.
      *
@@ -454,7 +454,7 @@ public class MUCRoomController {
 
     /**
      * Convert to MUC room entity.
-     * 
+     *
      * @param room
      *            the room
      * @return the MUC room entity
@@ -576,7 +576,7 @@ public class MUCRoomController {
             }
         }
     }
-    
+
     /**
      * Adds the admin.
      *
@@ -686,16 +686,19 @@ public class MUCRoomController {
                 .getChatRoom(roomName.toLowerCase());
         try {
               JID userJid = UserUtils.checkAndGetJID(jid);
-              
+
               // Send a presence to other room members
               List<Presence> addNonePresence = room.addNone(userJid, room.getRole());
               for (Presence presence : addNonePresence) {
-                room.send(presence);
+                  MUCRoomUtils.send(room, presence, room.getRole());
               }
         } catch (ForbiddenException e) {
             throw new ServiceException("Could not delete affiliation", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
             throw new ServiceException("Could not delete affiliation", jid, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            // Completely unknown implementation of MUCRoom::send
+            throw new ServiceException("Could not delete affiliation", jid, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR, e);
         }
     }
 }
