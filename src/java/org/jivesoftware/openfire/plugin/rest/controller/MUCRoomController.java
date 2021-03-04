@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.ws.rs.core.Response;
 
@@ -266,7 +268,9 @@ public class MUCRoomController {
             room.setRolesToBroadcastPresence(new ArrayList<String>());
         }
         // Set all roles
-        setRoles(room, mucRoomEntity);
+        if (!equalToAffiliations(room, mucRoomEntity)) {
+            setRoles(room, mucRoomEntity);
+        }
 
         // Set creation date
         if (mucRoomEntity.getCreationDate() != null) {
@@ -294,6 +298,23 @@ public class MUCRoomController {
         if (room.isPersistent()) {
             room.saveToDB();
         }
+    }
+
+    private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
+        Set<String> admins = new HashSet<>(mucRoomEntity.getAdmins());
+        Set<String> owners = new HashSet<>(mucRoomEntity.getOwners());
+        Set<String> members = new HashSet<>(mucRoomEntity.getMembers());
+        Set<String> outcasts = new HashSet<>(mucRoomEntity.getOutcasts());
+
+        Set<String> roomAdmins = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getAdmins()));
+        Set<String> roomOwners = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOwners()));
+        Set<String> roomMembers = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getMembers()));
+        Set<String> roomOutcasts = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOutcasts()));
+
+        return admins.equals(roomAdmins)
+            && owners.equals(roomOwners)
+            && members.equals(roomMembers)
+            && outcasts.equals(roomOutcasts);
     }
 
     /**

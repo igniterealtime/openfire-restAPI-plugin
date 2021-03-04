@@ -11,6 +11,7 @@ deploy:
   script: mvn deploy --settings target/ci-tooling/maven-settings-for-openfire-plugins.xml
   skip_cleanup: true
   on:
+    repo: igniterealtime/openfire-restAPI-plugin
     all_branches: true
 env:
   global:

@@ -13,7 +13,7 @@
     <description>Allows administration over a RESTful API.</description>
 
     <properties>
-        <jackson.version>1.9.11</jackson.version>
+        <jackson.version>2.12.1</jackson.version>
         <jersey.version>1.19.4</jersey.version>
     </properties>
 
@@ -38,13 +38,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-xc</artifactId>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.codehaus.jackson</groupId>
-            <artifactId>jackson-jaxrs</artifactId>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
             <version>${jackson.version}</version>
         </dependency>
    		<dependency>
