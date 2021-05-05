@@ -301,16 +301,18 @@ public class MUCRoomController {
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
-        Set<String> admins = new HashSet<>(mucRoomEntity.getAdmins());
-        Set<String> owners = new HashSet<>(mucRoomEntity.getOwners());
-        Set<String> members = new HashSet<>(mucRoomEntity.getMembers());
-        Set<String> outcasts = new HashSet<>(mucRoomEntity.getOutcasts());
+        if (mucRoomEntity == null || room == null) {
+            return false;
+        }
+        Set<String> admins = mucRoomEntity.getAdmins() != null ? new HashSet<>(mucRoomEntity.getAdmins()) : new HashSet<>();
+        Set<String> owners = mucRoomEntity.getOwners() != null ? new HashSet<>(mucRoomEntity.getOwners()) : new HashSet<>();
+        Set<String> members = mucRoomEntity.getMembers() != null ? new HashSet<>(mucRoomEntity.getMembers()) : new HashSet<>();
+        Set<String> outcasts = mucRoomEntity.getOutcasts() != null ? new HashSet<>(mucRoomEntity.getOutcasts()) : new HashSet<>();
 
-        Set<String> roomAdmins = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getAdmins()));
-        Set<String> roomOwners = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOwners()));
-        Set<String> roomMembers = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getMembers()));
-        Set<String> roomOutcasts = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOutcasts()));
-
+        Set<String> roomAdmins = room.getAdmins() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getAdmins())) : new HashSet<>();
+        Set<String> roomOwners = room.getOwners() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOwners())) : new HashSet<>();
+        Set<String> roomMembers = room.getMembers() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getMembers())) : new HashSet<>();
+        Set<String> roomOutcasts = room.getOutcasts() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOutcasts())) : new HashSet<>();
         return admins.equals(roomAdmins)
             && owners.equals(roomOwners)
             && members.equals(roomMembers)
