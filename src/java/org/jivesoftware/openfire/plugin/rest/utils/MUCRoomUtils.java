@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.muc.MUCRole;
@@ -69,6 +70,32 @@ public class MUCRoomUtils {
             result.add(new JID(jidString));
         }
         return result;
+    }
+
+    /**
+     * Convert MUCRole.role instances to string list.
+     *
+     * @param roles
+     *            the roles
+     * @return the array list<string>
+     */
+    public static List<String> convertRolesToStringList(Collection<MUCRole.Role> roles) {
+        return roles.stream()
+            .map(MUCRole.Role::toString)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Convert string instances to a MUCRole.role list.
+     *
+     * @param roles
+     *            the roles
+     * @return the array list<MUCRole.role>
+     */
+    public static List<MUCRole.Role> convertStringsToRoles(Collection<String> roles) {
+        return roles.stream()
+            .map(MUCRole.Role::valueOf)
+            .collect(Collectors.toList());
     }
 
     /**
