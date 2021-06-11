@@ -7,7 +7,7 @@
     <author>Roman Soldatow</author>
     <version>${project.version}</version>
     <date>02/24/2020</date>
-    <minServerVersion>4.1.1</minServerVersion>
+    <minServerVersion>4.6.1</minServerVersion>
     <adminconsole>
         <tab id="tab-server">
             <sidebar id="sidebar-server-settings">
