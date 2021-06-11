@@ -3,6 +3,14 @@
 
 The REST API Plugin provides the ability to manage Openfire by sending an REST/HTTP request to the server. This plugin's functionality is useful for applications that need to administer Openfire outside of the Openfire admin console.
 
+## CI Build Status
+
+[![Build Status](https://github.com/igniterealtime/openfire-restAPI-plugin/workflows/Java%20CI/badge.svg)](https://github.com/igniterealtime/openfire-restAPI-plugin/actions)
+
+## Reporting Issues
+
+Issues may be reported to the [forums](https://discourse.igniterealtime.org) or via this repo's [Github Issues](https://github.com/igniterealtime/openfire-restAPI-plugin).
+
 ## Feature list
 * Get overview over all or specific user and to create, update or delete a user
 * Get overview over all or specific group and to create, update or delete a group
