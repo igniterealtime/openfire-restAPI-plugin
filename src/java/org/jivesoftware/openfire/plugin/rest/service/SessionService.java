@@ -30,6 +30,13 @@ public class SessionService {
     }
     
     @GET
+    @Path("/load")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public SessionEntities getAllSessionsLoad() throws ServiceException {
+        return sessionController.getAllSessionsLoad();
+    }
+
+    @GET
     @Path("/{username}")
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public SessionEntities getUserSessions(@PathParam("username") String username) throws ServiceException {
