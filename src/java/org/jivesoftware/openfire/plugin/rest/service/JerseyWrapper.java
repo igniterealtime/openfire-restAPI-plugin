@@ -98,6 +98,7 @@ public class JerseyWrapper extends ResourceConfig {
 
         // Services
         registerClasses(
+            ClusteringService.class,
             GroupService.class,
             MessageService.class,
             MsgArchiveService.class,
