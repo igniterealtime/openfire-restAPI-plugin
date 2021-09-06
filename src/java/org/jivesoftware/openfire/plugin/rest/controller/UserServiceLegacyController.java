@@ -106,7 +106,7 @@ public class UserServiceLegacyController {
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
                     group = GroupManager.getInstance().createGroup(groupName);
-                    group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
                     group.getProperties().put("sharedRoster.displayName", groupName);
                     group.getProperties().put("sharedRoster.groupList", "");
                 }
@@ -188,7 +188,7 @@ public class UserServiceLegacyController {
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
                     group = GroupManager.getInstance().createGroup(groupName);
-                    group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
                     group.getProperties().put("sharedRoster.displayName", groupName);
                     group.getProperties().put("sharedRoster.groupList", "");
                 }

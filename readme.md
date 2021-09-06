@@ -1303,6 +1303,7 @@ Endpoint to create a new group
 <group>
 	<name>GroupName</name>
 	<description>Some description</description>
+	<isshared>false</isshared>
 </group>
 ```
 
@@ -1353,6 +1354,7 @@ Endpoint to update / overwrite a group
 <group>
 	<name>groupNameToUpdate</name>
 	<description>New description</description>
+    <isshared>false</isshared>
 </group>
 ```
 

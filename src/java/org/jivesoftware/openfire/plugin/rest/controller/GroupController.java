@@ -70,6 +70,7 @@ public class GroupController {
         GroupEntity groupEntity = new GroupEntity(group.getName(), group.getDescription());
         groupEntity.setAdmins(MUCRoomUtils.convertJIDsToStringList(group.getAdmins()));
         groupEntity.setMembers(MUCRoomUtils.convertJIDsToStringList(group.getMembers()));
+        groupEntity.setShared(group.getProperties().get("sharedRoster.showInRoster")=="onlyGroup");
 
         return groupEntity;
     }
@@ -90,7 +91,11 @@ public class GroupController {
                 group = GroupManager.getInstance().createGroup(groupEntity.getName());
                 group.setDescription(groupEntity.getDescription());
 
-                group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+                Boolean shared = groupEntity.getShared();
+                if(shared == null){shared = false;}
+                final String showInRoster = shared ? "onlyGroup" : "nobody";
+                group.getProperties().put("sharedRoster.showInRoster", showInRoster);
+
                 group.getProperties().put("sharedRoster.displayName", groupEntity.getName());
                 group.getProperties().put("sharedRoster.groupList", "");
             } catch (GroupAlreadyExistsException e) {
@@ -119,6 +124,11 @@ public class GroupController {
                 try {
                     group = GroupManager.getInstance().getGroup(groupName);
                     group.setDescription(groupEntity.getDescription());
+                    Boolean shared = groupEntity.getShared();
+                    if(shared != null) {
+                        final String showInRoster = shared ? "onlyGroup" : "nobody";
+                        group.getProperties().put("sharedRoster.showInRoster", showInRoster);
+                    }
                 } catch (GroupNotFoundException e) {
                     throw new ServiceException("Could not find group", groupName, ExceptionType.GROUP_NOT_FOUND,
                             Response.Status.NOT_FOUND, e);
