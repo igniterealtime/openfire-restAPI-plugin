@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.jivesoftware.admin.AuthCheckFilter;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
@@ -112,12 +113,17 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         setServiceLoggingEnabled(JiveGlobals.getBooleanProperty(SERVICE_LOGGING_ENABLED, false));
         // Listen to system property events
         PropertyEventDispatcher.addListener(this);
+
+        // Exclude this servlet from requering the user to login
+        AuthCheckFilter.addExclude(JerseyWrapper.SERVLET_URL);
     }
 
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#destroyPlugin()
      */
     public void destroyPlugin() {
+        // Release the excluded URL
+        AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
         // Stop listening to system property events
         PropertyEventDispatcher.removeListener(this);
     }

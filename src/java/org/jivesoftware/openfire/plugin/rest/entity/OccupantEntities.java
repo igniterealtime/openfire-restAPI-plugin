@@ -1,11 +1,10 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonProperty;
+import java.util.List;
 
 @XmlRootElement(name = "occupants")
 public class OccupantEntities {
