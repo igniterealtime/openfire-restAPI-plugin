@@ -1,26 +1,11 @@
 package org.jivesoftware.openfire.plugin.rest.controller;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.core.Response;
-
+import org.dom4j.Element;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.group.ConcurrentGroupList;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.muc.*;
-import org.jivesoftware.openfire.muc.cluster.RoomUpdatedEvent;
-import org.jivesoftware.openfire.muc.cluster.RoomRemovedEvent;
-import org.jivesoftware.openfire.muc.spi.LocalMUCRoom;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
@@ -28,15 +13,15 @@ import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.plugin.rest.utils.MUCRoomUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
 import org.jivesoftware.util.AlreadyExistsException;
-import org.jivesoftware.util.cache.CacheFactory;
-import org.xmpp.packet.JID;
-import org.xmpp.packet.Presence;
-
-import org.xmpp.packet.Message;
-import org.dom4j.Element;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmpp.packet.JID;
+import org.xmpp.packet.Message;
+import org.xmpp.packet.Presence;
+
+import javax.ws.rs.core.Response;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  * The Class MUCRoomController.
@@ -76,18 +61,19 @@ public class MUCRoomController {
      */
     public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) {
         log("Get the chat rooms");
-        List<MUCRoom> rooms = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRooms();
+        final MultiUserChatService service = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName);
+        Set<String> roomNames = service.getAllRoomNames();
 
         List<MUCRoomEntity> mucRoomEntities = new ArrayList<MUCRoomEntity>();
 
-        for (MUCRoom chatRoom : rooms) {
+        for (String roomName : roomNames) {
             if (roomSearch != null) {
-                if (!chatRoom.getName().contains(roomSearch)) {
+                if (!roomName.contains(roomSearch)) {
                     continue;
                 }
             }
 
+            final MUCRoom chatRoom = service.getChatRoom(roomName);
             if (channelType.equals(MUCChannelType.ALL)) {
                 mucRoomEntities.add(convertToMUCRoomEntity(chatRoom, expand));
             } else if (channelType.equals(MUCChannelType.PUBLIC) && chatRoom.isPublicRoom()) {
@@ -139,9 +125,6 @@ public class MUCRoomController {
 
         if (chatRoom != null) {
             chatRoom.destroyRoom(null, null);
-            if (ClusterManager.isClusteringStarted()) {
-                CacheFactory.doClusterTask(new RoomRemovedEvent((LocalMUCRoom) chatRoom));
-            }
         } else {
             throw new ServiceException("Could not remove the channel", roomName, ExceptionType.ROOM_NOT_FOUND, Response.Status.NOT_FOUND);
         }
@@ -290,12 +273,7 @@ public class MUCRoomController {
         // Unlock the room, because the default configuration lock the room.  		
         room.unlock(room.getRole());
 
-        // Fire RoomUpdateEvent if cluster is started
-        if (ClusterManager.isClusteringStarted()) {
-          CacheFactory.doClusterTask(new RoomUpdatedEvent((LocalMUCRoom) room));
-        }
-
-        // Save the room to the DB if the room should be persistant
+        // Save the room to the DB if the room should be persistent
         if (room.isPersistent()) {
             room.saveToDB();
         }
