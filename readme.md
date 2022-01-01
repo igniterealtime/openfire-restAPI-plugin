@@ -23,6 +23,7 @@ Issues may be reported to the [forums](https://discourse.igniterealtime.org) or 
 * Send broadcast message to all online users
 * Get overview of all or specific security audit logs
 * Get chat message history from a multi user chat room
+* Get clustering status of Openfire
 
 ## Available REST API clients
 REST API clients are implementations of the REST API in a specific programming language.
@@ -1462,6 +1463,29 @@ Endpoint to get security audit logs
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 > 
 >**GET** http://example.org:9090/plugins/restapi/v1/logs/security
+
+# Clustering related REST Endpoints
+
+## Retrieve the Clustering status
+Endpoint to get description of clustering status
+>**GET** /clustering/status
+
+**Payload:** none
+
+**Return value:** String describing the clustering status of this Openfire instance
+
+### Examples
+>**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/clustering/status
+
+### Possible Responses
+
+* SENIOR AND ONLY MEMBER
+* Senior member
+* Junior member
+* Starting up
+* Disabled
 
 # Data format
 Openfire REST API provides XML and JSON as data format. The default data format is XML.
