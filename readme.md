@@ -62,14 +62,16 @@ The configuration can be done in Openfire Admin console under Server > Server Se
 ### Basic HTTP Authentication
 To access the endpoints is that required to send the Username and Password of a Openfire Admin account in your HTTP header request.
 
-E.g. **Header:** Authorization: Basic YWRtaW46MTIzNDU=  (username: admin / password: 12345)
+E.g., for username: admin and password: 12345:
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
 
 ### Shared secret key
 
 To access the endpoints is that required to send the secret key in your header request. 
 The secret key can be defined in Openfire Admin console under Server > Server Settings > REST API.
 
-E.g. **Header:** Authorization: s3cretKey
+E.g.
+>**Header:** Authorization: s3cretKey
 
 # User related REST Endpoints
 
@@ -78,6 +80,7 @@ Endpoint to get all or filtered users
 > **GET** /users
 
 **Payload:** none
+
 **Return value:** Users
 
 ### Possible parameters
@@ -93,8 +96,11 @@ Endpoint to get all or filtered users
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/users
+
 >**GET** http://example.org:9090/plugins/restapi/v1/users?search=testuser
+
 >**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname
+
 >**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname&propertyValue=keyvalue
 
 If you want to get a JSON format result, please add "**Accept: application/json**" to the **Header**.
@@ -104,6 +110,7 @@ Endpoint to get information over a specific user
 > **GET** /users/{username}
 
 **Payload:** none
+
 **Return value:** User
 
 ### Possible parameters
@@ -114,9 +121,9 @@ Endpoint to get information over a specific user
 
 ### Examples
 
-**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
-**GET** http://example.org:9090/plugins/restapi/v1/users/testuser
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/users/testuser
 
 ## Create a user
 Endpoint to create a new user
@@ -127,9 +134,12 @@ Endpoint to create a new user
 
 ### Examples
 #### XML Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->**Header:** Content-Type: application/**xml**
 
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/**xml**
+>
 >**POST** http://example.org:9090/plugins/restapi/v1/users
 
 **Payload Example 1 (required parameters):**
@@ -158,8 +168,9 @@ Endpoint to create a new user
 ```
 #### JSON Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type: application/**json**
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/users
 
 **Payload Example 1 (required parameters):**
@@ -222,6 +233,7 @@ Endpoint to delete a user
 > **DELETE** /users/{username}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -233,6 +245,7 @@ Endpoint to delete a user
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser
 
 ## Update a user
@@ -240,6 +253,7 @@ Endpoint to update / rename a user
 > **PUT** /users/{username}
 
 **Payload:** User
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -251,8 +265,9 @@ Endpoint to update / rename a user
 ### Examples
 #### XML Example
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/users/testuser
 
 **Payload:**
@@ -270,8 +285,9 @@ Endpoint to update / rename a user
 #### Rename Example
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/users/oldUsername
 
 **Payload:**
@@ -289,8 +305,9 @@ Endpoint to update / rename a user
 
 #### JSON Example
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/json
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/users/testuser
 
 **Payload:**
@@ -328,6 +345,7 @@ Endpoint to get group names of a specific user
 > **GET** /users/{username}/groups
 
 **Payload:** none
+
 **Return value:** Groups
 
 ### Possible parameters
@@ -338,14 +356,15 @@ Endpoint to get group names of a specific user
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
->**GET ** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
+> 
+>**GET** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
 
 ## Add user to groups
 Endpoint to add user to a groups
 > **POST** /users/{username}/groups
 
 **Payload:** Groups
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -357,8 +376,9 @@ Endpoint to add user to a groups
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
 
 **Payload:**
@@ -369,11 +389,13 @@ Endpoint to add user to a groups
     <groupname>Support</groupname>
 </groups>
 ```
+
 ## Add user to group
 Endpoint to add user to a group
 > **POST** /users/{username}/groups/{groupName}
 
 **Payload:** none
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -385,8 +407,9 @@ Endpoint to add user to a group
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/groups/testGroup
 
 ## Delete a user from a groups
@@ -394,6 +417,7 @@ Endpoint to remove a user from a groups
 >**DELETE** /users/{username}/groups
 
 **Payload:** Groups
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -404,8 +428,9 @@ Endpoint to remove a user from a groups
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
 
 **Payload:**
@@ -416,11 +441,13 @@ Endpoint to remove a user from a groups
     <groupname>Support</groupname>
 </groups>
 ```
+
 ## Delete a user from a group
 Endpoint to remove a user from a group
 >**DELETE** /users/{username}/groups/{groupName}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -433,8 +460,9 @@ Endpoint to remove a user from a group
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/groups/testGroup
 
 ## Lockout a user
@@ -442,6 +470,7 @@ Endpoint to lockout / ban the user from the chat server. The user will be kicked
 >**POST** /lockouts/{username}
 
 **Payload:** none
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -452,7 +481,7 @@ Endpoint to lockout / ban the user from the chat server. The user will be kicked
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/lockouts/testuser
 
 ## Unlock a user 
@@ -460,6 +489,7 @@ Endpoint to unlock / unban the user
 >**DELETE** /lockouts/{username}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -470,7 +500,7 @@ Endpoint to unlock / unban the user
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/lockouts/testuser
 
 ## Retrieve user roster 
@@ -478,6 +508,7 @@ Endpoint to get roster entries (buddies) from a specific user
 >**GET** /users/{username}/roster
 
 **Payload:** none
+
 **Return value:** Roster
 
 ### Possible parameters
@@ -488,7 +519,7 @@ Endpoint to get roster entries (buddies) from a specific user
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/users/testuser/roster
 
 ## Create a user roster entry 
@@ -496,6 +527,7 @@ Endpoint to add a new roster entry to a user
 >**POST** /users/{username}/roster
 
 **Payload:** RosterItem
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -506,8 +538,9 @@ Endpoint to add a new roster entry to a user
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/roster
 
 **Payload:**
@@ -530,11 +563,13 @@ Payload Example 2 (available parameters):
 	</groups>
 </rosterItem>
 ```
+
 ## Delete a user roster entry 
 Endpoint to remove a roster entry from a user
 >**DELETE** /users/{username}/roster/{jid}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -546,7 +581,7 @@ Endpoint to remove a roster entry from a user
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/roster/peter@pan.de
 
 ## Update a user roster entry  
@@ -554,6 +589,7 @@ Endpoint to update a roster entry
 >**PUT** /users/{username}/roster/{jid}
 
 **Payload:** RosterItem
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -565,8 +601,9 @@ Endpoint to update a roster entry
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/users/testuser/roster/peter@pan.de
 
 **Payload:**
@@ -581,6 +618,7 @@ Endpoint to update a roster entry
 	</groups>
 </rosterItem>
 ```
+
 # Chat room related REST Endpoints
 
 ## Retrieve all chat rooms 
@@ -588,6 +626,7 @@ Endpoint to get all chat rooms
 >**GET** /chatrooms
 
 **Payload:** none
+
 **Return value:** Chatrooms
 
 ### Possible parameters
@@ -601,10 +640,13 @@ Endpoint to get all chat rooms
 ### Examples
 
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all&servicename=privateconf
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?search=test
 
 ## Retrieve a chat room
@@ -612,6 +654,7 @@ Endpoint to get information over specific chat room
 >**GET** /chatrooms<span>/{roomName}
 
 **Payload:** none
+
 **Return value:** Chatroom
 
 ### Possible parameters
@@ -624,8 +667,9 @@ Endpoint to get information over specific chat room
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test?servicename=privateconf
 
 ## Retrieve chat room participants 
@@ -633,6 +677,7 @@ Endpoint to get all participants with a role of specified room.
 >**GET** /chatrooms/{roomName}/participants
 
 **Payload:** none
+
 **Return value:** Participants
 
 ### Possible parameters
@@ -645,7 +690,7 @@ Endpoint to get all participants with a role of specified room.
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/room1/participants
 
 ## Retrieve chat room occupants
@@ -653,6 +698,7 @@ Endpoint to get all occupants (all roles / affiliations) of a specified room.
 >**GET** /chatrooms/{roomName}/occupants
 
 **Payload:** none
+
 **Return value:** Occupants
 
 ### Possible parameters
@@ -665,7 +711,7 @@ Endpoint to get all occupants (all roles / affiliations) of a specified room.
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/room1/occupants
 
 ## Retrieve chat room message history
@@ -674,6 +720,7 @@ Endpoint to get the chat message history of a specified room.
 >**GET** /chatrooms/{roomName}/chathistory
 
 **Payload:** none  
+
 **Return value:** Chat History
 
 ### Possible parameters
@@ -688,6 +735,7 @@ Endpoint to create a new chat room.
 >**POST** /chatrooms
 
 **Payload:** Chatroom
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -699,8 +747,9 @@ Endpoint to create a new chat room.
 ### XML Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type: application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms
 
 **Payload Example 1 (required parameters):**
@@ -759,8 +808,9 @@ Endpoint to create a new chat room.
 ### JSON Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type: application/json
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms
 
 **Payload Example 1 (required parameters):**
@@ -870,6 +920,7 @@ Endpoint to delete a chat room.
 >**DELETE** /chatrooms/{roomName}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -882,8 +933,9 @@ Endpoint to delete a chat room.
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/testroom
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/testroom?servicename=privateconf
 
 ## Update a chat room 
@@ -891,6 +943,7 @@ Endpoint to update a chat room.
 >**PUT** /chatrooms/{roomName}
 
 **Payload:** Chatroom
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -902,8 +955,9 @@ Endpoint to update a chat room.
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/chatrooms/global
 
 **Payload:**
@@ -950,8 +1004,11 @@ Endpoint to update a chat room.
 
 Endpoint to invite a user to a room.
 > **Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 > **Header:** Content-Type: application/xml
+> 
 > **POST** http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite/{name}
+
 **Payload Example:**
 
 ```xml
@@ -973,6 +1030,7 @@ Endpoint to add a new user with role to a room.
 >**POST** /chatrooms/{roomName}/{roles}/{name}
 
 **Payload:** none
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -986,13 +1044,19 @@ Endpoint to add a new user with role to a room.
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf
 
 ##  Add group with role to chat room
@@ -1000,6 +1064,7 @@ Endpoint to add a new group with role to a room.
 >**POST** /chatrooms/{roomName}/{roles}/group/{name}
 
 **Payload:** none
+
 **Return value:** HTTP status 201 (Created)
 
 ### Possible parameters
@@ -1013,20 +1078,26 @@ Endpoint to add a new group with role to a room.
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+>
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testGroup
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/group/testGroup
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/group/testGroup
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/group/testGroup
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testUser?servicename=privateconf
 
 
 ## Delete a user from a chat room 
 Endpoint to remove a room user role.
-DELETE /chatrooms/{roomName}/{roles}/{name}
+>**DELETE** /chatrooms/{roomName}/{roles}/{name}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -1040,13 +1111,19 @@ DELETE /chatrooms/{roomName}/{roles}/{name}
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf
 
 # System related REST Endpoints
@@ -1056,12 +1133,13 @@ Endpoint to get all system properties
 >**GET** /system/properties
 
 **Payload:** none
+
 **Return value:** System properties
  
 ### Examples
 
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/system/properties
 
 ## Retrieve system property 
@@ -1069,6 +1147,7 @@ Endpoint to get information over specific system property
 >**GET** /system/properties/{propertyName}
 
 **Payload:** none
+
 **Return value:** System property
 
 ### Possible parameters
@@ -1079,22 +1158,24 @@ Endpoint to get information over specific system property
 
 ### Examples
 
-**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
-**GET** http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain
 
 ## Create a system property 
 Endpoint to create a system property
 >**POST** system/properties
 
 **Payload:** System Property
+
 **Return value:** HTTP status 201 (Created)
 
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type: application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/system/properties
 
 **Payload Example:**
@@ -1108,6 +1189,7 @@ Endpoint to delete a system property
 >**DELETE** /system/properties/{propertyName}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -1119,7 +1201,7 @@ Endpoint to delete a system property
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/system/properties/propertyName
 
 ## Update a system property
@@ -1127,6 +1209,7 @@ Endpoint to update / overwrite a system property
 >**PUT** /system/properties/{propertyName}
 
 **Payload:** System property
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -1137,8 +1220,9 @@ Endpoint to update / overwrite a system property
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/system/properties/propertyName
 
 **Payload:**
@@ -1152,13 +1236,14 @@ Endpoint to get count of concurrent sessions
 >**GET** /system/statistics/sessions
 
 **Payload:** none
+
 **Return value:** Sessions count
 
 ### Examples
 
-**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
-**GET** http://example.org:9090/plugins/restapi/v1/system/statistics/sessions
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/system/statistics/sessions
 
 # Group related REST Endpoints
 
@@ -1167,12 +1252,13 @@ Endpoint to get all groups
 >**GET** /groups
 
 **Payload:** none
+
 **Return value:** Groups
  
 ### Examples
 
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/groups
 
 ## Retrieve a group 
@@ -1180,6 +1266,7 @@ Endpoint to get information over specific group
 >**GET** /groups/{groupName}
 
 **Payload:** none
+
 **Return value:** Group
 
 ### Possible parameters
@@ -1190,22 +1277,24 @@ Endpoint to get information over specific group
 
 ### Examples
 
-**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
-**GET** http://example.org:9090/plugins/restapi/v1/groups/moderators
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/groups/moderators
 
 ## Create a group 
 Endpoint to create a new group
 >**POST** /groups
 
 **Payload:** Group
+
 **Return value:** HTTP status 201 (Created)
 
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type: application/xml
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/groups
 
 **Payload Example:**
@@ -1222,6 +1311,7 @@ Endpoint to delete a group
 >**DELETE** /groups/{groupName}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -1233,7 +1323,7 @@ Endpoint to delete a group
 ### Examples
 
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**DELETE** http://example.org:9090/plugins/restapi/v1/groups/groupToDelete
 
 ## Update a group
@@ -1241,6 +1331,7 @@ Endpoint to update / overwrite a group
 >**PUT** /groups/{groupName}
 
 **Payload:** Group
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -1251,8 +1342,9 @@ Endpoint to update / overwrite a group
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+> 
 >**Header:** Content-Type application/xml
-
+> 
 >**PUT** http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate
 
 **Payload:**
@@ -1271,12 +1363,13 @@ Endpoint to get all user sessions
 >**GET** /sessions
 
 **Payload:** none
+
 **Return value:** Sessions
  
 ### Examples
 
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/sessions
 
 ## Retrieve the user sessions
@@ -1284,6 +1377,7 @@ Endpoint to get sessions from a user
 >**GET** /sessions/{username}
 
 **Payload:** none
+
 **Return value:** Sessions
 
 ### Possible parameters
@@ -1294,15 +1388,16 @@ Endpoint to get sessions from a user
 
 ### Examples
 
-**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
-**GET** http://example.org:9090/plugins/restapi/v1/sessions/testuser
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/sessions/testuser
 
 ## Close all user sessions
 Endpoint to close/kick sessions from a user
 >**DELETE** /sessions/{username}
 
 **Payload:** none
+
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
@@ -1313,9 +1408,9 @@ Endpoint to close/kick sessions from a user
 
 ### Examples
 
-**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-
-**DELETE** http://example.org:9090/plugins/restapi/v1/sessions/testuser
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**DELETE** http://example.org:9090/plugins/restapi/v1/sessions/testuser
 
 # Message related REST Endpoints
 
@@ -1324,12 +1419,13 @@ Endpoint to send a broadcast/server message to all online users
 >**POST** /messages/users
 
 **Payload:** Message
+
 **Return value:** HTTP status 201 (Created)
  
 ### Examples
 
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**POST** http://example.org:9090/plugins/restapi/v1/messages/users
 
 **Payload:**
@@ -1346,6 +1442,7 @@ Endpoint to get security audit logs
 >**GET** /logs/security
 
 **Payload:** none
+
 **Return value:** Security Audit Logs
 
 ### Possible parameters
@@ -1361,12 +1458,12 @@ Endpoint to get security audit logs
 ### Examples
 
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-
+> 
 >**GET** http://example.org:9090/plugins/restapi/v1/logs/security
 
 # Data format
 Openfire REST API provides XML and JSON as data format. The default data format is XML.
-To get a JSON result, please add "**Accept application/json**" to the request header.
+To get a JSON result, please add "**Accept: application/json**" to the request header.
 If you want to create a resource with JSON data format, please add "**Content-Type: application/json**".
 
 ## Data types
@@ -1571,9 +1668,12 @@ Which replies an XML group list formatted like this:
     <groupname>usergroup2</groupname>
 </result>
 ```
-\* When sending double characters (Chinese/Japanese/Korean etc) you should URLEncode the string as utf8.
+
+When sending double characters (Chinese/Japanese/Korean etc.) you should URLEncode the string as utf8.
 In Java this is done like this
-URLEncoder.encode(username, "UTF-8")); 
+
+> URLEncoder.encode(username, "UTF-8"));
+
 If the strings are encoded incorrectly, double byte characters will look garbeled in the Admin Console.
 
 ## Server Reply
@@ -1588,6 +1688,3 @@ The server will reply to all User Service requests with an XML result page. If t
 | UserServiceDisabled        | 	The User Service is currently set to disabled in the Admin Console.                                                                                             |
 | SharedGroupException       | 	Roster item can not be added/deleted to/from a shared group for operations with roster.                                                                         |
 
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExNjM0MzMwNzJdfQ==
--->
