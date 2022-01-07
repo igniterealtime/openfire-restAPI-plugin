@@ -26,7 +26,6 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
-import org.glassfish.jersey.server.ServerProperties;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.PluginMetadataHelper;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;

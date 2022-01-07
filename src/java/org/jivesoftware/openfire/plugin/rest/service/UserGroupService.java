@@ -1,20 +1,23 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
-import javax.annotation.PostConstruct;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.UserServiceController;
 import org.jivesoftware.openfire.plugin.rest.entity.UserGroupsEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
+import javax.annotation.PostConstruct;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 @Path("restapi/v1/users/{username}/groups")
+@Tag(name = "Users", description = "Managing Openfire users.")
 public class UserGroupService {
 
     private UserServiceController plugin;
@@ -25,37 +28,81 @@ public class UserGroupService {
     }
 
     @GET
+    @Operation( summary = "Get user's groups",
+        description = "Retrieve names of all groups that a particular user is in.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The names of the groups that the user is in.", content = @Content(schema = @Schema(implementation = UserGroupsEntity.class))),
+        })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public UserGroupsEntity getUserGroups(@PathParam("username") String username) throws ServiceException {
+    public UserGroupsEntity getUserGroups(
+            @Parameter(description = "The username for user for which to return group names.", required = true) @PathParam("username") String username)
+        throws ServiceException
+    {
         return new UserGroupsEntity(plugin.getUserGroups(username));
     }
 
     @POST
-    public Response addUserToGroups(@PathParam("username") String username, UserGroupsEntity userGroupsEntity)
-            throws ServiceException {
+    @Operation( summary = "Add user to groups",
+        description = "Add a particular user to a collection of groups.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "The user was added to all groups."),
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response addUserToGroups(
+            @Parameter(description = "The username of the user that is to be added to groups.", required = true) @PathParam("username") String username,
+            @RequestBody(description = "A collection of names for groups that the user is to be added to.", required = true) UserGroupsEntity userGroupsEntity)
+        throws ServiceException
+    {
         plugin.addUserToGroups(username, userGroupsEntity);
         return Response.status(Response.Status.CREATED).build();
     }
     
     @POST
     @Path("/{groupName}")
-    public Response addUserToGroup(@PathParam("username") String username, @PathParam("groupName") String groupName)
-            throws ServiceException {
+    @Operation( summary = "Add user to group",
+        description = "Add a particular user to a particular group.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "The user was added to the groups."),
+        })
+    public Response addUserToGroup(
+            @Parameter(description = "The username of the user that is to be added to a group.", required = true) @PathParam("username") String username,
+            @Parameter(description = "The name of the group that the user is to be added to.", required = true) @PathParam("groupName") String groupName)
+        throws ServiceException
+    {
         plugin.addUserToGroup(username, groupName);
         return Response.status(Response.Status.CREATED).build();
     }
     
     @DELETE
     @Path("/{groupName}")
-    public Response deleteUserFromGroup(@PathParam("username") String username, @PathParam("groupName") String groupName)
-            throws ServiceException {
+    @Operation( summary = "Delete user from group",
+        description = "Removes a user from a group.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The user was taken out of the group."),
+            @ApiResponse(responseCode = "404", description = "The group could not be found."),
+        })
+    public Response deleteUserFromGroup(
+            @Parameter(description = "The username of the user that is to be removed from a group.", required = true) @PathParam("username") String username,
+            @Parameter(description = "The name of the group that the user is to be removed from.", required = true) @PathParam("groupName") String groupName)
+        throws ServiceException
+    {
         plugin.deleteUserFromGroup(username, groupName);
         return Response.status(Response.Status.OK).build();
     }
 
     @DELETE
-    public Response deleteUserFromGroups(@PathParam("username") String username, UserGroupsEntity userGroupsEntity)
-            throws ServiceException {
+    @Operation( summary = "Delete user from groups",
+        description = "Removes a user from a collection of groups.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The user was taken out of the group."),
+            @ApiResponse(responseCode = "404", description = "One or more groups could not be found."),
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response deleteUserFromGroups(
+            @Parameter(description = "The username of the user that is to be removed from a group.", required = true) @PathParam("username") String username,
+            @RequestBody(description = "A collection of names for groups from which the user is to be removed.", required = true) UserGroupsEntity userGroupsEntity)
+        throws ServiceException
+    {
         plugin.deleteUserFromGroups(username, userGroupsEntity);
         return Response.status(Response.Status.OK).build();
     }

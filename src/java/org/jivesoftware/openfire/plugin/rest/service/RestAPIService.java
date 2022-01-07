@@ -1,22 +1,24 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
-import javax.annotation.PostConstruct;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperty;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
+import javax.annotation.PostConstruct;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 @Path("restapi/v1/system/properties")
+@Tag(name = "System", description = "Managing Openfire system configuration")
 public class RestAPIService {
 
     private RESTServicePlugin plugin;
@@ -27,34 +29,78 @@ public class RestAPIService {
     }
 
     @GET
+    @Operation( summary = "Get system properties",
+        description = "Get all Openfire system properties.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The system properties.", content = @Content(schema = @Schema(implementation = SystemProperties.class))),
+        })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public SystemProperties getSystemProperties() {
         return plugin.getSystemProperties();
     }
-    
+
     @GET
     @Path("/{propertyKey}")
+    @Operation( summary = "Get system property",
+        description = "Get a specific Openfire system property.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The requested system property.", content = @Content(schema = @Schema(implementation = SystemProperty.class))),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found.")
+        })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public SystemProperty getSystemProperty(@PathParam("propertyKey") String propertyKey) throws ServiceException {
+    public SystemProperty getSystemProperty(
+            @Parameter(description = "The name of the system property to return.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey)
+        throws ServiceException
+    {
         return plugin.getSystemProperty(propertyKey);
     }
 
     @POST
-    public Response createSystemProperty(SystemProperty systemProperty) throws ServiceException {
+    @Operation( summary = "Create system property",
+        description = "Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "The system property is created."),
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response createSystemProperty(
+            @RequestBody(description = "The system property to create.", required = true) SystemProperty systemProperty)
+        throws ServiceException
+    {
         plugin.createSystemProperty(systemProperty);
         return Response.status(Response.Status.CREATED).build();
     }
 
     @PUT
     @Path("/{propertyKey}")
-    public Response updateUser(@PathParam("propertyKey") String propertyKey, SystemProperty systemProperty) throws ServiceException {
+    @Operation( summary = "Update system property",
+        description = "Updates an existing Openfire system property.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The system property is updated."),
+            @ApiResponse(responseCode = "400", description = "The provided system property does not match the name in the URL."),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found.")
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response updateSystemProperty(
+            @Parameter(description = "The name of the system property to update.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey,
+            @RequestBody(description = "The new system property definition that replaced an existing definition.", required = true) SystemProperty systemProperty)
+        throws ServiceException
+    {
         plugin.updateSystemProperty(propertyKey, systemProperty);
         return Response.status(Response.Status.OK).build();
     }
 
     @DELETE
     @Path("/{propertyKey}")
-    public Response deleteUser(@PathParam("propertyKey") String propertyKey) throws ServiceException {
+    @Operation( summary = "Remove system property",
+        description = "Removes an existing Openfire system property.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The system property is deleted."),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found.")
+        })
+    public Response deleteSystemProperty(
+            @Parameter(description = "The name of the system property to delete.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey)
+        throws ServiceException
+    {
         plugin.deleteSystemProperty(propertyKey);
         return Response.status(Response.Status.OK).build();
     }

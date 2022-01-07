@@ -1,50 +1,88 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
-import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
-
 @Path("restapi/v1/chatrooms/{roomName}/owners")
+@Tag(name = "Chat room", description = "Managing Multi-User chat rooms.")
 public class MUCRoomOwnersService {
 
     @POST
     @Path("/{jid}")
-    public Response addMUCRoomOwner(@DefaultValue("conference") @QueryParam("servicename") String serviceName,
-            @PathParam("jid") String jid, @PathParam("roomName") String roomName) throws ServiceException {
+    @Operation( summary = "Add room owner",
+        description = "Adds an owner to a multi-user chat room.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Owner added to the room.")
+        })
+    public Response addMUCRoomOwner(
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The (bare) JID of the entity that is to be added as an owner.", example = "john@example.org", required = true) @PathParam("jid") String jid,
+        @Parameter(description = "The name of the MUC room to which an owner is to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+        throws ServiceException
+    {
         MUCRoomController.getInstance().addOwner(serviceName, roomName, jid);
         return Response.status(Status.CREATED).build();
     }
 
     @POST
     @Path("/group/{groupname}")
-    public Response addMUCRoomOwnerGroup(@DefaultValue("conference") @QueryParam("servicename") String serviceName,
-            @PathParam("groupname") String groupname, @PathParam("roomName") String roomName) throws ServiceException {
+    @Operation( summary = "Add room owners",
+        description = "Adds all members of an Openfire user group as owners to a multi-user chat room.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Owners added to the room.")
+        })
+    public Response addMUCRoomOwnerGroup(
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The name of the user group from which all members will be owners of the room.", example = "Operators", required = true) @PathParam("groupname") String groupname,
+        @Parameter(description = "The name of the MUC room to which owners are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+        throws ServiceException
+    {
         MUCRoomController.getInstance().addOwner(serviceName, roomName, groupname);
         return Response.status(Status.CREATED).build();
     }
 
     @DELETE
     @Path("/{jid}")
-    public Response deleteMUCRoomOwner(@PathParam("jid") String jid,
-            @DefaultValue("conference") @QueryParam("servicename") String serviceName,
-            @PathParam("roomName") String roomName) throws ServiceException {
+    @Operation( summary = "Remove room owner",
+        description = "Removes a user as an owner of a multi-user chat room.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Owner removed from the room."),
+            @ApiResponse(responseCode = "409", description = "When removal of this owner would leave the room without any owners (which is not allowed: a room must always have an owner).")
+        })
+    public Response deleteMUCRoomOwner(
+        @Parameter(description = "The (bare) JID of the entity that is to be removed as an owner of the room.", example = "john@example.org", required = true) @PathParam("jid") String jid,
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The name of the MUC room from which an owner is to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+        throws ServiceException
+    {
+        // FIXME: check if this removes _all_ affiliations, which probably would be more than we're bargaining for.
         MUCRoomController.getInstance().deleteAffiliation(serviceName, roomName, jid);
         return Response.status(Status.OK).build();
     }
 
     @DELETE
     @Path("/group/{groupname}")
-    public Response deleteMUCRoomOwnerGroup(@PathParam("groupname") String groupname,
-            @DefaultValue("conference") @QueryParam("servicename") String serviceName,
-            @PathParam("roomName") String roomName) throws ServiceException {
+    @Operation( summary = "Remove room owners",
+        description = "Removes all members of an Openfire user group as owner of a multi-user chat room.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Owners removed from the room."),
+            @ApiResponse(responseCode = "409", description = "When removal of these owners would leave the room without any owners (which is not allowed: a room must always have an owner).")
+        })
+    public Response deleteMUCRoomOwnerGroup(
+        @Parameter(description = "The name of the user group from which all members will be removed as owners of the room.", example = "Operators", required = true) @PathParam("groupname") String groupname,
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The name of the MUC room to which owners are to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+        throws ServiceException
+    {
+        // FIXME: check if this removes _all_ affiliations, which probably would be more than we're bargaining for.
         MUCRoomController.getInstance().deleteAffiliation(serviceName, roomName, groupname);
         return Response.status(Status.OK).build();
     }
