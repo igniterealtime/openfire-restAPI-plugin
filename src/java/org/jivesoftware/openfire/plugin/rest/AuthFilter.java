@@ -41,6 +41,11 @@ public class AuthFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext containerRequest) throws IOException {
+        if (containerRequest.getUriInfo().getRequestUri().getPath().equals("/plugins/restapi/v1/openapi.yaml")) {
+            LOG.debug("Authentication was bypassed for openapi.yaml file (documentation)");
+            return;
+        }
+
         if (!plugin.isEnabled()) {
             LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);

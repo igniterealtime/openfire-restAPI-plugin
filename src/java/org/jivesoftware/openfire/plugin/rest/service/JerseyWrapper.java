@@ -5,8 +5,9 @@ import org.jivesoftware.openfire.plugin.rest.AuthFilter;
 import org.jivesoftware.openfire.plugin.rest.CORSFilter;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
 import org.jivesoftware.util.JiveGlobals;
-import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletConfig;
+import javax.ws.rs.core.Context;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,10 +73,13 @@ public class JerseyWrapper extends ResourceConfig {
     /**
      * Instantiates a new jersey wrapper.
      */
-    public JerseyWrapper() {
+    public JerseyWrapper(@Context ServletConfig servletConfig) {
+
+        // Filters
         loadAuthenticationFilter();
         register(CORSFilter.class);
 
+        // Services
         registerClasses(
             GroupService.class,
             MessageService.class,
@@ -98,6 +102,9 @@ public class JerseyWrapper extends ResourceConfig {
 
         // Exception mapper
         register(RESTExceptionMapper.class);
+
+        // Documentation (Swagger)
+        register( new CustomOpenApiResource() );
     }
     
     /*

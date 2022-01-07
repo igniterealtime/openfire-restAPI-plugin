@@ -199,9 +199,7 @@
                 </ul>
 
                 <p>You can find here detailed documentation over the Openfire REST API: 
-                    <a
-                        href="/plugin-showfile.jsp?plugin=restapi&showReadme=true&decorator=none">REST
-                        API Documentation</a>
+                    <a href="docs/index.html" target="_blank">REST API Documentation (opens in new tab)</a>
                 </p>
             </div>
         </fieldset>
