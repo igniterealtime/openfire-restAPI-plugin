@@ -4,7 +4,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.jivesoftware.openfire.plugin.rest.AuthFilter;
 import org.jivesoftware.openfire.plugin.rest.CORSFilter;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
-import org.jivesoftware.openfire.plugin.rest.entity.UserEntities;
 import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.LoggerFactory;
 
