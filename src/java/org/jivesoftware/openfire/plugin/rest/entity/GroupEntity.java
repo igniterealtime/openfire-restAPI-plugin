@@ -1,5 +1,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -92,6 +94,7 @@ public class GroupEntity {
      */
     @XmlElementWrapper(name = "admins")
     @XmlElement(name = "admin")
+    @JsonProperty(value = "admins")
     public List<String> getAdmins() {
         return admins;
     }
@@ -103,6 +106,7 @@ public class GroupEntity {
      */
     @XmlElementWrapper(name = "members")
     @XmlElement(name = "member")
+    @JsonProperty(value = "members")
     public List<String> getMembers() {
         return members;
     }

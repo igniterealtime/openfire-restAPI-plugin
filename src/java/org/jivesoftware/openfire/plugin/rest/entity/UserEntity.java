@@ -1,5 +1,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -138,6 +140,7 @@ public class UserEntity {
      */
     @XmlElement(name = "property")
     @XmlElementWrapper(name = "properties")
+    @JsonProperty(value = "properties")
     public List<UserProperty> getProperties() {
         return properties;
     }

@@ -1,5 +1,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Date;
 import java.util.List;
 
@@ -239,18 +241,21 @@ public class MUCRoomEntity {
 
     @XmlElement(name = "broadcastPresenceRole")
     @XmlElementWrapper(name = "broadcastPresenceRoles")
+    @JsonProperty(value = "broadcastPresenceRoles")
     public List<String> getBroadcastPresenceRoles() {
         return broadcastPresenceRoles;
     }
 
     @XmlElementWrapper(name = "owners")
     @XmlElement(name = "owner")
+    @JsonProperty(value = "owners")
     public List<String> getOwners() {
         return owners;
     }
 
     @XmlElementWrapper(name = "ownerGroups")
     @XmlElement(name = "ownerGroup")
+    @JsonProperty(value = "ownerGroups")
     public List<String> getOwnerGroups() {
         return ownerGroups;
     }
@@ -265,12 +270,14 @@ public class MUCRoomEntity {
 
     @XmlElementWrapper(name = "members")
     @XmlElement(name = "member")
+    @JsonProperty(value = "members")
     public List<String> getMembers() {
         return members;
     }
 
     @XmlElementWrapper(name = "memberGroups")
     @XmlElement(name = "memberGroup")
+    @JsonProperty(value = "memberGroups")
     public List<String> getmemberGroups() {
         return memberGroups;
     }
@@ -285,12 +292,14 @@ public class MUCRoomEntity {
 
     @XmlElementWrapper(name = "outcasts")
     @XmlElement(name = "outcast")
+    @JsonProperty(value = "outcasts")
     public List<String> getOutcasts() {
         return outcasts;
     }
 
     @XmlElementWrapper(name = "outcastGroups")
     @XmlElement(name = "outcastGroup")
+    @JsonProperty(value = "outcastGroups")
     public List<String> getoutcastGroups() {
         return outcastGroups;
     }
@@ -305,12 +314,14 @@ public class MUCRoomEntity {
 
     @XmlElementWrapper(name = "admins")
     @XmlElement(name = "admin")
+    @JsonProperty(value = "admins")
     public List<String> getAdmins() {
         return admins;
     }
 
     @XmlElementWrapper(name = "adminGroups")
     @XmlElement(name = "adminGroup")
+    @JsonProperty(value = "adminGroups")
     public List<String> getadminGroups() {
         return adminGroups;
     }
