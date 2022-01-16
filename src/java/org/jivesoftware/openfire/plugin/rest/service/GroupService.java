@@ -1,22 +1,24 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
-import javax.annotation.PostConstruct;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.GroupController;
 import org.jivesoftware.openfire.plugin.rest.entity.GroupEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.GroupEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
+import javax.annotation.PostConstruct;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 @Path("restapi/v1/groups")
+@Tag(name="User Group", description = "Managing Openfire user groupings.")
 public class GroupService {
 
     private GroupController groupController;
@@ -27,34 +29,78 @@ public class GroupService {
     }
 
     @GET
+    @Operation( summary = "Get groups",
+                description = "Get a list of all user groups.",
+                responses = {
+                    @ApiResponse(responseCode = "200", description = "All groups", content = @Content(schema = @Schema(implementation = GroupEntities.class)))
+                })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public GroupEntities getGroups() throws ServiceException {
+    public GroupEntities getGroups() throws ServiceException
+    {
         return new GroupEntities(groupController.getGroups());
     }
 
     @POST
-    public Response createGroup(GroupEntity groupEntity) throws ServiceException {
+    @Operation( summary = "Create group",
+        description = "Create a new user group.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Group created."),
+            @ApiResponse(responseCode = "400", description = "Group or group name missing."),
+            @ApiResponse(responseCode = "409", description = "Group already exists.")
+        })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response createGroup(
+            @RequestBody(description = "The group that needs to be created.", required = true) GroupEntity groupEntity)
+        throws ServiceException
+    {
         groupController.createGroup(groupEntity);
         return Response.status(Response.Status.CREATED).build();
     }
-    
+
     @GET
     @Path("/{groupName}")
+    @Operation( summary = "Get group",
+        description = "Get one specific user group by name.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The group.", content = @Content(schema = @Schema(implementation = GroupEntity.class))),
+            @ApiResponse(responseCode = "404", description = "Group with this name not found.")
+        })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public GroupEntity getGroup(@PathParam("groupName") String groupName) throws ServiceException {
+    public GroupEntity getGroup(@Parameter(description = "The name of the group that needs to be fetched.", example = "Colleagues", required = true) @PathParam("groupName") String groupName)
+        throws ServiceException
+    {
         return groupController.getGroup(groupName);
     }
-    
+
     @PUT
     @Path("/{groupName}")
-    public Response updateGroup(@PathParam("groupName") String groupName, GroupEntity groupEntity) throws ServiceException {
+    @Operation( summary = "Update group",
+        description = "Updates / overwrites an existing user group. Note that the name of the group cannot be changed.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Group updated."),
+            @ApiResponse(responseCode = "400", description = "Group or group name missing, or name does not match existing group."),
+            @ApiResponse(responseCode = "404", description = "Group with this name not found."),
+        })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response updateGroup(@Parameter(description = "The name of the group that needs to be fetched.", example = "Colleagues", required = true) @PathParam("groupName") String groupName,
+                                @RequestBody(description = "The new group definition that needs to overwrite the old definition.", required = true) GroupEntity groupEntity )
+        throws ServiceException
+    {
         groupController.updateGroup(groupName, groupEntity);
         return Response.status(Response.Status.OK).build();
     }
 
     @DELETE
     @Path("/{groupName}")
-    public Response deleteGroup(@PathParam("groupName") String groupName) throws ServiceException {
+    @Operation( summary = "Delete group",
+        description = "Removes an existing user group.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Group deleted."),
+            @ApiResponse(responseCode = "400", description = "Group not found.")
+        })
+    public Response deleteGroup(@Parameter(description = "The name of the group that needs to be removed.", example = "Colleagues", required = true) @PathParam("groupName") String groupName)
+        throws ServiceException
+    {
         groupController.deleteGroup(groupName);
         return Response.status(Response.Status.OK).build();
     }

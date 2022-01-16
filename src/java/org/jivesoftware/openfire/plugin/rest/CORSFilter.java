@@ -1,26 +1,23 @@
 package org.jivesoftware.openfire.plugin.rest;
 
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerResponse;
-import com.sun.jersey.spi.container.ContainerResponseFilter;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
+import java.io.IOException;
 
 /**
  * The Class CORSFilter.
  */
+@Priority(Priorities.HEADER_DECORATOR)
 public class CORSFilter implements ContainerResponseFilter {
 
-    /* (non-Javadoc)
-     * @see com.sun.jersey.spi.container.ContainerResponseFilter#filter(com.sun.jersey.spi.container.ContainerRequest, com.sun.jersey.spi.container.ContainerResponse)
-     */
     @Override
-    public ContainerResponse filter(ContainerRequest request, ContainerResponse response) {
-        response.getHttpHeaders().add("Access-Control-Allow-Origin", "*");
-        response.getHttpHeaders().add("Access-Control-Allow-Headers",
-                "origin, content-type, accept, authorization");
-        response.getHttpHeaders().add("Access-Control-Allow-Credentials", "true");
-        response.getHttpHeaders().add("Access-Control-Allow-Methods",
-                "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-
-        return response;
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext response) throws IOException {
+        response.getHeaders().add("Access-Control-Allow-Origin", "*");
+        response.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
+        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
+        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
     }
 }

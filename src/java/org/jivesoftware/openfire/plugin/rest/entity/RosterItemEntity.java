@@ -1,5 +1,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -116,6 +118,7 @@ public class RosterItemEntity {
      */
     @XmlElement(name = "group")
     @XmlElementWrapper(name = "groups")
+    @JsonProperty(value = "groups")
     public List<String> getGroups() {
         return groups;
     }

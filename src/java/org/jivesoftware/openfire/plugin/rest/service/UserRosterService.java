@@ -1,16 +1,12 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
-import javax.annotation.PostConstruct;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.plugin.rest.controller.UserServiceController;
 import org.jivesoftware.openfire.plugin.rest.entity.RosterEntities;
@@ -20,7 +16,13 @@ import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserNotFoundException;
 
+import javax.annotation.PostConstruct;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 @Path("restapi/v1/users/{username}/roster")
+@Tag(name = "Users", description = "Managing Openfire users.")
 public class UserRosterService {
 
     private static final String COULD_NOT_UPDATE_THE_ROSTER = "Could not update the roster";
@@ -35,14 +37,32 @@ public class UserRosterService {
     }
 
     @GET
+    @Operation( summary = "Retrieve user roster",
+        description = "Get a list of all roster entries (buddies / contact list) of a particular user.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "All roster entries", content = @Content(schema = @Schema(implementation = RosterEntities.class))),
+            @ApiResponse(responseCode = "404", description = "No user of with this username exists.")
+        })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public RosterEntities getUserRoster(@PathParam("username") String username) throws ServiceException {
+    public RosterEntities getUserRoster(@Parameter(description = "The username of the user for which the retrieve the roster entries.", required = true) @PathParam("username") String username) throws ServiceException {
         return plugin.getRosterEntities(username);
     }
 
     @POST
-    public Response createRoster(@PathParam("username") String username, RosterItemEntity rosterItemEntity)
-            throws ServiceException {
+    @Operation( summary = "Create roster entry",
+        description = "Add a roster entry to the roster (buddies / contact list) of a particular user.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "The entry was added to the roster."),
+            @ApiResponse(responseCode = "400", description = "A roster entry cannot be added to a 'shared group' (try removing group names from the roster entry and try again)."),
+            @ApiResponse(responseCode = "404", description = "No user of with this username exists."),
+            @ApiResponse(responseCode = "409", description = "A roster entry already exists for the provided contact JID.")
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response createRoster(
+            @Parameter(description = "The username of the user for which the add a roster entry.", required = true) @PathParam("username") String username,
+            @RequestBody(description = "The definition of the roster entry that is to be added.", required = true) RosterItemEntity rosterItemEntity)
+        throws ServiceException
+    {
         try {
             plugin.addRosterItem(username, rosterItemEntity);
         } catch (UserNotFoundException e) {
@@ -60,8 +80,18 @@ public class UserRosterService {
 
     @DELETE
     @Path("/{rosterJid}")
-    public Response deleteRoster(@PathParam("username") String username, @PathParam("rosterJid") String rosterJid)
-            throws ServiceException {
+    @Operation( summary = "Remove roster entry",
+        description = "Removes one of the roster entries (contacts) of a particular user.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Entry removed"),
+            @ApiResponse(responseCode = "400", description = "A roster entry cannot be removed from a 'shared group'."),
+            @ApiResponse(responseCode = "404", description = "No user of with this username exists, or its roster did not contain this entry.")
+        })
+    public Response deleteRoster(
+            @Parameter(description = "The username of the user for which the remove a roster entry.", required = true) @PathParam("username") String username,
+            @Parameter(description = "The JID of the entry/contact to remove.", required = true) @PathParam("rosterJid") String rosterJid)
+        throws ServiceException
+    {
         try {
             plugin.deleteRosterItem(username, rosterJid);
         } catch (SharedGroupException e) {
@@ -73,8 +103,21 @@ public class UserRosterService {
 
     @PUT
     @Path("/{rosterJid}")
-    public Response updateRoster(@PathParam("username") String username, @PathParam("rosterJid") String rosterJid,
-            RosterItemEntity rosterItemEntity) throws ServiceException {
+    @Operation( summary = "Update roster entry",
+        description = "Changes a roster entry on the roster (buddies / contact list) of a particular user.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "The roster entry was updated."),
+            @ApiResponse(responseCode = "400", description = "A roster entry cannot be added with a 'shared group'."),
+            @ApiResponse(responseCode = "404", description = "No user of with this username exists."),
+            @ApiResponse(responseCode = "409", description = "A roster entry already exists for the provided contact JID.")
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response updateRoster(
+            @Parameter(description = "The username of the user for which the update a roster entry.", required = true) @PathParam("username") String username,
+            @Parameter(description = "The JID of the entry/contact to update.", required = true) @PathParam("rosterJid") String rosterJid,
+            @RequestBody(description = "The updated definition of the roster entry.", required = true) RosterItemEntity rosterItemEntity)
+        throws ServiceException
+    {
         try {
             plugin.updateRosterItem(username, rosterJid, rosterItemEntity);
         } catch (UserNotFoundException e) {

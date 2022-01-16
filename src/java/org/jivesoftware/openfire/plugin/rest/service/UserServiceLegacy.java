@@ -1,19 +1,7 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
 import gnu.inet.encoding.Stringprep;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
@@ -24,7 +12,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 @Path("restapi/v1")
+@Tag(name = "UserService (deprecated)", description = "Undocumented UserService endpoint, retained for backwards compatibility.")
 public class UserServiceLegacy {
     private static Logger LOG = LoggerFactory.getLogger(UserServiceLegacy.class);
 

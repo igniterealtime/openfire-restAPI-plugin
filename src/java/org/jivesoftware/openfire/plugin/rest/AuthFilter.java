@@ -1,7 +1,12 @@
 package org.jivesoftware.openfire.plugin.rest;
 
+import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
 
@@ -14,12 +19,13 @@ import org.jivesoftware.openfire.auth.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
+import java.io.IOException;
 
 /**
  * The Class AuthFilter.
  */
+@PreMatching
+@Priority(Priorities.AUTHORIZATION)
 public class AuthFilter implements ContainerRequestFilter {
 
     /** The log. */
@@ -33,15 +39,13 @@ public class AuthFilter implements ContainerRequestFilter {
     private RESTServicePlugin plugin = (RESTServicePlugin) XMPPServer.getInstance().getPluginManager()
             .getPlugin("restapi");
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.sun.jersey.spi.container.ContainerRequestFilter#filter(com.sun.jersey
-     * .spi.container.ContainerRequest)
-     */
     @Override
-    public ContainerRequest filter(ContainerRequest containerRequest) throws WebApplicationException {
+    public void filter(ContainerRequestContext containerRequest) throws IOException {
+        if (containerRequest.getUriInfo().getRequestUri().getPath().equals("/plugins/restapi/v1/openapi.yaml")) {
+            LOG.debug("Authentication was bypassed for openapi.yaml file (documentation)");
+            return;
+        }
+
         if (!plugin.isEnabled()) {
             LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);
@@ -50,13 +54,13 @@ public class AuthFilter implements ContainerRequestFilter {
         // Let the preflight request through the authentication
         if ("OPTIONS".equals(containerRequest.getMethod())) {
             LOG.debug("Authentication was bypassed because of OPTIONS request");
-            return containerRequest;
+            return;
         }
         
         // To be backwards compatible to userservice 1.*
-        if ("restapi/v1/userservice".equals(containerRequest.getPath())) {
+        if (containerRequest.getUriInfo().getRequestUri().getPath().contains("restapi/v1/userservice")) {
             LOG.info("Deprecated 'userservice' endpoint was used. Please switch to the new endpoints");
-            return containerRequest;
+            return;
         }
 
         if (!plugin.getAllowedIPs().isEmpty()) {
@@ -78,7 +82,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
         
         // Get the authentication passed in HTTP headers parameters
-        String auth = containerRequest.getHeaderValue("authorization");
+        String auth = containerRequest.getHeaderString("authorization");
 
         if (auth == null) {
             throw new WebApplicationException(Status.UNAUTHORIZED);
@@ -119,6 +123,5 @@ public class AuthFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         }
-        return containerRequest;
     }
 }
