@@ -91,9 +91,7 @@ public class GroupController {
                 group = GroupManager.getInstance().createGroup(groupEntity.getName());
                 group.setDescription(groupEntity.getDescription());
 
-                Boolean shared = groupEntity.getShared();
-                if(shared == null){shared = false;}
-                final String showInRoster = shared ? "onlyGroup" : "nobody";
+                final String showInRoster = groupEntity.getShared() ? "onlyGroup" : "nobody";
                 group.getProperties().put("sharedRoster.showInRoster", showInRoster);
 
                 group.getProperties().put("sharedRoster.displayName", groupEntity.getName());
@@ -124,11 +122,8 @@ public class GroupController {
                 try {
                     group = GroupManager.getInstance().getGroup(groupName);
                     group.setDescription(groupEntity.getDescription());
-                    Boolean shared = groupEntity.getShared();
-                    if(shared != null) {
-                        final String showInRoster = shared ? "onlyGroup" : "nobody";
-                        group.getProperties().put("sharedRoster.showInRoster", showInRoster);
-                    }
+                    final String showInRoster = groupEntity.getShared() ? "onlyGroup" : "nobody";
+                    group.getProperties().put("sharedRoster.showInRoster", showInRoster);
                 } catch (GroupNotFoundException e) {
                     throw new ServiceException("Could not find group", groupName, ExceptionType.GROUP_NOT_FOUND,
                             Response.Status.NOT_FOUND, e);
