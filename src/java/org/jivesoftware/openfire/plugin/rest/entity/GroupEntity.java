@@ -29,8 +29,8 @@ public class GroupEntity {
     /** The members. */
     private List<String> members;
 
-    /** The visibility */
-    private Boolean shared;
+    /** The visibility, false unless set */
+    private Boolean shared = false;
 
     /**
      * Instantiates a new group entity.
