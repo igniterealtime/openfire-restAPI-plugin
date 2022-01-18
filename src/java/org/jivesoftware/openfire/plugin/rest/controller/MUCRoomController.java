@@ -531,11 +531,13 @@ public class MUCRoomController {
     private void setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException,
             ConflictException {
         List<JID> roles = new ArrayList<JID>();
-        Collection<JID> owners = new ArrayList<JID>();
         Collection<JID> existingOwners = new ArrayList<JID>();
+        List<JID> mucRoomEntityOwners = new ArrayList<JID>();
 
-        List<JID> mucRoomEntityOwners = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners());
-        owners.addAll(room.getOwners());
+        for (String ownerJid : mucRoomEntity.getOwners()) {
+            mucRoomEntityOwners.add(UserUtils.checkAndGetJID(ownerJid));
+        }
+        Collection<JID> owners = new ArrayList<JID>(room.getOwners());
 
         // Find same owners
         for (JID jid : owners) {
@@ -546,7 +548,6 @@ public class MUCRoomController {
 
         // Don't delete the same owners
         owners.removeAll(existingOwners);
-        room.addOwners(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners()), room.getRole());
 
         // Collect all roles to reset
         roles.addAll(owners);
@@ -558,18 +559,22 @@ public class MUCRoomController {
             room.addNone(jid, room.getRole());
         }
 
-        room.addOwners(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners()), room.getRole());
+        for (String ownerJid : mucRoomEntity.getOwners()) {
+            room.addOwner(UserUtils.checkAndGetJID(ownerJid), room.getRole());
+        }
         if (mucRoomEntity.getAdmins() != null) {
-            room.addAdmins(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getAdmins()), room.getRole());
+            for (String adminJid : mucRoomEntity.getAdmins()) {
+                room.addAdmin(UserUtils.checkAndGetJID(adminJid), room.getRole());
+            }
         }
         if (mucRoomEntity.getMembers() != null) {
             for (String memberJid : mucRoomEntity.getMembers()) {
-                room.addMember(new JID(memberJid), null, room.getRole());
+                room.addMember(UserUtils.checkAndGetJID(memberJid), null, room.getRole());
             }
         }
         if (mucRoomEntity.getOutcasts() != null) {
             for (String outcastJid : mucRoomEntity.getOutcasts()) {
-                room.addOutcast(new JID(outcastJid), null, room.getRole());
+                room.addOutcast(UserUtils.checkAndGetJID(outcastJid), null, room.getRole());
             }
         }
     }
