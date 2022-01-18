@@ -3,6 +3,7 @@ package org.jivesoftware.openfire.plugin.rest.service;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.jivesoftware.openfire.plugin.rest.AuthFilter;
 import org.jivesoftware.openfire.plugin.rest.CORSFilter;
+import org.jivesoftware.openfire.plugin.rest.CustomJacksonMapperProvider;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
 import org.jivesoftware.util.JiveGlobals;
 
@@ -102,6 +103,9 @@ public class JerseyWrapper extends ResourceConfig {
 
         // Exception mapper
         register(RESTExceptionMapper.class);
+
+        // Jackson's Object Mapper
+        register(CustomJacksonMapperProvider.class);
 
         // Documentation (Swagger)
         register( new CustomOpenApiResource() );
