@@ -1,8 +1,7 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
 import org.jivesoftware.openfire.plugin.rest.controller.ClusteringController;
-import org.jivesoftware.openfire.plugin.rest.controller.GroupController;
-import org.jivesoftware.openfire.plugin.rest.entity.ClusteringEntities;
+import org.jivesoftware.openfire.plugin.rest.entity.ClusteringEntity;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.GET;
@@ -23,7 +22,7 @@ public class ClusteringService {
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/status")
-    public ClusteringEntities getClusteringStatus(){
-        return new ClusteringEntities(clusteringController.getClusterStatus());
+    public ClusteringEntity getClusteringStatus(){
+        return new ClusteringEntity(clusteringController.getClusterStatus());
     }
 }

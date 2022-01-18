@@ -1,23 +1,20 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
-import org.codehaus.jackson.annotate.JsonProperty;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "clustering")
-public class ClusteringEntities {
+public class ClusteringEntity {
 
     String status;
 
-    public ClusteringEntities(){};
+    public ClusteringEntity(){};
 
-    public ClusteringEntities(String status){
+    public ClusteringEntity(String status){
         this.status = status;
     }
 
-    @XmlElement(name = "status")
-    @JsonProperty(value = "status")
+    @XmlElement()
     public String getStatus(){
         return status;
     }
