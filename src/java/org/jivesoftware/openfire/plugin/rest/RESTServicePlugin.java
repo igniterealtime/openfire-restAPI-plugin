@@ -17,11 +17,8 @@
 package org.jivesoftware.openfire.plugin.rest;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -134,16 +131,18 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      * @return the system properties
      */
     public SystemProperties getSystemProperties() {
-        SystemProperties systemProperties = new SystemProperties();
-        List<SystemProperty> propertiesList = new ArrayList<SystemProperty>();
-        
-        for(String propertyKey : JiveGlobals.getPropertyNames()) {
-            String propertyValue = JiveGlobals.getProperty(propertyKey);
-            propertiesList.add(new SystemProperty(propertyKey, propertyValue));
-        }
-        systemProperties.setProperties(propertiesList);
-        return systemProperties;
+        final Collection<org.jivesoftware.util.SystemProperty> systemProperties = org.jivesoftware.util.SystemProperty.getProperties();
+        final Set<String> systemPropertyKeys = systemProperties.stream().map(org.jivesoftware.util.SystemProperty::getKey).collect(Collectors.toSet());
+        // Get all the SystemProperties
+        final List<SystemProperty> compoundProperties = systemProperties.stream().map(p -> new SystemProperty(p.getKey(), p.getValueAsSaved())).collect(Collectors.toList());
+        // Now add any missing JiveGlobals properties
+        JiveGlobals.getPropertyNames().stream().filter(key -> !systemPropertyKeys.contains(key)).forEach(key -> compoundProperties.add(new SystemProperty(key, JiveGlobals.getProperty(key))));
+        // And sort by key
+        compoundProperties.sort(Comparator.comparing(SystemProperty::getKey));
 
+        SystemProperties result = new SystemProperties();
+        result.setProperties(compoundProperties);
+        return result;
     }
 
     /**
