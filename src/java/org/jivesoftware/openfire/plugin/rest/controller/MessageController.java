@@ -22,12 +22,15 @@ import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.plugin.rest.entity.MessageEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.xmpp.packet.JID;
 
 /**
  * The Class MessageController.
  */
 public class MessageController {
-    /** The Constant INSTANCE. */
+    /**
+     * The Constant INSTANCE.
+     */
     public static final MessageController INSTANCE = new MessageController();
 
     /**
@@ -42,19 +45,49 @@ public class MessageController {
     /**
      * Send broadcast message.
      *
-     * @param messageEntity
-     *            the message entity
-     * @throws ServiceException
-     *             the service exception
+     * @param messageEntity the message entity
+     * @throws ServiceException the service exception
      */
     public void sendBroadcastMessage(MessageEntity messageEntity) throws ServiceException {
         if (messageEntity.getBody() != null && !messageEntity.getBody().isEmpty()) {
             SessionManager.getInstance().sendServerMessage(null, messageEntity.getBody());
         } else {
             throw new ServiceException("Message content/body is null or empty", "",
-                    ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
-                    Response.Status.BAD_REQUEST);
+                ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
+                Response.Status.BAD_REQUEST);
         }
     }
 
+    /**
+     * Send broadcast message to a user.
+     *
+     * @param messageEntity the message entity
+     * @param address       the recipient address
+     * @param resource      the recipient resource (optional)
+     * @throws ServiceException the service exception
+     */
+    public void sendMessageToUser(MessageEntity messageEntity, String address, String resource) throws ServiceException {
+        if (messageEntity.getBody() != null && !messageEntity.getBody().isEmpty()) {
+            if (address == null) {
+                throw new ServiceException("Invalid recipient", "",
+                    ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
+                    Response.Status.BAD_REQUEST);
+            }
+
+            JID jabberId = null;
+
+            if (resource == null) {
+                jabberId = new JID(address);
+            } else {
+                JID var5 = new JID(address);
+                jabberId = new JID(var5.getNode(), var5.getDomain(), resource);
+            }
+
+            SessionManager.getInstance().sendServerMessage(jabberId, null, messageEntity.getBody());
+        } else {
+            throw new ServiceException("Message content/body is null or empty", "",
+                ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
+                Response.Status.BAD_REQUEST);
+        }
+    }
 }
