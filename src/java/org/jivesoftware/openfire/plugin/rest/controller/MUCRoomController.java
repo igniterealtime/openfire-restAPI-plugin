@@ -18,7 +18,6 @@ package org.jivesoftware.openfire.plugin.rest.controller;
 
 import org.dom4j.Element;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.group.ConcurrentGroupList;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.muc.*;
@@ -29,6 +28,7 @@ import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.plugin.rest.utils.MUCRoomUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
 import org.jivesoftware.util.AlreadyExistsException;
+import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
@@ -46,7 +46,7 @@ public class MUCRoomController {
     private static Logger LOG = LoggerFactory.getLogger(MUCRoomController.class);
 
     /** The Constant INSTANCE. */
-    public static final MUCRoomController INSTANCE = new MUCRoomController();
+    private static MUCRoomController INSTANCE = null;
 
     /**
      * Gets the single instance of MUCRoomController.
@@ -54,14 +54,25 @@ public class MUCRoomController {
      * @return single instance of MUCRoomController
      */
     public static MUCRoomController getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new MUCRoomController();
+        }
         return INSTANCE;
     }
-    private static final PluginManager pluginManager = XMPPServer.getInstance().getPluginManager();
-    private static final RESTServicePlugin plugin = (RESTServicePlugin) pluginManager.getPlugin("restapi");
+
+    /**
+     * @param instance the mock/stub/spy controller to use.
+     * @deprecated - for test use only
+     */
+    @Deprecated
+    public static void setInstance(final MUCRoomController instance) {
+        MUCRoomController.INSTANCE = instance;
+    }
 
     public static void log(String logMessage) {
-        if (plugin.isServiceLoggingEnabled())
+        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
             LOG.info(logMessage);
+        }
     }
 
     /**
