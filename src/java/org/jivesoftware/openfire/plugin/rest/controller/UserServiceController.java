@@ -16,29 +16,16 @@
 
 package org.jivesoftware.openfire.plugin.rest.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
 import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupManager;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.lockout.LockOutManager;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.dao.PropertyDAO;
-import org.jivesoftware.openfire.plugin.rest.entity.GroupEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.RosterEntities;
-import org.jivesoftware.openfire.plugin.rest.entity.RosterItemEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.UserEntities;
-import org.jivesoftware.openfire.plugin.rest.entity.UserEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.UserGroupsEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.UserProperty;
+import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
@@ -50,11 +37,16 @@ import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
+import org.jivesoftware.util.JiveGlobals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.StreamError;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * The Class UserServiceController.
@@ -63,7 +55,7 @@ public class UserServiceController {
     private static Logger LOG = LoggerFactory.getLogger(UserServiceController.class);
 
     /** The Constant INSTANCE. */
-    public static final UserServiceController INSTANCE = new UserServiceController();
+    private static UserServiceController INSTANCE = null;
 
     /** The user manager. */
     private UserManager userManager;
@@ -83,11 +75,20 @@ public class UserServiceController {
      * @return single instance of UserServiceController
      */
     public static UserServiceController getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new UserServiceController();
+        }
         return INSTANCE;
     }
 
-    private static final PluginManager pluginManager = XMPPServer.getInstance().getPluginManager();
-    private static final RESTServicePlugin plugin = (RESTServicePlugin) pluginManager.getPlugin("restapi");
+    /**
+     * @param instance the mock/stub/spy controller to use.
+     * @deprecated - for test use only
+     */
+    @Deprecated
+    public static void setInstance(final UserServiceController instance) {
+        UserServiceController.INSTANCE = instance;
+    }
 
     /**
      * Instantiates a new user service controller.
@@ -100,8 +101,9 @@ public class UserServiceController {
     }
 
     public static void log(String logMessage) {
-        if (plugin.isServiceLoggingEnabled())
+        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
             LOG.info(logMessage);
+        }
     }
 
     /**
