@@ -57,6 +57,7 @@ public class OccupantEntity {
         this.affiliation = affiliation;
     }
 
+    @XmlElement
     public String getUserAddress() {
         return userAddress;
     }

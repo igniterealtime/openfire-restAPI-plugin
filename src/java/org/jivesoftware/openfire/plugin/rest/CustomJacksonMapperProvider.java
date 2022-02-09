@@ -15,6 +15,7 @@
  */
 package org.jivesoftware.openfire.plugin.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
@@ -34,8 +35,10 @@ public class CustomJacksonMapperProvider implements ContextResolver<ObjectMapper
     public CustomJacksonMapperProvider() {
         mapper = new ObjectMapper();
 
-        // Configure Jackson to use JAXB annotations as the primary, and  Jackson annotations as the secondary source.
-        mapper.registerModule(new JaxbAnnotationModule());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        // Configure Jackson to use JAXB annotations as the secondary, and Jackson annotations as the primary source.
+        mapper.registerModule(new JaxbAnnotationModule().setPriority(JaxbAnnotationModule.Priority.SECONDARY));
     }
 
     @Override
