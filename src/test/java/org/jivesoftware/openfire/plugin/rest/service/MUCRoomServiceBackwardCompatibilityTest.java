@@ -25,6 +25,8 @@ import org.jivesoftware.openfire.plugin.rest.entity.OccupantEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.OccupantEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -35,10 +37,7 @@ import javax.ws.rs.core.Response;
 import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,6 +57,8 @@ import static org.mockito.Mockito.*;
  * @author Guus der Kinderen, guus@goodbytes.nl
  */
 public class MUCRoomServiceBackwardCompatibilityTest extends JerseyTest {
+
+    private TimeZone defaultTimeZone;
 
     /**
      * Constructs the mock of the service controller that mimics the 'business logic' normally provided by a running
@@ -128,6 +129,24 @@ public class MUCRoomServiceBackwardCompatibilityTest extends JerseyTest {
     public static void setUpClass() throws ServiceException {
         // Override the service controller with a mock controller.
         MUCRoomController.setInstance(constructMockController());
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
+        // XML timestamps will be local to the server that's running the test. Correct the local timezone to match the
+        // timezone in which the expected result was recorded, for the duration of the test.
+        defaultTimeZone = TimeZone.getDefault();
+        TimeZone.setDefault(TimeZone.getTimeZone("CET"));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+
+        // Reset the default time zone to what it was prior to the test.
+        TimeZone.setDefault(defaultTimeZone);
     }
 
     @Override
