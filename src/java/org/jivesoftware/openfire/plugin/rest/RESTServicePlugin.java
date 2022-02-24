@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Jive Software. All rights reserved.
+ * Copyright (C) 2005-2008 Jive Software, 2022 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,19 @@
 
 package org.jivesoftware.openfire.plugin.rest;
 
-import java.io.File;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.core.Response;
-
 import org.jivesoftware.admin.AuthCheckFilter;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
-import org.jivesoftware.openfire.plugin.rest.entity.SystemProperty;
-import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
-import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
 import org.jivesoftware.util.StringUtils;
 
-import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * The Class RESTServicePlugin.
@@ -125,89 +119,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         PropertyEventDispatcher.removeListener(this);
     }
 
-    /**
-     * Gets the system properties.
-     *
-     * @return the system properties
-     */
-    public SystemProperties getSystemProperties() {
-        final Collection<org.jivesoftware.util.SystemProperty> systemProperties = org.jivesoftware.util.SystemProperty.getProperties();
-        final Set<String> systemPropertyKeys = systemProperties.stream().map(org.jivesoftware.util.SystemProperty::getKey).collect(Collectors.toSet());
-        // Get all the SystemProperties
-        final List<SystemProperty> compoundProperties = systemProperties.stream().map(p -> new SystemProperty(p.getKey(), p.getValueAsSaved())).collect(Collectors.toList());
-        // Now add any missing JiveGlobals properties
-        JiveGlobals.getPropertyNames().stream().filter(key -> !systemPropertyKeys.contains(key)).forEach(key -> compoundProperties.add(new SystemProperty(key, JiveGlobals.getProperty(key))));
-        // And sort by key
-        compoundProperties.sort(Comparator.comparing(SystemProperty::getKey));
-
-        SystemProperties result = new SystemProperties();
-        result.setProperties(compoundProperties);
-        return result;
-    }
-
-    /**
-     * Gets the system property.
-     *
-     * @param propertyKey the property key
-     * @return the system property
-     * @throws ServiceException the service exception
-     */
-    public SystemProperty getSystemProperty(String propertyKey) throws ServiceException {
-        String propertyValue = JiveGlobals.getProperty(propertyKey);
-        if(propertyValue != null) {
-        return new SystemProperty(propertyKey, propertyValue);
-        } else {
-            throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
-                    Response.Status.NOT_FOUND);
-        }
-    }
-    
-    /**
-     * Creates the system property.
-     *
-     * @param systemProperty the system property
-     */
-    public void createSystemProperty(SystemProperty systemProperty) {
-        JiveGlobals.setProperty(systemProperty.getKey(), systemProperty.getValue());
-    }
-    
-    /**
-     * Delete system property.
-     *
-     * @param propertyKey the property key
-     * @throws ServiceException the service exception
-     */
-    public void deleteSystemProperty(String propertyKey) throws ServiceException {
-        if(JiveGlobals.getProperty(propertyKey) != null) {
-            JiveGlobals.deleteProperty(propertyKey);
-        } else {
-            throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
-                    Response.Status.NOT_FOUND);
-        }
-    }
-    
-    /**
-     * Update system property.
-     *
-     * @param propertyKey the property key
-     * @param systemProperty the system property
-     * @throws ServiceException the service exception
-     */
-    public void updateSystemProperty(String propertyKey, SystemProperty systemProperty) throws ServiceException {
-        if(JiveGlobals.getProperty(propertyKey) != null) {
-            if(systemProperty.getKey().equals(propertyKey)) {
-                JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
-            } else {
-                throw new ServiceException("Path property name and entity property name doesn't match", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
-                        Response.Status.BAD_REQUEST);
-            }
-        } else {
-            throw new ServiceException("Could not find property for update", systemProperty.getKey(), ExceptionType.PROPERTY_NOT_FOUND,
-                    Response.Status.NOT_FOUND);
-        }
-    }
-
-    
     /**
      * Returns the loading status message.
      *

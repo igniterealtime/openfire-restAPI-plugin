@@ -23,12 +23,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
+import org.jivesoftware.openfire.plugin.rest.controller.SystemController;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperty;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
-import javax.annotation.PostConstruct;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -36,13 +35,6 @@ import javax.ws.rs.core.Response;
 @Path("restapi/v1/system")
 @Tag(name = "System", description = "Managing Openfire system configuration")
 public class RestAPIService {
-
-    private RESTServicePlugin plugin;
-
-    @PostConstruct
-    public void init() {
-        plugin = RESTServicePlugin.getInstance();
-    }
 
     @GET
     @Path("/properties")
@@ -53,7 +45,7 @@ public class RestAPIService {
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public SystemProperties getSystemProperties() {
-        return plugin.getSystemProperties();
+        return SystemController.getInstance().getSystemProperties();
     }
 
     @GET
@@ -69,7 +61,7 @@ public class RestAPIService {
             @Parameter(description = "The name of the system property to return.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey)
         throws ServiceException
     {
-        return plugin.getSystemProperty(propertyKey);
+        return SystemController.getInstance().getSystemProperty(propertyKey);
     }
 
     @POST
@@ -84,7 +76,7 @@ public class RestAPIService {
             @RequestBody(description = "The system property to create.", required = true) SystemProperty systemProperty)
         throws ServiceException
     {
-        plugin.createSystemProperty(systemProperty);
+        SystemController.getInstance().createSystemProperty(systemProperty);
         return Response.status(Response.Status.CREATED).build();
     }
 
@@ -103,7 +95,7 @@ public class RestAPIService {
             @RequestBody(description = "The new system property definition that replaced an existing definition.", required = true) SystemProperty systemProperty)
         throws ServiceException
     {
-        plugin.updateSystemProperty(propertyKey, systemProperty);
+        SystemController.getInstance().updateSystemProperty(propertyKey, systemProperty);
         return Response.status(Response.Status.OK).build();
     }
 
@@ -119,7 +111,7 @@ public class RestAPIService {
             @Parameter(description = "The name of the system property to delete.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey)
         throws ServiceException
     {
-        plugin.deleteSystemProperty(propertyKey);
+        SystemController.getInstance().deleteSystemProperty(propertyKey);
         return Response.status(Response.Status.OK).build();
     }
 }
