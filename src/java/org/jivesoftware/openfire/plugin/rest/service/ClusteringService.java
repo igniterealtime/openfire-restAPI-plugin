@@ -50,13 +50,13 @@ public class ClusteringService {
     }
 
     @GET
+    @Path("/status")
     @Operation( summary = "Get clustering status",
         description = "Describes the point-in-time state of Openfire's clustering with other servers",
         responses = {
             @ApiResponse(responseCode = "200", description = "Status returned", content = @Content(schema = @Schema(implementation = ClusteringEntity.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Path("/status")
     public ClusteringEntity getClusteringStatus(){
         return new ClusteringEntity(clusteringController.getClusterStatus());
     }

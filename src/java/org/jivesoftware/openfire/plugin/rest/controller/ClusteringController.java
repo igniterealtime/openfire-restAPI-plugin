@@ -36,9 +36,9 @@ public class ClusteringController {
     private static ClusteringController INSTANCE = null;
 
     /**
-     * Gets the single instance of MUCRoomController.
+     * Gets the single instance of ClusteringController.
      *
-     * @return single instance of MUCRoomController
+     * @return single instance of ClusteringController
      */
     public static ClusteringController getInstance() {
         if (INSTANCE == null) {
