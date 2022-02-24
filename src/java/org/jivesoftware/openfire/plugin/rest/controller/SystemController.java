@@ -16,20 +16,25 @@
 
 package org.jivesoftware.openfire.plugin.rest.controller;
 
+import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.cluster.ClusterManager;
+import org.jivesoftware.openfire.http.HttpBindManager;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.spi.ConnectionListener;
+import org.jivesoftware.openfire.spi.ConnectionManagerImpl;
+import org.jivesoftware.openfire.spi.ConnectionType;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.SystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.lang.management.ManagementFactory;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SystemController {
@@ -144,5 +149,125 @@ public class SystemController {
             throw new ServiceException("Could not find property for update", systemProperty.getKey(), ExceptionType.PROPERTY_NOT_FOUND,
                 Response.Status.NOT_FOUND);
         }
+    }
+
+    /**
+     * Determines if there are threads that are deadlocked.
+     *
+     * @return true if deadlocked threads are found, otherwise false.
+     */
+    public boolean hasDeadlock() {
+        try {
+            return ManagementFactory.getThreadMXBean().findDeadlockedThreads() != null;
+        } catch (Throwable t) {
+            LOG.warn("Unable to determine if there is a deadlock.", t);
+            return false;
+        }
+    }
+
+    /**
+     * Determines if there are any system properties that require a restart.
+     *
+     * @return true if at least one system property requires a restart, otherwise false.
+     */
+    public boolean hasSystemPropertyRequiringRestart() {
+        try {
+            SystemProperty.getProperties().stream().filter(SystemProperty::isRestartRequired).forEach(p -> LOG.info("Requires restart: {}. Current value: {}. Initial value: {}", p.getKey(), p.getValue(), p.getDisplayValue()));
+            return SystemProperty.getProperties().stream()
+                .filter(systemProperty -> !systemProperty.getKey().equals("xmpp.domain")) // xmpp.domain can report a false positive. See OF-2399
+                .anyMatch(SystemProperty::isRestartRequired);
+        } catch (Throwable t) {
+            LOG.warn("Unable to determine if there are any system properties that require a restart.", t);
+            return false;
+        }
+    }
+
+    /**
+     * Determine if the core Openfire service is started.
+     *
+     * @return true if Openfire has started, otherwise false.
+     */
+    public boolean isStarted() {
+        return XMPPServer.getInstance().isStarted();
+    }
+
+    /**
+     * Determine if clustering has been fully started, if clustering is enabled.
+     *
+     * When clustering is not enabled, this method will always return 'true'.
+     *
+     * @return true if Openfire has started, otherwise false.
+     */
+    public boolean hasClusteringStartedWhenEnabled() {
+        if (!ClusterManager.isClusteringEnabled()) {
+            return true;
+        }
+        return ClusterManager.isClusteringStarted();
+    }
+
+    /**
+     * Checks if the plugin manager has finished starting all plugins that were available at boot-time.
+     *
+     * Note that the return value does not indicate that plugins succeeded or failed to start: a 'true' return value
+     * indicates only that the plugin manager finished its initial attempt to start all plugins.
+     *
+     * @return True when all (initial) plugins have been started.
+     */
+    public boolean hasPluginManagerExecuted() {
+        return XMPPServer.getInstance().getPluginManager().isExecuted();
+    }
+
+    /**
+     * Verifies that a connection listener for the provided type and encryption level is disabled, or ready to accept connections.
+     *
+     * @param connectionType The type of connection for which to check state
+     * @param encrypted true when the direct-TLS encrypted variant of the listeners is to be checked, otherwise false.
+     * @return True when the connection listener is ready to accept connections, or is disabled.
+     */
+    public boolean isConnectionListenerStartedWhenEnabled(@Nonnull final ConnectionType connectionType, final boolean encrypted) {
+        switch (connectionType) {
+            case BOSH_C2S:
+                if (encrypted) {
+                    return !HttpBindManager.HTTP_BIND_ENABLED.getValue() || HttpBindManager.HTTP_BIND_SECURE_PORT.getValue() <= 0 || HttpBindManager.getInstance().isHttpsBindActive();
+                } else {
+                    return !HttpBindManager.HTTP_BIND_ENABLED.getValue() || HttpBindManager.HTTP_BIND_PORT.getValue() <= 0 || HttpBindManager.getInstance().isHttpBindActive();
+                }
+
+            case WEBADMIN:
+                // FIXME. See OF-2400
+                return true;
+
+            case SOCKET_S2S:
+                // FIXME. See OF-2400
+                return true;
+
+            default:
+                final ConnectionManagerImpl connectionManager = (ConnectionManagerImpl) XMPPServer.getInstance().getConnectionManager();
+                if (connectionManager == null) {
+                    return false;
+                }
+                final ConnectionListener listener = connectionManager.getListener(connectionType, encrypted);
+                if (listener == null) {
+                    return false;
+                }
+                return !listener.isEnabled() || listener.getSocketAcceptor() != null;
+        }
+    }
+    /**
+     * Verifies that all connection listeners that are enabled are ready to accept connections.
+     *
+     * @return True when all enabled connection listeners are ready to accept connections.
+     */
+    public boolean areConnectionListenersStarted() {
+        for (final ConnectionType connectionType : ConnectionType.values()) {
+            if (!isConnectionListenerStartedWhenEnabled(connectionType, true)) {
+                return false;
+            }
+            if (!isConnectionListenerStartedWhenEnabled(connectionType, false)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
