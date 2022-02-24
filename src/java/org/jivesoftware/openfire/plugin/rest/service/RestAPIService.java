@@ -33,7 +33,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("restapi/v1/system/properties")
+@Path("restapi/v1/system")
 @Tag(name = "System", description = "Managing Openfire system configuration")
 public class RestAPIService {
 
@@ -45,6 +45,7 @@ public class RestAPIService {
     }
 
     @GET
+    @Path("/properties")
     @Operation( summary = "Get system properties",
         description = "Get all Openfire system properties.",
         responses = {
@@ -56,7 +57,7 @@ public class RestAPIService {
     }
 
     @GET
-    @Path("/{propertyKey}")
+    @Path("/properties/{propertyKey}")
     @Operation( summary = "Get system property",
         description = "Get a specific Openfire system property.",
         responses = {
@@ -72,6 +73,7 @@ public class RestAPIService {
     }
 
     @POST
+    @Path("/properties")
     @Operation( summary = "Create system property",
         description = "Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.",
         responses = {
@@ -87,7 +89,7 @@ public class RestAPIService {
     }
 
     @PUT
-    @Path("/{propertyKey}")
+    @Path("/properties/{propertyKey}")
     @Operation( summary = "Update system property",
         description = "Updates an existing Openfire system property.",
         responses = {
@@ -106,7 +108,7 @@ public class RestAPIService {
     }
 
     @DELETE
-    @Path("/{propertyKey}")
+    @Path("/properties/{propertyKey}")
     @Operation( summary = "Remove system property",
         description = "Removes an existing Openfire system property.",
         responses = {
