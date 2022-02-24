@@ -15,27 +15,51 @@
  */
 package org.jivesoftware.openfire.plugin.rest.controller;
 
-import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterManager;
-import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.cluster.ClusterNodeInfo;
+import org.jivesoftware.openfire.cluster.NodeID;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
+import org.jivesoftware.openfire.plugin.rest.entity.ClusterNodeEntities;
+import org.jivesoftware.openfire.plugin.rest.entity.ClusterNodeEntity;
+import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClusteringController {
-    private static Logger LOG = LoggerFactory.getLogger(ClusteringController.class);
-    public static final ClusteringController INSTANCE = new ClusteringController();
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+public class ClusteringController {
+    private static final Logger LOG = LoggerFactory.getLogger(ClusteringController.class);
+
+    private static ClusteringController INSTANCE = null;
+
+    /**
+     * Gets the single instance of MUCRoomController.
+     *
+     * @return single instance of MUCRoomController
+     */
     public static ClusteringController getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ClusteringController();
+        }
         return INSTANCE;
     }
 
-    private static final PluginManager pluginManager = XMPPServer.getInstance().getPluginManager();
-    private static final RESTServicePlugin plugin = (RESTServicePlugin) pluginManager.getPlugin("restapi");
+    /**
+     * @param instance the mock/stub/spy controller to use.
+     * @deprecated - for test use only
+     */
+    @Deprecated
+    public static void setInstance(final ClusteringController instance) {
+        ClusteringController.INSTANCE = instance;
+    }
 
     public static void log(String logMessage) {
-        if (plugin.isServiceLoggingEnabled())
+        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
             LOG.info(logMessage);
+        }
     }
 
     public String getClusterStatus() {
@@ -58,4 +82,13 @@ public class ClusteringController {
         }
     }
 
+    public Optional<ClusterNodeEntity> getNodeEntity(String nodeId) {
+        final Optional<ClusterNodeInfo> nodeInfo = ClusterManager.getNodeInfo(NodeID.getInstance(nodeId.getBytes(StandardCharsets.UTF_8)));
+        return nodeInfo.map(ClusterNodeEntity::from);
+    }
+
+    public ClusterNodeEntities getNodeEntities() {
+        final Collection<ClusterNodeInfo> nodesInfo = ClusterManager.getNodesInfo();
+        return new ClusterNodeEntities(nodesInfo.stream().map(ClusterNodeEntity::from).collect(Collectors.toList()));
+    }
 }
