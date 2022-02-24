@@ -49,6 +49,10 @@ public final class ExceptionType {
 
     /** The Constant ALREADY_EXISTS. */
     public static final String ALREADY_EXISTS = "AlreadyExistsException";
+
+    /** The Constant CLUSTER_NODE_NOT_FOUND. */
+    public static final String CLUSTER_NODE_NOT_FOUND = "ClusterNodeNotFoundException";
+
     /**
      * Instantiates a new exception type.
      */

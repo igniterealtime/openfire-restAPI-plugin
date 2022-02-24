@@ -23,6 +23,7 @@ Issues may be reported to the [forums](https://discourse.igniterealtime.org) or 
 * Send broadcast message to all online users
 * Get overview of all or specific security audit logs
 * Get chat message history from a multi user chat room
+* Get clustering status of Openfire
 
 ## Available REST API clients
 REST API clients are implementations of the REST API in a specific programming language.
@@ -1463,12 +1464,83 @@ Endpoint to get security audit logs
 > 
 >**GET** http://example.org:9090/plugins/restapi/v1/logs/security
 
+# Clustering related REST Endpoints
+
+## Retrieve information for all cluster nodes.
+Endpoint to get information for all nodes in the cluster. Note that this endpoint can only return data for remote nodes
+when the instance of Openfire that processes this query has successfully joined the cluster.
+
+>**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes
+
+**Payload:** none
+
+**Return value:** ClusterNodes
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes
+>
+
+## Retrieve information for a specific cluster node.
+Endpoint to get information for a specific cluster node. Note that this endpoint can only return data for remote nodes
+when the instance of Openfire that processes this query has successfully joined the cluster.
+
+>**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes/{nodeId}
+
+**Payload:** none
+
+**Return value:** ClusterNode
+
+### Possible parameters
+
+| Parameter | 	Parameter Type | Description  | Default value |
+|-----------|-----------------|--------------|---------------|
+| nodeId    | 	@Path	         | Exact NodeID |               |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes/52a89928-66f7-45fd-9bb8-096de07400ac
+> 
+
+## Retrieve the Clustering status
+Endpoint to get description of clustering status
+>**GET** /clustering/status
+
+**Payload:** none
+
+**Return value:** String describing the clustering status of this Openfire instance
+
+### Examples
+>**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/clustering/status
+
+### Possible Responses
+
+* SENIOR AND ONLY MEMBER
+* Senior member
+* Junior member
+* Starting up
+* Disabled
+
 # Data format
 Openfire REST API provides XML and JSON as data format. The default data format is XML.
 To get a JSON result, please add "**Accept: application/json**" to the request header.
 If you want to create a resource with JSON data format, please add "**Content-Type: application/json**".
 
 ## Data types
+
+### ClusterNode
+
+| Parameter    | Optional | Description                                                                         |
+|--------------|----------|-------------------------------------------------------------------------------------|
+| hostName     | No       | The hostname and IP address of the server on which this cluster node is running.    |
+| nodeID       | No       | A unique identifier of this cluster node.                                           |
+| joinedTime   | No       | Timestamp when the node joined the cluster.                                         |
+| seniorMember | No       | Boolean value indicating if the node is currently the senior member of the cluster. |
+
 ### User
 
 | Parameter  | Optional | Description                                                                              |
