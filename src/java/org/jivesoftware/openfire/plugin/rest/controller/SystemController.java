@@ -250,6 +250,10 @@ public class SystemController {
                 if (listener == null) {
                     return false;
                 }
+                // When disabled, the listener immediately is in the state that we expect it to be in.
+                // If the listener is disabled, the check to see if it is 'ready' should pass.
+                // If the check does not pass when a listener is disabled, then this test will always indicate that the
+                // server isn't ready to be used.
                 return !listener.isEnabled() || listener.getSocketAcceptor() != null;
         }
     }

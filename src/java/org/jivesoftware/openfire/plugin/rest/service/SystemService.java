@@ -243,7 +243,7 @@ public class SystemService {
     @GET
     @Path("/readiness/connections")
     @Operation( summary = "Perform 'connections' readiness check",
-        description = "Detects if Openfire is ready accepting connection requests.",
+        description = "Detects if Openfire is ready to accept connection requests.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system is ready."),
             @ApiResponse(responseCode = "400", description = "The provided connectionType value is invalid."),
@@ -251,7 +251,7 @@ public class SystemService {
         })
     public Response readinessConnections(
         @Parameter(description = "Optional. Use to limit the check to one particular connection type. One of: SOCKET_S2S, SOCKET_C2S, BOSH_C2S, WEBADMIN, COMPONENT, CONNECTION_MANAGER", example = "SOCKET_C2S", required = false) @QueryParam("connectionType") String connectionType,
-        @Parameter(description = "Check the encrypted (true) or unencrypted (false) variant of the connection type. Only used in combination with 'connectionType'.", required = false) @QueryParam("servicename") Boolean encrypted
+        @Parameter(description = "Check the encrypted (true) or unencrypted (false) variant of the connection type. Only used in combination with 'connectionType', as without it, all types and both encrypted and unencrypted are checked.", required = false) @QueryParam("encrypted") Boolean encrypted
     ) {
         if (connectionType != null && !connectionType.isEmpty()) {
             // Limit check to one connection listener.
@@ -264,7 +264,7 @@ public class SystemService {
                 return Response.status(Response.Status.BAD_REQUEST).build();
             }
         } else {
-            // Check all connection listeners.
+            // Check all connection listeners, encrypted and unencrypted.
             if (!SystemController.getInstance().areConnectionListenersStarted()) {
                 return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
             }
