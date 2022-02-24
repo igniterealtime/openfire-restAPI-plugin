@@ -107,7 +107,7 @@ public class JerseyWrapper extends ResourceConfig {
             MUCRoomOutcastsService.class,
             MUCRoomOwnersService.class,
             MUCRoomService.class,
-            RestAPIService.class,
+            SystemService.class,
             SecurityAuditLogService.class,
             SessionService.class,
             StatisticsService.class,

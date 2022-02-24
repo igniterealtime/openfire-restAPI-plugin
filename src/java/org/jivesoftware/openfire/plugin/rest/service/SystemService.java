@@ -34,7 +34,7 @@ import javax.ws.rs.core.Response;
 
 @Path("restapi/v1/system")
 @Tag(name = "System", description = "Managing Openfire system configuration")
-public class RestAPIService {
+public class SystemService {
 
     @GET
     @Path("/properties")
