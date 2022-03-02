@@ -24,6 +24,7 @@ Issues may be reported to the [forums](https://discourse.igniterealtime.org) or 
 * Get overview of all or specific security audit logs
 * Get chat message history from a multi user chat room
 * Get clustering status of Openfire
+* Get overview of 'readiness' and 'liveness' state of Openfire
 
 ## Available REST API clients
 REST API clients are implementations of the REST API in a specific programming language.
@@ -1245,6 +1246,78 @@ Endpoint to get count of concurrent sessions
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
 >
 >**GET** http://example.org:9090/plugins/restapi/v1/system/statistics/sessions
+
+## Check the 'liveness' state (using all checks)
+Detects if Openfire has reached a state that it cannot recover from, except for with a restart, based on every liveness check that it has implemented.
+
+>**GET** /system/liveness
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Perform 'deadlock' liveness check
+Detects if Openfire has reached a state that it cannot recover from because of a deadlock.
+>**GET** /system/liveness/deadlock
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Perform 'properties' liveness check
+Detects if Openfire has reached a state that it cannot recover from because a system property change requires a restart to take effect.
+>**GET** /system/liveness/properties
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Check the 'readiness' state (using all checks)
+Detects if Openfire is in a state where it is ready to process traffic, based on every readiness check that it has implemented.
+>**GET** /system/readiness
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Perform 'server' readiness check
+Detects if Openfire's core service has been started.
+>**GET** /system/readiness/server
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Perform 'cluster' readiness check
+Detects if the cluster functionality has finished starting (or is disabled).
+>**GET** /system/readiness/cluster
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Perform 'plugins' readiness check
+Detects if Openfire has finished starting its plugins.
+>**GET** /system/readiness/plugins
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+## Perform 'connections' readiness check
+Detects if Openfire is ready to accept connection requests.
+>**GET** /system/readiness/connections
+
+**Payload:** none
+
+**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+
+### Possible parameters
+
+| Parameter      | Parameter Type | Description                                                                                                                                                                                                | Default value |
+|----------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| connectionType | @Path          | Optional. Use to limit the check to one particular connection type. One of: SOCKET_S2S, SOCKET_C2S, BOSH_C2S, WEBADMIN, COMPONENT, CONNECTION_MANAGER                                                      |               |
+| encypted       | @Path          | Check the encrypted (true) or unencrypted (false) variant of the connection type. Only used in combination with 'connectionType', as without it, all types and both encrypted and unencrypted are checked. |               |
 
 # Group related REST Endpoints
 
