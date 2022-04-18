@@ -62,6 +62,11 @@ public class AuthFilter implements ContainerRequestFilter {
             return;
         }
 
+        if (isStatusEndpoint(containerRequest.getUriInfo().getRequestUri().getPath())) {
+            LOG.debug("Authentication was bypassed for a status endpoint");
+            return;
+        }
+
         if (!plugin.isEnabled()) {
             LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);
@@ -139,5 +144,12 @@ public class AuthFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         }
+    }
+
+    private boolean isStatusEndpoint(String path){
+        return path.equals("/plugins/restapi/v1/system/liveness") ||
+            path.startsWith("/plugins/restapi/v1/system/liveness/") ||
+            path.equals("/plugins/restapi/v1/system/readiness") ||
+            path.startsWith("/plugins/restapi/v1/system/readiness/");
     }
 }
