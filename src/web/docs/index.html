@@ -41,7 +41,7 @@
     window.onload = function() {
         // Begin Swagger UI call region
         const ui = SwaggerUIBundle({
-            url: "http://localhost:9090/plugins/restapi/v1/openapi.yaml",
+            url: window.location.origin + "/plugins/restapi/v1/openapi.yaml",
             dom_id: '#swagger-ui',
             deepLinking: true,
             presets: [
