@@ -59,9 +59,16 @@ public class RESTExceptionMapper implements ExceptionMapper<ServiceException> {
         errorResponse.setResource(exception.getResource());
         errorResponse.setMessage(exception.getMessage());
         errorResponse.setException(exception.getException());
-        LOG.error(
+
+        if (exception.getStatus() != null && exception.getStatus().getStatusCode() == 500) {
+            LOG.warn(
                 exception.getException() + ": " + exception.getMessage() + " with resource "
-                        + exception.getResource(), exception.getException());
+                    + exception.getResource(), exception.getException());
+        } else {
+            LOG.info(
+                exception.getException() + ": " + exception.getMessage() + " with resource "
+                    + exception.getResource(), exception.getException());
+        }
         
         ResponseBuilder responseBuilder = Response.status(exception.getStatus()).entity(errorResponse);
         List<MediaType> accepts = headers.getAcceptableMediaTypes();
