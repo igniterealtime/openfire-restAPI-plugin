@@ -18,9 +18,12 @@ package org.jivesoftware.openfire.plugin.rest.service;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.ws.rs.*;
@@ -36,7 +39,12 @@ public class MUCRoomOutcastsService {
     @Operation( summary = "Add room outcast",
         description = "Marks a JID as outcast of a multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "201", description = "JID marked as outcast.")
+            @ApiResponse(responseCode = "201", description = "JID marked as outcast."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to add a room outcast.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Adding this JID as a room outcast would cause a room conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response addMUCRoomOutcast(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
@@ -53,7 +61,12 @@ public class MUCRoomOutcastsService {
     @Operation( summary = "Add room outcasts",
         description = "Marks all members of an Openfire user group as outcasts of a multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "201", description = "Group members marked as outcast.")
+            @ApiResponse(responseCode = "201", description = "Group members marked as outcast."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to add a room outcast.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Adding this JID as a room outcast would cause a room conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response addMUCRoomOutcastGroup(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
@@ -70,7 +83,12 @@ public class MUCRoomOutcastsService {
     @Operation( summary = "Remove room outcast",
         description = "Unmarks a JID as outcast of a multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "JID no longer marked as outcast.")
+            @ApiResponse(responseCode = "200", description = "JID no longer marked as outcast."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to remove this affiliation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Applying this affiliation change would cause a room conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response deleteMUCRoomOutcast(
             @Parameter(description = "The (bare) JID of the entity that is to be removed as an outcast of the room.", example = "john@example.org", required = true) @PathParam("jid") String jid,
@@ -88,7 +106,12 @@ public class MUCRoomOutcastsService {
     @Operation( summary = "Remove room outcasts",
         description = "Removes all members of an Openfire user group as outcast of a multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Group members no longer marked as outcast.")
+            @ApiResponse(responseCode = "200", description = "Group members no longer marked as outcast."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to remove this affiliation.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Applying this affiliation change would cause a room conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response deleteMUCRoomOutcastGroup(
             @Parameter(description = "The name of the user group from which all members will be removed as outcast of the room.", example = "Operators", required = true) @PathParam("groupname") String groupname,

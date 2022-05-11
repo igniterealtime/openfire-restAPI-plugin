@@ -40,7 +40,9 @@ public final class ExceptionType {
 
     /** The Constant GROUP_NOT_FOUND. */
     public static final String GROUP_NOT_FOUND = "GroupNotFoundException";
-    
+
+    public static final String MUCSERVICE_NOT_FOUND = "MUCServiceNotFoundException";
+
     /** The Constant ROOM_NOT_FOUND. */
     public static final String ROOM_NOT_FOUND = "RoomNotFoundException";
 

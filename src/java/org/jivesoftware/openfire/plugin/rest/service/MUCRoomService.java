@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.ws.rs.*;
@@ -41,14 +42,19 @@ public class MUCRoomService {
     @Operation( summary = "Get chat rooms",
         description = "Get a list of all multi-user chat rooms of a particular chat room service.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "All chat rooms", content = @Content(schema = @Schema(implementation = MUCRoomEntities.class)))
+            @ApiResponse(responseCode = "200", description = "All chat rooms", content = @Content(schema = @Schema(implementation = MUCRoomEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "MUC service does not exist or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public MUCRoomEntities getMUCRooms(
             @Parameter(description = "The name of the MUC service for which to return all chat rooms.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @Parameter(description = "Room type-based filter: 'all' or 'public'", examples = { @ExampleObject(value = "public", description = "Only return rooms configured with 'List Room in Directory'"), @ExampleObject(value = "all", description = "Return all rooms")}, required = false) @DefaultValue(MUCChannelType.PUBLIC) @QueryParam("type") String channelType,
             @Parameter(description = "Search/Filter by room name.\nThis act like the wildcard search %String%", example = "conference", required = false) @QueryParam("search") String roomSearch,
-            @Parameter(description = "For all groups defined in owners, admins, members and outcasts, list individual members instead of the group name.", required = false) @DefaultValue("false") @QueryParam("expandGroups") Boolean expand) {
+            @Parameter(description = "For all groups defined in owners, admins, members and outcasts, list individual members instead of the group name.", required = false) @DefaultValue("false") @QueryParam("expandGroups") Boolean expand)
+        throws ServiceException
+    {
         return MUCRoomController.getInstance().getChatRooms(serviceName, channelType, roomSearch, expand);
     }
 
@@ -58,7 +64,9 @@ public class MUCRoomService {
         description = "Get information of a specific multi-user chat room.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The chat room", content = @Content(schema = @Schema(implementation = MUCRoomEntity.class))),
-            @ApiResponse(responseCode = "404", description = "The chat room can not be found")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public MUCRoomEntity getMUCRoomJSON2(
@@ -74,7 +82,9 @@ public class MUCRoomService {
         description = "Removes an existing multi-user chat room.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Room deleted."),
-            @ApiResponse(responseCode = "404", description = "Room not found.")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @DELETE
     @Path("/{roomName}")
@@ -91,7 +101,12 @@ public class MUCRoomService {
     @Operation( summary = "Create chat room",
         description = "Create a new multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "201", description = "Room created.")
+            @ApiResponse(responseCode = "201", description = "Room created."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Room creation is not permitted.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "MUC Service does not exist or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Room already exists, or another conflict occurred while creating the room.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response createMUCRoom(
@@ -108,8 +123,13 @@ public class MUCRoomService {
     @Operation( summary = "Update chat room",
         description = "Updates an existing multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Room updated.")
-        })
+            @ApiResponse(responseCode = "200", description = "Room updated."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Room update/create is not permitted.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "MUC Service does not exist or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "This update causes a conflict, possibly with another existing room.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response updateMUCRoom(
             @Parameter(description = "The name of the chat room that needs to be updated", example = "lobby", required = true) @PathParam("roomName") String roomName,
@@ -126,7 +146,10 @@ public class MUCRoomService {
     @Operation( summary = "Get room participants",
         description = "Get all participants of a specific multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "The chat room participants", content = @Content(schema = @Schema(implementation = ParticipantEntities.class)))
+            @ApiResponse(responseCode = "200", description = "The chat room participants", content = @Content(schema = @Schema(implementation = ParticipantEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public ParticipantEntities getMUCRoomParticipants(
@@ -142,12 +165,16 @@ public class MUCRoomService {
     @Operation( summary = "Get room occupants",
         description = "Get all occupants of a specific multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "The chat room participants", content = @Content(schema = @Schema(implementation = OccupantEntities.class)))
+            @ApiResponse(responseCode = "200", description = "The chat room participants", content = @Content(schema = @Schema(implementation = OccupantEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public OccupantEntities getMUCRoomOccupants(
             @Parameter(description = "The name of the chat room for which to return occupants", example = "lobby", required = true) @PathParam("roomName") String roomName,
             @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName)
+        throws ServiceException
     {
         return MUCRoomController.getInstance().getRoomOccupants(roomName, serviceName);
     }
@@ -158,8 +185,10 @@ public class MUCRoomService {
         description = "Get messages that have been exchanged in a specific multi-user chat room.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The chat room message history", content = @Content(schema = @Schema(implementation = MUCRoomMessageEntities.class))),
-            @ApiResponse(responseCode = "404", description = "Room not found.")
-        })
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public MUCRoomMessageEntities getMUCRoomHistory(
             @Parameter(description = "The name of the chat room for which to return message history", example = "lobby", required = true) @PathParam("roomName") String roomName,
@@ -174,8 +203,12 @@ public class MUCRoomService {
     @Operation( summary = "Invite user",
         description = "Invites a user to join a specific multi-user chat room.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Invitation sent")
-        })
+            @ApiResponse(responseCode = "200", description = "Invitation sent"),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to invite a user to this room.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response inviteUserToMUCRoom(
             @Parameter(description = "The name of the chat room in which to invite a user", example = "lobby", required = true) @PathParam("roomName") String roomName,

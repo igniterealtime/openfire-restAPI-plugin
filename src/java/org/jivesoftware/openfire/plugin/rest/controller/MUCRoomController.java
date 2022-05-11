@@ -35,15 +35,17 @@ import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
 import org.xmpp.packet.Presence;
 
+import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class MUCRoomController.
  */
 public class MUCRoomController {
-    private static Logger LOG = LoggerFactory.getLogger(MUCRoomController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MUCRoomController.class);
 
     /** The Constant INSTANCE. */
     private static MUCRoomController INSTANCE = null;
@@ -76,6 +78,81 @@ public class MUCRoomController {
     }
 
     /**
+     * Returns the MultiUserChatService instance for the provided name.
+     *
+     * This method returns any service that matches the provided name case-insensitively, but prefers a case-sensitive
+     * match.
+     *
+     * @param serviceName The name of the service.
+     * @return The service
+     * @throws ServiceException When no service for the provided name exists.
+     */
+    @Nonnull
+    protected static MultiUserChatService getService(@Nonnull final String serviceName) throws ServiceException
+    {
+        Set<MultiUserChatService> services = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices()
+            .stream().filter(multiUserChatService -> multiUserChatService.getServiceName().equalsIgnoreCase(serviceName))
+            .collect(Collectors.toSet());
+
+        if (services.isEmpty()) {
+            throw new ServiceException("Chat service does not exist or is not accessible.", serviceName, ExceptionType.MUCSERVICE_NOT_FOUND, Response.Status.NOT_FOUND);
+        }
+
+        if (services.size() > 1) {
+            // Multiple services by the name case-insensitive name. This is dodgy. Try finding an exact (by case) match.
+            final Optional<MultiUserChatService> exactMatch = services.stream().filter(multiUserChatService -> multiUserChatService.getServiceName().equals(serviceName)).findAny();
+            if (exactMatch.isPresent()) {
+                return exactMatch.get();
+            }
+            // This is even more dodgy (and really shouldn't occur).
+            LOG.warn("Found multiple services matching the service name '{}' when doing a case-insensitive lookup, but none when doing a case-sensitive lookup. Returning an arbitrary one of those that match case-insensitively.", serviceName);
+        }
+
+        return services.iterator().next();
+    }
+
+    /**
+     * Returns the chat room instance for the provided name.
+     *
+     * This method returns any room that matches the provided room name case-insensitively, but prefers a case-sensitive
+     * match. It will <em>not</em> evaluate more than one service, in case more than one match the provided service name
+     * case-insensitively.
+     *
+     * @param serviceName The name of the service that contains the chat room.
+     * @param roomName The name of the chat room.
+     * @return The chat room instance
+     * @throws ServiceException When no service for the provided name exists, or when that service does not contain a chat room of the provided name.
+     */
+    @Nonnull
+    protected static MUCRoom getRoom(@Nonnull final String serviceName, @Nonnull final String roomName) throws ServiceException
+    {
+        final MultiUserChatService service = getService(serviceName);
+
+        // Try finding an exact match first (iterating over all chat room names is pretty resource intensive, so do that
+        // only as a last resort.
+        MUCRoom room = service.getChatRoom(roomName);
+        if (room == null && !roomName.equals(roomName.toLowerCase())) {
+            // Try avoiding the need for an all-names lookup, by first attempting to get the room by its lowercase name.
+            room = service.getChatRoom(roomName.toLowerCase());
+        }
+        if (room == null) {
+            // As a last resort (because it's resource intensive), iterate over all room(name)s for this service.
+            final Set<String> nonExactMatches = service.getAllRoomNames().stream().filter(name -> name.equalsIgnoreCase(roomName)).collect(Collectors.toSet());
+            for (final String nonExactMatch : nonExactMatches) {
+                room = service.getChatRoom(nonExactMatch);
+                if (room != null) {
+                    LOG.info("Could not find a case-sensitive match for room '{}', but did find a case-insensitive match: '{}'. Case insensitive lookups are resource intensive. Consider modifying your search query.", roomName, room.getName());
+                    break;
+                }
+            }
+        }
+        if (room == null) {
+            throw new ServiceException("Chat room does not exist or is not accessible.", roomName, ExceptionType.ROOM_NOT_FOUND, Response.Status.NOT_FOUND);
+        }
+        return room;
+    }
+
+    /**
      * Gets the chat rooms.
      *
      * @param serviceName
@@ -86,12 +163,13 @@ public class MUCRoomController {
      *            the room search
      * @return the chat rooms
      */
-    public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) {
+    public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) throws ServiceException
+    {
         log("Get the chat rooms");
-        final MultiUserChatService service = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName);
+        final MultiUserChatService service = getService(serviceName);
         Set<String> roomNames = service.getAllRoomNames();
 
-        List<MUCRoomEntity> mucRoomEntities = new ArrayList<MUCRoomEntity>();
+        List<MUCRoomEntity> mucRoomEntities = new ArrayList<>();
 
         for (String roomName : roomNames) {
             if (roomSearch != null) {
@@ -101,6 +179,11 @@ public class MUCRoomController {
             }
 
             final MUCRoom chatRoom = service.getChatRoom(roomName);
+            if (chatRoom == null) {
+                LOG.warn("Cannot get room '{}' from service '{}' even though service's 'getAllRoomNames()' returns this name.", roomName, serviceName);
+                continue;
+            }
+
             if (channelType.equals(MUCChannelType.ALL)) {
                 mucRoomEntities.add(convertToMUCRoomEntity(chatRoom, expand));
             } else if (channelType.equals(MUCChannelType.PUBLIC) && chatRoom.isPublicRoom()) {
@@ -124,15 +207,8 @@ public class MUCRoomController {
      */
     public MUCRoomEntity getChatRoom(String roomName, String serviceName, boolean expand) throws ServiceException {
         log("Get the chat room: " + roomName);
-        MUCRoom chatRoom = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName);
-
-        if (chatRoom == null) {
-            throw new ServiceException("Could not find the chat room", roomName, ExceptionType.ROOM_NOT_FOUND, Response.Status.NOT_FOUND);
-        }
-
-        MUCRoomEntity mucRoomEntity = convertToMUCRoomEntity(chatRoom, expand);
-        return mucRoomEntity;
+        final MUCRoom chatRoom = getRoom(serviceName, roomName);
+        return convertToMUCRoomEntity(chatRoom, expand);
     }
 
     /**
@@ -147,14 +223,8 @@ public class MUCRoomController {
      */
     public void deleteChatRoom(String roomName, String serviceName) throws ServiceException {
         log("Delete the chat room: " + roomName);
-        MUCRoom chatRoom = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName.toLowerCase());
-
-        if (chatRoom != null) {
-            chatRoom.destroyRoom(null, null);
-        } else {
-            throw new ServiceException("Could not remove the channel", roomName, ExceptionType.ROOM_NOT_FOUND, Response.Status.NOT_FOUND);
-        }
+        final MUCRoom chatRoom = getRoom(serviceName, roomName);
+        chatRoom.destroyRoom(null, null);
     }
 
     /**
@@ -232,14 +302,15 @@ public class MUCRoomController {
      * @throws AlreadyExistsException
      */
     private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName) throws NotAllowedException,
-            ForbiddenException, ConflictException, AlreadyExistsException {
+        ForbiddenException, ConflictException, AlreadyExistsException, ServiceException
+    {
         log("Create a chat room: " + mucRoomEntity.getRoomName());
         // Set owner
         JID owner = XMPPServer.getInstance().createJID("admin", null);
         if (mucRoomEntity.getOwners() != null && mucRoomEntity.getOwners().size() > 0) {
             owner = new JID(mucRoomEntity.getOwners().get(0));
         } else {
-            List<String> owners = new ArrayList<String>();
+            List<String> owners = new ArrayList<>();
             owners.add(owner.toBareJID());
             mucRoomEntity.setOwners(owners);
         }
@@ -250,8 +321,7 @@ public class MUCRoomController {
             XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(serviceName, serviceName, false);
         }
 
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(mucRoomEntity.getRoomName().toLowerCase(), owner);
+        MUCRoom room = getService(serviceName).getChatRoom(mucRoomEntity.getRoomName().toLowerCase(), owner);
 
         // Set values
         room.setNaturalLanguageName(mucRoomEntity.getNaturalName());
@@ -334,13 +404,13 @@ public class MUCRoomController {
      *            the service name
      * @return the room participants
      */
-    public ParticipantEntities getRoomParticipants(String roomName, String serviceName) {
+    public ParticipantEntities getRoomParticipants(String roomName, String serviceName) throws ServiceException
+    {
         log("Get room participants for room: " + roomName);
         ParticipantEntities participantEntities = new ParticipantEntities();
-        List<ParticipantEntity> participants = new ArrayList<ParticipantEntity>();
+        List<ParticipantEntity> participants = new ArrayList<>();
 
-        Collection<MUCRole> serverParticipants = XMPPServer.getInstance().getMultiUserChatManager()
-                .getMultiUserChatService(serviceName).getChatRoom(roomName).getParticipants();
+        Collection<MUCRole> serverParticipants = getRoom(serviceName, roomName).getParticipants();
 
         for (MUCRole role : serverParticipants) {
             ParticipantEntity participantEntity = new ParticipantEntity();
@@ -364,13 +434,13 @@ public class MUCRoomController {
      *            the service name
      * @return the room occupants
      */
-    public OccupantEntities getRoomOccupants(String roomName, String serviceName) {
+    public OccupantEntities getRoomOccupants(String roomName, String serviceName) throws ServiceException
+    {
         log("Get room occupants for room: " + roomName);
         OccupantEntities occupantEntities = new OccupantEntities();
-        List<OccupantEntity> occupants = new ArrayList<OccupantEntity>();
+        List<OccupantEntity> occupants = new ArrayList<>();
 
-        Collection<MUCRole> serverOccupants = XMPPServer.getInstance().getMultiUserChatManager()
-                .getMultiUserChatService(serviceName).getChatRoom(roomName).getOccupants();
+        Collection<MUCRole> serverOccupants = getRoom(serviceName, roomName).getOccupants();
 
         for (MUCRole role : serverOccupants) {
             OccupantEntity occupantEntity = new OccupantEntity();
@@ -400,12 +470,7 @@ public class MUCRoomController {
         MUCRoomMessageEntities mucRoomMessageEntities = new MUCRoomMessageEntities();
         List<MUCRoomMessageEntity> listMessages = new ArrayList<>();
 
-        MultiUserChatService mucS =XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName);
-        MUCRoom chatRoom = mucS.getChatRoom(roomName);
-        if (chatRoom == null) {
-            throw new ServiceException("Could not find the chat room", roomName, ExceptionType.ROOM_NOT_FOUND, Response.Status.NOT_FOUND);
-        }
-
+        MUCRoom chatRoom = getRoom(serviceName, roomName);
         MUCRoomHistory mucRH = chatRoom.getRoomHistory();
         Iterator<Message> messageHistory = mucRH.getMessageHistory();
 
@@ -449,8 +514,7 @@ public class MUCRoomController {
      */
     public void inviteUser(String serviceName, String roomName, String jid, MUCInvitationEntity mucInvitationEntity)
             throws ServiceException {
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-            .getChatRoom(roomName.toLowerCase());
+        MUCRoom room = getRoom(serviceName, roomName);
 
         try {
             room.sendInvitation(UserUtils.checkAndGetJID(jid), mucInvitationEntity.getReason(), room.getRole(), null);
@@ -487,10 +551,10 @@ public class MUCRoomController {
         mucRoomEntity.setMembersOnly(room.isMembersOnly());
         mucRoomEntity.setModerated(room.isModerated());
 
-        ConcurrentGroupList<JID> owners = new ConcurrentGroupList<JID>(room.getOwners());
-        ConcurrentGroupList<JID> admins = new ConcurrentGroupList<JID>(room.getAdmins());
-        ConcurrentGroupList<JID> members = new ConcurrentGroupList<JID>(room.getMembers());
-        ConcurrentGroupList<JID> outcasts = new ConcurrentGroupList<JID>(room.getOutcasts());
+        ConcurrentGroupList<JID> owners = new ConcurrentGroupList<>(room.getOwners());
+        ConcurrentGroupList<JID> admins = new ConcurrentGroupList<>(room.getAdmins());
+        ConcurrentGroupList<JID> members = new ConcurrentGroupList<>(room.getMembers());
+        ConcurrentGroupList<JID> outcasts = new ConcurrentGroupList<>(room.getOutcasts());
 
         if (expand) {
             for(Group ownerGroup : owners.getGroups()) {
@@ -541,12 +605,11 @@ public class MUCRoomController {
      */
     private void setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException,
             ConflictException {
-        List<JID> roles = new ArrayList<JID>();
-        Collection<JID> owners = new ArrayList<JID>();
-        Collection<JID> existingOwners = new ArrayList<JID>();
+        List<JID> roles = new ArrayList<>();
+        Collection<JID> existingOwners = new ArrayList<>();
 
         List<JID> mucRoomEntityOwners = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners());
-        owners.addAll(room.getOwners());
+        Collection<JID> owners = new ArrayList<>(room.getOwners());
 
         // Find same owners
         for (JID jid : owners) {
@@ -598,8 +661,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void addAdmin(String serviceName, String roomName, String jid) throws ServiceException {
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName.toLowerCase());
+        MUCRoom room = getRoom(serviceName, roomName);
         try {
             room.addAdmin(UserUtils.checkAndGetJID(jid), room.getRole());
         } catch (ForbiddenException e) {
@@ -622,8 +684,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void addOwner(String serviceName, String roomName, String jid) throws ServiceException {
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName.toLowerCase());
+        MUCRoom room = getRoom(serviceName, roomName);
         try {
             room.addOwner(UserUtils.checkAndGetJID(jid), room.getRole());
         } catch (ForbiddenException e) {
@@ -644,8 +705,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void addMember(String serviceName, String roomName, String jid) throws ServiceException {
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName.toLowerCase());
+        MUCRoom room = getRoom(serviceName, roomName);
         try {
             room.addMember(UserUtils.checkAndGetJID(jid), null, room.getRole());
         } catch (ForbiddenException | ConflictException e) {
@@ -666,8 +726,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void addOutcast(String serviceName, String roomName, String jid) throws ServiceException {
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName.toLowerCase());
+        MUCRoom room = getRoom(serviceName, roomName);
         try {
             room.addOutcast(UserUtils.checkAndGetJID(jid), null, room.getRole());
         } catch (NotAllowedException | ForbiddenException e) {
@@ -690,8 +749,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void deleteAffiliation(String serviceName, String roomName, String jid) throws ServiceException {
-        MUCRoom room = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatService(serviceName)
-                .getChatRoom(roomName.toLowerCase());
+        MUCRoom room = getRoom(serviceName, roomName);
         try {
               JID userJid = UserUtils.checkAndGetJID(jid);
 
