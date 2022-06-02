@@ -1027,9 +1027,42 @@ Endpoint to invite a user to a room.
 | roomname  | 	@Path	         | Exact room name                    |               |
 | name      | @Path	          | The local username or the user JID |               |
 
-##  Add user with role to chat room
-Endpoint to add a new user with role to a room.
->**POST** /chatrooms/{roomName}/{roles}/{name}
+##  Get all users with a particular affiliation in a chat room
+Retrieves a list of JIDs for all users with the specified affiliation in a multi-user chat room.
+
+>**GET** /chatrooms/{roomName}/{affiliation}
+
+**Payload:** none
+
+**Return value:** HTTP status 200 (OK)
+
+### Possible parameters
+
+| Parameter   | 	Parameter Type | Description                                                                                | Default value |
+|-------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname    | 	@Path	         | Exact room name                                                                            |               |
+| affiliation | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type application/xml
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/global/member
+
+**Return payload:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<members>
+    <member>member2@localhost</member>
+    <member>member1@localhost</member>
+</members>
+```
+
+##  Add user with affiliation to chat room
+Endpoint to add a new user with affiliation to a room.
+>**POST** /chatrooms/{roomName}/{affiliation}/{name}
 
 **Payload:** none
 
@@ -1037,12 +1070,12 @@ Endpoint to add a new user with role to a room.
 
 ### Possible parameters
 
-| Parameter   | 	Parameter Type | Description                                                                         | Default value |
-|-------------|-----------------|-------------------------------------------------------------------------------------|---------------|
-| roomname    | 	@Path	         | Exact room name                                                                     |               |
-| name        | 	@Path	         | The local username or the user JID                                                  |               |
-| roles       | 	@Path	         | Available roles: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                  | conference    |
+| Parameter   | 	Parameter Type | Description                                                                                | Default value |
+|-------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname    | 	@Path	         | Exact room name                                                                            |               |
+| name        | 	@Path	         | The local username or the user JID                                                         |               |
+| affiliation | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
@@ -1061,9 +1094,73 @@ Endpoint to add a new user with role to a room.
 > 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf
 
-##  Add group with role to chat room
-Endpoint to add a new group with role to a room.
->**POST** /chatrooms/{roomName}/{roles}/group/{name}
+##  Replace all users with a affiliation in a chat room
+Endpoint to replace all users with a particular affiliation in a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.
+>**PUT** /chatrooms/{roomName}/{affiliation}
+
+**Payload:** list of affiliations
+
+**Return value:** HTTP status 201 (Created)
+
+### Possible parameters
+
+| Parameter   | 	Parameter Type | Description                                                                                | Default value |
+|-------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname    | 	@Path	         | Exact room name                                                                            |               |
+| affiliation | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type application/xml
+>
+>**PUT** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members
+> 
+**Request Payload:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<members>
+    <member>member2@localhost</member>
+    <member>member1@localhost</member>
+</members>
+```
+
+##  Add multiple users with a affiliation to a chat room
+Endpoint to add multiple users with an affiliation to a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.
+>**PUT** /chatrooms/{roomName}/{affiliation}
+
+**Payload:** list of affiliations
+
+**Return value:** HTTP status 201 (Created)
+
+### Possible parameters
+
+| Parameter    | 	Parameter Type | Description                                                                         | Default value |
+|--------------|-----------------|-------------------------------------------------------------------------------------|---------------|
+| roomname     | 	@Path	         | Exact room name                                                                     |               |
+| affiliation  | 	@Path	         | Available affiliation: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename  | 	@QueryParam	   | The name of the Group Chat Service                                                  | conference    |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type application/xml
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members
+>
+**Request Payload:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<members>
+    <member>member2@localhost</member>
+    <member>member1@localhost</member>
+</members>
+```
+
+##  Add group with affiliation to chat room
+Endpoint to add a new group with affiliation to a room.
+>**POST** /chatrooms/{roomName}/{affiliation}/group/{name}
 
 **Payload:** none
 
@@ -1071,12 +1168,12 @@ Endpoint to add a new group with role to a room.
 
 ### Possible parameters
 
-| Parameter   | Parameter Type | Description                                                                         | Default value |
-|-------------|----------------|-------------------------------------------------------------------------------------|---------------|
-| roomname    | @Path          | Exact room name                                                                     |               |
-| name        | @Path          | The group name                                                                      |               |
-| roles       | @Path          | Available roles: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | @QueryParam    | The name of the Group Chat Service                                                  | conference    |
+| Parameter   | Parameter Type | Description                                                                                | Default value |
+|-------------|----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname    | @Path          | Exact room name                                                                            |               |
+| name        | @Path          | The group name                                                                             |               |
+| affiliation | @Path          | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename | @QueryParam    | The name of the Group Chat Service                                                         | conference    |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
@@ -1095,8 +1192,8 @@ Endpoint to add a new group with role to a room.
 
 
 ## Delete a user from a chat room 
-Endpoint to remove a room user role.
->**DELETE** /chatrooms/{roomName}/{roles}/{name}
+Endpoint to remove a room user affiliation.
+>**DELETE** /chatrooms/{roomName}/{affiliations}/{name}
 
 **Payload:** none
 
@@ -1104,12 +1201,12 @@ Endpoint to remove a room user role.
 
 ### Possible parameters
 
-| Parameter   | 	Parameter Type | Description                                                                         | Default value |
-|-------------|-----------------|-------------------------------------------------------------------------------------|---------------|
-| roomname    | 	@Path	         | Exact room name                                                                     |               |
-| name        | 	@Path	         | The local username or the user JID                                                  |               |
-| roles       | 	@Path	         | Available roles: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                  | conference    |
+| Parameter    | 	Parameter Type | Description                                                                                | Default value |
+|--------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname     | 	@Path	         | Exact room name                                                                            |               |
+| name         | 	@Path	         | The local username or the user JID                                                         |               |
+| affiliations | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename  | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=

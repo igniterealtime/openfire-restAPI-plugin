@@ -36,6 +36,7 @@ import org.xmpp.packet.Message;
 import org.xmpp.packet.Presence;
 
 import javax.annotation.Nonnull;
+import javax.servlet.ServletException;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -733,6 +734,181 @@ public class MUCRoomController {
             throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
             throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
+        }
+    }
+
+    /**
+     * Returns a collection of user addresses of every user that has a particular affiliation to a room.
+     *
+     * @param serviceName
+     *            the service name of the room
+     * @param roomName
+     *            the name of the room for which to return affiliated users
+     * @param affiliation
+     *            the affiliation for which to return all users
+     * @return All users that have the specified affiliation to the specified room.
+     * @throws ServiceException On any issue looking up the room or its affiliated users.
+     */
+    public Collection<JID> getByAffiliation(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation) throws ServiceException
+    {
+        final MUCRoom room = getRoom(serviceName, roomName);
+        switch (affiliation) {
+            case admin:
+                return room.getAdmins();
+            case member:
+                return room.getMembers();
+            case owner:
+                return room.getOwners();
+            case outcast:
+                return room.getOutcasts();
+            default:
+                return room.getOccupants().stream()
+                    .filter(o->affiliation.equals(o.getAffiliation()))
+                    .map(MUCRole::getUserAddress)
+                    .collect(Collectors.toSet());
+        }
+    }
+
+    /**
+     * Updates a list of users that have a particular affiliation to a room with a new list.
+     *
+     * This will remove all users as having an affiliation of this type with the room for users that are not in the
+     * list of replacements.
+     *
+     * @param serviceName
+     *            the service name of the room
+     * @param roomName
+     *            the name of the room for which to replace affiliated users
+     * @param affiliation
+     *            the affiliation for which to replace all users
+     * @param jids
+     *            the new list of affiliated users
+     * @throws ServiceException On any issue looking up the room or changing its affiliated users.
+     */
+    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids) throws ServiceException
+    {
+        final Collection<JID> replacements = new HashSet<>();
+
+        // Input validation.
+        for (String replacement : jids) {
+            try {
+                replacements.add(new JID(replacement));
+            } catch (IllegalArgumentException e) {
+                throw new ServiceException("Unable to parse value as jid: " + replacement, roomName, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST, e);
+            }
+        }
+
+        final Collection<JID> oldUsers = getByAffiliation(serviceName, roomName, affiliation);
+
+        // The users to add are the replacements that aren't already in the old collection.
+        final List<JID> toAdd = new ArrayList<>(replacements);
+        toAdd.removeAll(oldUsers);
+
+        // The users to remove are the old users that are no longer in the replacements.
+        final List<JID> toRemove = new ArrayList<>(oldUsers);
+        toRemove.removeAll(replacements);
+
+        final MUCRoom room = getRoom(serviceName, roomName);
+        try {
+            // First, add all new affiliations (some affiliations aren't allowed to be empty, so removing things first could cause issues).
+            switch (affiliation) {
+                case admin:
+                    room.addAdmins(toAdd, room.getRole());
+                    break;
+
+                case member:
+                    for (final JID add : toAdd) {
+                        room.addMember(add, null, room.getRole());
+                    }
+                    break;
+
+                case owner:
+                    room.addOwners(toAdd, room.getRole());
+                    break;
+
+                case outcast:
+                    for (final JID add : toAdd) {
+                        room.addOutcast(add, null, room.getRole());
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unrecognized affiliation: " + affiliation);
+            }
+
+            // Next, remove the affiliations that are no longer wanted.
+            for (final JID remove : toRemove) {
+                room.addNone(remove, room.getRole());
+            }
+        } catch (ForbiddenException | NotAllowedException e) {
+            throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        } catch (ConflictException e) {
+            throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
+        }
+    }
+
+    /**
+     * Adds to a list of users that have a particular affiliation to a room with a new list, without affecting the
+     * pre-existing list.
+     *
+     * @param serviceName
+     *            the service name of the room
+     * @param roomName
+     *            the name of the room for which to add affiliated users
+     * @param affiliation
+     *            the affiliation for which to add users
+     * @param jids
+     *            the list of additional affiliated users
+     * @throws ServiceException On any issue looking up the room or changing its affiliated users.
+     */
+    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids) throws ServiceException
+    {
+        final Collection<JID> additions = new HashSet<>();
+
+        // Input validation.
+        for (String replacement : jids) {
+            try {
+                additions.add(new JID(replacement));
+            } catch (IllegalArgumentException e) {
+                throw new ServiceException("Unable to parse value as jid: " + replacement, roomName, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST, e);
+            }
+        }
+
+        final Collection<JID> oldUsers = getByAffiliation(serviceName, roomName, affiliation);
+
+        // The users to add are the additions that aren't already in the old collection.
+        final List<JID> toAdd = new ArrayList<>(additions);
+        toAdd.removeAll(oldUsers);
+
+        final MUCRoom room = getRoom(serviceName, roomName);
+        try {
+            // Add all new affiliations.
+            switch (affiliation) {
+                case admin:
+                    room.addAdmins(toAdd, room.getRole());
+                    break;
+
+                case member:
+                    for (final JID add : toAdd) {
+                        room.addMember(add, null, room.getRole());
+                    }
+                    break;
+
+                case owner:
+                    room.addOwners(toAdd, room.getRole());
+                    break;
+
+                case outcast:
+                    for (final JID add : toAdd) {
+                        room.addOutcast(add, null, room.getRole());
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unrecognized affiliation: " + affiliation);
+            }
+        } catch (ForbiddenException | NotAllowedException e) {
+            throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        } catch (ConflictException e) {
+            throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
         }
     }
 
