@@ -61,7 +61,7 @@ public class GroupService {
         description = "Create a new user group.",
         responses = {
             @ApiResponse(responseCode = "201", description = "Group created."),
-            @ApiResponse(responseCode = "400", description = "Group or group name missing."),
+            @ApiResponse(responseCode = "400", description = "Group or group name missing, or invalid syntax for a property."),
             @ApiResponse(responseCode = "409", description = "Group already exists.")
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -94,7 +94,7 @@ public class GroupService {
         description = "Updates / overwrites an existing user group. Note that the name of the group cannot be changed.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Group updated."),
-            @ApiResponse(responseCode = "400", description = "Group or group name missing, or name does not match existing group."),
+            @ApiResponse(responseCode = "400", description = "Group or group name missing, or name does not match existing group, or invalid syntax for a property."),
             @ApiResponse(responseCode = "404", description = "Group with this name not found."),
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
