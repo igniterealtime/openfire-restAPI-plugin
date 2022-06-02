@@ -20,28 +20,103 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.jivesoftware.openfire.muc.MUCRole;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
+import org.jivesoftware.openfire.plugin.rest.entity.MemberEntities;
+import org.jivesoftware.openfire.plugin.rest.entity.OwnerEntities;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.xmpp.packet.JID;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("restapi/v1/chatrooms/{roomName}/members")
 @Tag(name = "Chat room", description = "Managing Multi-User chat rooms.")
 public class MUCRoomMembersService {
 
+    @GET
+    @Path("/")
+    @Operation( summary = "All room members",
+        description = "Retrieves a list of JIDs for all members of a multi-user chat room.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Member list retrieved."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        })
+    public Response getMembers(
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The name of the MUC room for which to return members.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+        throws ServiceException
+    {
+        final List<String> results = MUCRoomController.getInstance().getByAffiliation(serviceName, roomName, MUCRole.Affiliation.member).stream()
+            .map(JID::toBareJID)
+            .collect(Collectors.toList());
+        return Response.ok(new MemberEntities(results)).build();
+    }
+
+    @PUT
+    @Path("/")
+    @Operation( summary = "Replace room members",
+        description = "Replaces the room members in a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user as a room member, any other pre-existing affiliation is removed.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Members of the room have been replaced."),
+            @ApiResponse(responseCode = "400", description = "Provided values cannot be parsed as JIDs.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to modify a room members.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response replaceMUCRoomMembers(
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The name of the MUC room of which members are to be replaced.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @RequestBody(description = "The new list of room members.", required = true) MemberEntities memberEntities)
+        throws ServiceException
+    {
+        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.member, memberEntities.getMembers());
+        return Response.status(Status.CREATED).build();
+    }
+
+    @POST
+    @Path("/")
+    @Operation( summary = "Add room members",
+        description = "Add multiple room members in a multi-user chat room (without removing existing members). Note that a user can only have one type of affiliation with a room. By adding a user as a room member, any other pre-existing affiliation is removed.",
+        responses = {
+            @ApiResponse(responseCode = "201", description = "Members of the room have been added."),
+            @ApiResponse(responseCode = "400", description = "Provided values cannot be parsed as JIDs.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to modify a room members.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response addMUCRoomMembers(
+        @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "The name of the MUC room to which members are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @RequestBody(description = "The list of room members to add to the room.", required = true) MemberEntities memberEntities)
+        throws ServiceException
+    {
+        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.member, memberEntities.getMembers());
+        return Response.status(Status.CREATED).build();
+    }
+
     @POST
     @Path("/{jid}")
     @Operation( summary = "Add room member",
-        description = "Registers a JID as a member of a multi-user chat room.",
+        description = "Registers a JID as a member of a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user as a room member, any other pre-existing affiliation is removed.",
         responses = {
             @ApiResponse(responseCode = "201", description = "Member added to the room."),
             @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Not allowed to add a room admin, or adding it would cause a conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to add a room member, or adding it would cause a conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
@@ -58,11 +133,11 @@ public class MUCRoomMembersService {
     @POST
     @Path("/group/{groupname}")
     @Operation( summary = "Add room members",
-        description = "Adds all members of an Openfire user group as registered members of a multi-user chat room.",
+        description = "Adds all members of an Openfire user group as registered members of a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user as a room member, any other pre-existing affiliation is removed.",
         responses = {
             @ApiResponse(responseCode = "201", description = "Members added to the room."),
             @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "403", description = "Not allowed to add a room admin, or adding it would cause a conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to add a room member, or adding it would cause a conflict.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
@@ -94,7 +169,6 @@ public class MUCRoomMembersService {
             @Parameter(description = "The name of the MUC room from which a member is to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)
         throws ServiceException
     {
-        // FIXME: check if this removes _all_ affiliations, which probably would be more than we're bargaining for.
         MUCRoomController.getInstance().deleteAffiliation(serviceName, roomName, jid);
         return Response.status(Status.OK).build();
     }
@@ -117,7 +191,6 @@ public class MUCRoomMembersService {
             @Parameter(description = "The name of the MUC room to which members are to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)
         throws ServiceException
     {
-        // FIXME: check if this removes _all_ affiliations, which probably would be more than we're bargaining for.
         MUCRoomController.getInstance().deleteAffiliation(serviceName, roomName, groupname);
         return Response.status(Status.OK).build();
     }

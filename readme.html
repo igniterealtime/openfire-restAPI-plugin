@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Openfire REST API Plugin Readme</title>
+    <title>Welcome file</title>
     <link rel="stylesheet" href="https://stackedit.io/style.css" />
 </head>
 
@@ -55,9 +55,12 @@
                     <li><a href="#delete-a-chat-room-endpoint-to-delete-a-chat-room.">Delete a chat room Endpoint to delete a chat room.</a></li>
                     <li><a href="#update-a-chat-room-endpoint-to-update-a-chat-room.">Update a chat room Endpoint to update a chat room.</a></li>
                     <li><a href="#invite-user-to-a-chat-room">Invite user to a chat Room</a></li>
-                    <li><a href="#add-user-with-role-to-chat-room">Add user with role to chat room</a></li>
-                    <li><a href="#add-group-with-role-to-chat-room">Add group with role to chat room</a></li>
-                    <li><a href="#delete-a-user-from-a-chat-room-endpoint-to-remove-a-room-user-role.">Delete a user from a chat room Endpoint to remove a room user role.</a></li>
+                    <li><a href="#get-all-users-with-a-particular-affiliation-in-a-chat-room">Get all users with a particular affiliation in a chat room</a></li>
+                    <li><a href="#add-user-with-affiliation-to-chat-room">Add user with affiliation to chat room</a></li>
+                    <li><a href="#replace-all-users-with-a-affiliation-in-a-chat-room">Replace all users with a affiliation in a chat room</a></li>
+                    <li><a href="#add-multiple-users-with-a-affiliation-to-a-chat-room">Add multiple users with a affiliation to a chat room</a></li>
+                    <li><a href="#add-group-with-affiliation-to-chat-room">Add group with affiliation to chat room</a></li>
+                    <li><a href="#delete-a-user-from-a-chat-room-endpoint-to-remove-a-room-user-affiliation.">Delete a user from a chat room Endpoint to remove a room user affiliation.</a></li>
                 </ul>
             </li>
             <li><a href="#system-related-rest-endpoints">System related REST Endpoints</a>
@@ -1245,13 +1248,13 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h2 id="add-user-with-role-to-chat-room">Add user with role to chat room</h2>
-        <p>Endpoint to add a new user with role to a room.</p>
+        </table><h2 id="get-all-users-with-a-particular-affiliation-in-a-chat-room">Get all users with a particular affiliation in a chat room</h2>
+        <p>Retrieves a list of JIDs for all users with the specified affiliation in a multi-user chat room.</p>
         <blockquote>
-            <p><strong>POST</strong> /chatrooms/{roomName}/{roles}/{name}</p>
+            <p><strong>GET</strong> /chatrooms/{roomName}/{affiliation}</p>
         </blockquote>
         <p><strong>Payload:</strong> none</p>
-        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
         <h3 id="possible-parameters-24">Possible parameters</h3>
 
         <table>
@@ -1271,15 +1274,9 @@
                 <td></td>
             </tr>
             <tr>
-                <td>name</td>
+                <td>affiliation</td>
                 <td>@Path</td>
-                <td>The local username or the user JID</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>roles</td>
-                <td>@Path</td>
-                <td>Available roles: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
                 <td></td>
             </tr>
             <tr>
@@ -1292,20 +1289,18 @@
         </table><h3 id="examples-22">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>Header:</strong> Content-Type application/xml<br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf</a></p>
-            </blockquote>
+            <p><strong>Header:</strong> Content-Type application/xml</p>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/member">http://example.org:9090/plugins/restapi/v1/chatrooms/global/member</a></p>
         </blockquote>
-        <h2 id="add-group-with-role-to-chat-room">Add group with role to chat room</h2>
-        <p>Endpoint to add a new group with role to a room.</p>
+        <p><strong>Return payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h2 id="add-user-with-affiliation-to-chat-room">Add user with affiliation to chat room</h2>
+        <p>Endpoint to add a new user with affiliation to a room.</p>
         <blockquote>
-            <p><strong>POST</strong> /chatrooms/{roomName}/{roles}/group/{name}</p>
+            <p><strong>POST</strong> /chatrooms/{roomName}/{affiliation}/{name}</p>
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
@@ -1330,13 +1325,13 @@
             <tr>
                 <td>name</td>
                 <td>@Path</td>
-                <td>The group name</td>
+                <td>The local username or the user JID</td>
                 <td></td>
             </tr>
             <tr>
-                <td>roles</td>
+                <td>affiliation</td>
                 <td>@Path</td>
-                <td>Available roles: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
                 <td></td>
             </tr>
             <tr>
@@ -1350,6 +1345,161 @@
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
+                <p><strong>Header:</strong> Content-Type application/xml<br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf</a></p>
+            </blockquote>
+        </blockquote>
+        <h2 id="replace-all-users-with-a-affiliation-in-a-chat-room">Replace all users with a affiliation in a chat room</h2>
+        <p>Endpoint to replace all users with a particular affiliation in a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.</p>
+        <blockquote>
+            <p><strong>PUT</strong> /chatrooms/{roomName}/{affiliation}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> list of affiliations</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-26">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>roomname</td>
+                <td>@Path</td>
+                <td>Exact room name</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>affiliation</td>
+                <td>@Path</td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>servicename</td>
+                <td>@QueryParam</td>
+                <td>The name of the Group Chat Service</td>
+                <td>conference</td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-24">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>Header:</strong> Content-Type application/xml</p>
+            <p><strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/members">http://example.org:9090/plugins/restapi/v1/chatrooms/global/members</a></p>
+        </blockquote>
+        <p><strong>Request Payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h2 id="add-multiple-users-with-a-affiliation-to-a-chat-room">Add multiple users with a affiliation to a chat room</h2>
+        <p>Endpoint to add multiple users with an affiliation to a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.</p>
+        <blockquote>
+            <p><strong>PUT</strong> /chatrooms/{roomName}/{affiliation}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> list of affiliations</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-27">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>roomname</td>
+                <td>@Path</td>
+                <td>Exact room name</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>affiliation</td>
+                <td>@Path</td>
+                <td>Available affiliation: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>servicename</td>
+                <td>@QueryParam</td>
+                <td>The name of the Group Chat Service</td>
+                <td>conference</td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-25">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>Header:</strong> Content-Type application/xml</p>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/members">http://example.org:9090/plugins/restapi/v1/chatrooms/global/members</a></p>
+        </blockquote>
+        <p><strong>Request Payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h2 id="add-group-with-affiliation-to-chat-room">Add group with affiliation to chat room</h2>
+        <p>Endpoint to add a new group with affiliation to a room.</p>
+        <blockquote>
+            <p><strong>POST</strong> /chatrooms/{roomName}/{affiliation}/group/{name}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-28">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>roomname</td>
+                <td>@Path</td>
+                <td>Exact room name</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>name</td>
+                <td>@Path</td>
+                <td>The group name</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>affiliation</td>
+                <td>@Path</td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>servicename</td>
+                <td>@QueryParam</td>
+                <td>The name of the Group Chat Service</td>
+                <td>conference</td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-26">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
                 <p><strong>Header:</strong> Content-Type application/xml</p>
             </blockquote>
             <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testGroup">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testGroup</a></p>
@@ -1360,13 +1510,13 @@
                     <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testUser?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testUser?servicename=privateconf</a></p>
             </blockquote>
         </blockquote>
-        <h2 id="delete-a-user-from-a-chat-room-endpoint-to-remove-a-room-user-role.">Delete a user from a chat room Endpoint to remove a room user role.</h2>
+        <h2 id="delete-a-user-from-a-chat-room-endpoint-to-remove-a-room-user-affiliation.">Delete a user from a chat room Endpoint to remove a room user affiliation.</h2>
         <blockquote>
-            <p><strong>DELETE</strong> /chatrooms/{roomName}/{roles}/{name}</p>
+            <p><strong>DELETE</strong> /chatrooms/{roomName}/{affiliations}/{name}</p>
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-26">Possible parameters</h3>
+        <h3 id="possible-parameters-29">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1391,9 +1541,9 @@
                 <td></td>
             </tr>
             <tr>
-                <td>roles</td>
+                <td>affiliations</td>
                 <td>@Path</td>
-                <td>Available roles: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
                 <td></td>
             </tr>
             <tr>
@@ -1403,7 +1553,7 @@
                 <td>conference</td>
             </tr>
             </tbody>
-        </table><h3 id="examples-24">Examples</h3>
+        </table><h3 id="examples-27">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1423,7 +1573,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> System properties</p>
-        <h3 id="examples-25">Examples</h3>
+        <h3 id="examples-28">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1436,89 +1586,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> System property</p>
-        <h3 id="possible-parameters-27">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>propertyName</td>
-                <td>@Path</td>
-                <td>The name of system property</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-26">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain">http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain</a></p>
-        </blockquote>
-        <h2 id="create-a-system-property-endpoint-to-create-a-system-property">Create a system property Endpoint to create a system property</h2>
-        <blockquote>
-            <p><strong>POST</strong> system/properties</p>
-        </blockquote>
-        <p><strong>Payload:</strong> System Property</p>
-        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="examples-27">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>Header:</strong> Content-Type: application/xml<br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties">http://example.org:9090/plugins/restapi/v1/system/properties</a></p>
-            </blockquote>
-        </blockquote>
-        <p><strong>Payload Example:</strong></p>
-        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyName<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyValue<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
-</code></pre>
-        <h2 id="delete-a-system-property">Delete a system property</h2>
-        <p>Endpoint to delete a system property</p>
-        <blockquote>
-            <p><strong>DELETE</strong> /system/properties/{propertyName}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> none</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-28">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>propertyName</td>
-                <td>@Path</td>
-                <td>The name of system property</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-28">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
-            </blockquote>
-        </blockquote>
-        <h2 id="update-a-system-property">Update a system property</h2>
-        <p>Endpoint to update / overwrite a system property</p>
-        <blockquote>
-            <p><strong>PUT</strong> /system/properties/{propertyName}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> System property</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-29">Possible parameters</h3>
+        <h3 id="possible-parameters-30">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1540,6 +1608,88 @@
         </table><h3 id="examples-29">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain">http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain</a></p>
+        </blockquote>
+        <h2 id="create-a-system-property-endpoint-to-create-a-system-property">Create a system property Endpoint to create a system property</h2>
+        <blockquote>
+            <p><strong>POST</strong> system/properties</p>
+        </blockquote>
+        <p><strong>Payload:</strong> System Property</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="examples-30">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>Header:</strong> Content-Type: application/xml<br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties">http://example.org:9090/plugins/restapi/v1/system/properties</a></p>
+            </blockquote>
+        </blockquote>
+        <p><strong>Payload Example:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyName<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyValue<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>
+</code></pre>
+        <h2 id="delete-a-system-property">Delete a system property</h2>
+        <p>Endpoint to delete a system property</p>
+        <blockquote>
+            <p><strong>DELETE</strong> /system/properties/{propertyName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-31">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>propertyName</td>
+                <td>@Path</td>
+                <td>The name of system property</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-31">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
+            </blockquote>
+        </blockquote>
+        <h2 id="update-a-system-property">Update a system property</h2>
+        <p>Endpoint to update / overwrite a system property</p>
+        <blockquote>
+            <p><strong>PUT</strong> /system/properties/{propertyName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> System property</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-32">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>propertyName</td>
+                <td>@Path</td>
+                <td>The name of system property</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-32">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
                 <p><strong>Header:</strong> Content-Type application/xml<br>
                     <strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
@@ -1556,7 +1706,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Sessions count</p>
-        <h3 id="examples-30">Examples</h3>
+        <h3 id="examples-33">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/statistics/sessions">http://example.org:9090/plugins/restapi/v1/system/statistics/sessions</a></p>
@@ -1617,7 +1767,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value</strong>: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.</p>
-        <h3 id="possible-parameters-30">Possible parameters</h3>
+        <h3 id="possible-parameters-33">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1649,7 +1799,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Groups</p>
-        <h3 id="examples-31">Examples</h3>
+        <h3 id="examples-34">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1662,90 +1812,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Group</p>
-        <h3 id="possible-parameters-31">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>groupName</td>
-                <td>@Path</td>
-                <td>The name of the group</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-32">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/moderators">http://example.org:9090/plugins/restapi/v1/groups/moderators</a></p>
-        </blockquote>
-        <h2 id="create-a-group-endpoint-to-create-a-new-group">Create a group Endpoint to create a new group</h2>
-        <blockquote>
-            <p><strong>POST</strong> /groups</p>
-        </blockquote>
-        <p><strong>Payload:</strong> Group</p>
-        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="examples-33">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>Header:</strong> Content-Type: application/xml<br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups">http://example.org:9090/plugins/restapi/v1/groups</a></p>
-            </blockquote>
-        </blockquote>
-        <p><strong>Payload Example:</strong></p>
-        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>
- <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>GroupName<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Some description<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>isshared</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>isshared</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span>
-</code></pre>
-        <h2 id="delete-a-group">Delete a group</h2>
-        <p>Endpoint to delete a group</p>
-        <blockquote>
-            <p><strong>DELETE</strong> /groups/{groupName}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> none</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-32">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>groupName</td>
-                <td>@Path</td>
-                <td>The name of the group</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-34">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupToDelete">http://example.org:9090/plugins/restapi/v1/groups/groupToDelete</a></p>
-            </blockquote>
-        </blockquote>
-        <h2 id="update-a-group">Update a group</h2>
-        <p>Endpoint to update / overwrite a group</p>
-        <blockquote>
-            <p><strong>PUT</strong> /groups/{groupName}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> Group</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-33">Possible parameters</h3>
+        <h3 id="possible-parameters-34">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1767,6 +1834,89 @@
         </table><h3 id="examples-35">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/moderators">http://example.org:9090/plugins/restapi/v1/groups/moderators</a></p>
+        </blockquote>
+        <h2 id="create-a-group-endpoint-to-create-a-new-group">Create a group Endpoint to create a new group</h2>
+        <blockquote>
+            <p><strong>POST</strong> /groups</p>
+        </blockquote>
+        <p><strong>Payload:</strong> Group</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="examples-36">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>Header:</strong> Content-Type: application/xml<br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups">http://example.org:9090/plugins/restapi/v1/groups</a></p>
+            </blockquote>
+        </blockquote>
+        <p><strong>Payload Example:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>name</span><span class="token punctuation">&gt;</span></span>GroupName<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>name</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Some description<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>isshared</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>isshared</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h2 id="delete-a-group">Delete a group</h2>
+        <p>Endpoint to delete a group</p>
+        <blockquote>
+            <p><strong>DELETE</strong> /groups/{groupName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-35">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>groupName</td>
+                <td>@Path</td>
+                <td>The name of the group</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-37">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupToDelete">http://example.org:9090/plugins/restapi/v1/groups/groupToDelete</a></p>
+            </blockquote>
+        </blockquote>
+        <h2 id="update-a-group">Update a group</h2>
+        <p>Endpoint to update / overwrite a group</p>
+        <blockquote>
+            <p><strong>PUT</strong> /groups/{groupName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> Group</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-36">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>groupName</td>
+                <td>@Path</td>
+                <td>The name of the group</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-38">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
                 <p><strong>Header:</strong> Content-Type application/xml<br>
                     <strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate">http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate</a></p>
@@ -1785,7 +1935,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Sessions</p>
-        <h3 id="examples-36">Examples</h3>
+        <h3 id="examples-39">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1799,7 +1949,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Sessions</p>
-        <h3 id="possible-parameters-34">Possible parameters</h3>
+        <h3 id="possible-parameters-37">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1818,7 +1968,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-37">Examples</h3>
+        </table><h3 id="examples-40">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
@@ -1830,7 +1980,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-35">Possible parameters</h3>
+        <h3 id="possible-parameters-38">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1849,7 +1999,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-38">Examples</h3>
+        </table><h3 id="examples-41">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
@@ -1862,7 +2012,7 @@
         </blockquote>
         <p><strong>Payload:</strong> Message</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="examples-39">Examples</h3>
+        <h3 id="examples-42">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1882,7 +2032,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Security Audit Logs</p>
-        <h3 id="possible-parameters-36">Possible parameters</h3>
+        <h3 id="possible-parameters-39">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1925,7 +2075,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-40">Examples</h3>
+        </table><h3 id="examples-43">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1941,7 +2091,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> ClusterNodes</p>
-        <h3 id="examples-41">Examples</h3>
+        <h3 id="examples-44">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/clustering/nodes">http://example.org:9090/plugins/restapi/v1/clustering/nodes</a></p>
@@ -1954,7 +2104,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> ClusterNode</p>
-        <h3 id="possible-parameters-37">Possible parameters</h3>
+        <h3 id="possible-parameters-40">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1973,7 +2123,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-42">Examples</h3>
+        </table><h3 id="examples-45">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/clustering/nodes/52a89928-66f7-45fd-9bb8-096de07400ac">http://example.org:9090/plugins/restapi/v1/clustering/nodes/52a89928-66f7-45fd-9bb8-096de07400ac</a></p>
@@ -1985,7 +2135,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> String describing the clustering status of this Openfire instance</p>
-        <h3 id="examples-43">Examples</h3>
+        <h3 id="examples-46">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/clustering/status">http://example.org:9090/plugins/restapi/v1/clustering/status</a></p>
