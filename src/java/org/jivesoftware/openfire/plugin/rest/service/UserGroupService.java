@@ -59,9 +59,10 @@ public class UserGroupService {
 
     @POST
     @Operation( summary = "Add user to groups",
-        description = "Add a particular user to a collection of groups.",
+        description = "Add a particular user to a collection of groups. When a group that is provided does not exist, it will be automatically created if possible.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The user was added to all groups."),
+            @ApiResponse(responseCode = "400", description = "When the username cannot be parsed into a JID.")
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response addUserToGroups(
@@ -76,9 +77,10 @@ public class UserGroupService {
     @POST
     @Path("/{groupName}")
     @Operation( summary = "Add user to group",
-        description = "Add a particular user to a particular group.",
+        description = "Add a particular user to a particular group. When the group that does not exist, it will be automatically created if possible.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The user was added to the groups."),
+            @ApiResponse(responseCode = "400", description = "When the username cannot be parsed into a JID.")
         })
     public Response addUserToGroup(
             @Parameter(description = "The username of the user that is to be added to a group.", required = true) @PathParam("username") String username,
