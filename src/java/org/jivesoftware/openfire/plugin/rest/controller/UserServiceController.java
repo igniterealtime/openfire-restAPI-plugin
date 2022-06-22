@@ -401,6 +401,15 @@ public class UserServiceController {
      */
     public List<String> getUserGroups(String username) throws ServiceException {
         log("Get user groups for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.GROUP_NOT_FOUND, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
         User user = getAndCheckUser(username);
         Collection<Group> groups = GroupManager.getInstance().getGroups(user);
         List<String> groupNames = new ArrayList<String>();
@@ -438,7 +447,7 @@ public class UserServiceController {
                 groups.add(group);
             }
             for (Group group : groups) {
-                group.getMembers().add(server.createJID(username, null));
+                group.getMembers().add(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
             }
         }
     }
@@ -461,7 +470,7 @@ public class UserServiceController {
             group = GroupController.getInstance().createGroup(new GroupEntity(groupName, ""));
         }
         
-        group.getMembers().add(server.createJID(username, null));
+        group.getMembers().add(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
     }
 
     /**
@@ -487,7 +496,7 @@ public class UserServiceController {
                             Response.Status.NOT_FOUND, e);
                 }
                 log("Removing user: " + username + " from the group: " + groupName);
-                group.getMembers().remove(server.createJID(username, null));
+                group.getMembers().remove(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
             }
         }
     }
@@ -508,7 +517,7 @@ public class UserServiceController {
             throw new ServiceException("Could not find group", groupName, ExceptionType.GROUP_NOT_FOUND,
                     Response.Status.NOT_FOUND, e);
         }
-        group.getMembers().remove(server.createJID(username, null));
+        group.getMembers().remove(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
     }
 
     /**
