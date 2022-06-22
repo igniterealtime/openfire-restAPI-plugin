@@ -52,22 +52,22 @@ import java.util.List;
  * The Class UserServiceController.
  */
 public class UserServiceController {
-    private static Logger LOG = LoggerFactory.getLogger(UserServiceController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserServiceController.class);
 
     /** The Constant INSTANCE. */
     private static UserServiceController INSTANCE = null;
 
     /** The user manager. */
-    private UserManager userManager;
+    private final UserManager userManager;
 
     /** The roster manager. */
-    private RosterManager rosterManager;
+    private final RosterManager rosterManager;
 
     /** The server. */
-    private XMPPServer server;
+    private final XMPPServer server;
     
     /** The lock out manager. */
-    private LockOutManager lockOutManager;
+    private final LockOutManager lockOutManager;
 
     /**
      * Gets the single instance of UserServiceController.
@@ -192,10 +192,15 @@ public class UserServiceController {
     /**
      * Gets the user entities.
      *
+     * When a property key (and possibly value) is provided, then the user that is returned is one for which the
+     * specified property has been defined.
+     *
      * @param userSearch
      *            the user search
-     * @param propertyValue
      * @param propertyKey
+     *            the property key (can be null)
+     * @param propertyValue
+     *            the property value (can be null)
      * @return the user entities
      * @throws ServiceException
      *              the service exception
@@ -275,7 +280,7 @@ public class UserServiceController {
         log("Get roster entities for user: " + username);
         Roster roster = getUserRoster(username);
 
-        List<RosterItemEntity> rosterEntities = new ArrayList<RosterItemEntity>();
+        List<RosterItemEntity> rosterEntities = new ArrayList<>();
         for (RosterItem rosterItem : roster.getRosterItems()) {
             RosterItemEntity rosterItemEntity = new RosterItemEntity(rosterItem.getJid().toBareJID(),
                     rosterItem.getNickname(), rosterItem.getSubStatus().getValue());
@@ -318,13 +323,11 @@ public class UserServiceController {
             // Roster item does not exist. Try to add it.
         }
 
-        if (roster != null) {
-            RosterItem rosterItem = roster.createRosterItem(jid, rosterItemEntity.getNickname(),
-                    rosterItemEntity.getGroups(), false, true);
-            UserUtils.checkSubType(rosterItemEntity.getSubscriptionType());
-            rosterItem.setSubStatus(RosterItem.SubType.getTypeFromInt(rosterItemEntity.getSubscriptionType()));
-            roster.updateRosterItem(rosterItem);
-        }
+        RosterItem rosterItem = roster.createRosterItem(jid, rosterItemEntity.getNickname(),
+                rosterItemEntity.getGroups(), false, true);
+        UserUtils.checkSubType(rosterItemEntity.getSubscriptionType());
+        rosterItem.setSubStatus(RosterItem.SubType.getTypeFromInt(rosterItemEntity.getSubscriptionType()));
+        roster.updateRosterItem(rosterItem);
     }
 
     /**
@@ -412,7 +415,7 @@ public class UserServiceController {
         }
         User user = getAndCheckUser(username);
         Collection<Group> groups = GroupManager.getInstance().getGroups(user);
-        List<String> groupNames = new ArrayList<String>();
+        List<String> groupNames = new ArrayList<>();
         for (Group group : groups) {
             groupNames.add(group.getName());
         }
@@ -433,7 +436,7 @@ public class UserServiceController {
     public void addUserToGroups(String username, UserGroupsEntity userGroupsEntity) throws ServiceException {
         if (userGroupsEntity != null) {
             log("Adding user: " + username + " to groups");
-            Collection<Group> groups = new ArrayList<Group>();
+            Collection<Group> groups = new ArrayList<>();
 
             for (String groupName : userGroupsEntity.getGroupNames()) {
                 Group group;
@@ -534,7 +537,7 @@ public class UserServiceController {
     public UserEntities getUserEntitiesByProperty(String propertyKey, String propertyValue) throws ServiceException {
         log("Get user entities by property key : " + propertyKey + "and property value: " + propertyValue);
         List<String> usernames = PropertyDAO.getUsernameByProperty(propertyKey, propertyValue);
-        List<UserEntity> users = new ArrayList<UserEntity>();
+        List<UserEntity> users = new ArrayList<>();
         UserEntities userEntities = new UserEntities();
 
         for (String username : usernames) {
