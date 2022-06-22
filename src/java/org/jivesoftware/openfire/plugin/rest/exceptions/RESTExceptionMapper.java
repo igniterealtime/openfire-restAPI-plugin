@@ -16,18 +16,15 @@
 
 package org.jivesoftware.openfire.plugin.rest.exceptions;
 
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 /**
  * The Class RESTExceptionMapper.
@@ -41,7 +38,9 @@ public class RESTExceptionMapper implements ExceptionMapper<ServiceException> {
     /** The headers. */
     @Context
     private HttpHeaders headers;
-    
+
+    @Context
+    private HttpServletRequest request;
 
     /**
      * Instantiates a new REST exception mapper.
@@ -64,6 +63,9 @@ public class RESTExceptionMapper implements ExceptionMapper<ServiceException> {
             LOG.warn(
                 exception.getException() + ": " + exception.getMessage() + " with resource "
                     + exception.getResource(), exception.getException());
+        } else if (exception.getStatus().getStatusCode() == 404 && "HEAD".equalsIgnoreCase(request.getMethod())) {
+            // This is an existence check that has a 'nope' answer that is perfectly valid. This should not be logged by default.
+            LOG.debug(exception.getException() + ": " + exception.getMessage() + " with resource " + exception.getResource());
         } else {
             LOG.info(
                 exception.getException() + ": " + exception.getMessage() + " with resource "
