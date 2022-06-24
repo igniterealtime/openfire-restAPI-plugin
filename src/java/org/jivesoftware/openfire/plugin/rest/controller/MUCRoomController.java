@@ -375,6 +375,8 @@ public class MUCRoomController {
         if (room.isPersistent()) {
             room.saveToDB();
         }
+
+        getService(serviceName).syncChatRoom(room);
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
