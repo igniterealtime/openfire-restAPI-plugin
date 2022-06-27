@@ -17,8 +17,10 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.jivesoftware.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -171,5 +173,19 @@ public class GroupEntity {
      * @param shared whether this is a shared group
      */
     public void setShared(Boolean shared) { this.shared = shared; }
+
+
+    @Override
+    public String toString() {
+
+        return MoreObjects.toStringHelper(this)
+            .add("name", this.name)
+            .add("description", this.description)
+            .add( "admins", this.admins)
+            .add("members", this.members)
+            .add("shared", this.shared)
+            .toString();
+
+    }
 
 }

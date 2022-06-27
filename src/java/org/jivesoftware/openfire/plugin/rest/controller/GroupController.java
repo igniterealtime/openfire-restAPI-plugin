@@ -28,6 +28,7 @@ import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.plugin.rest.entity.GroupEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.MUCRoomUtils;
 import org.xmpp.packet.JID;
 
@@ -55,6 +56,7 @@ public class GroupController {
      *             the service exception
      */
     public List<GroupEntity> getGroups() throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_LIST.toString());
         Collection<Group> groups = GroupManager.getInstance().getGroups();
         List<GroupEntity> groupEntities = new ArrayList<>();
         for (Group group : groups) {
@@ -75,6 +77,7 @@ public class GroupController {
      *             the service exception
      */
     public GroupEntity getGroup(String groupName) throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_GET_BY_NAME.toString(), groupName);
         Group group;
         try {
             group = GroupManager.getInstance().getGroup(groupName);
@@ -101,6 +104,7 @@ public class GroupController {
      *             the service exception
      */
     public Group createGroup(GroupEntity groupEntity) throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_CREATE.toString(), groupEntity);
         Group group;
         if (groupEntity != null && !groupEntity.getName().isEmpty()) {
             try {
@@ -163,6 +167,7 @@ public class GroupController {
      * @throws ServiceException the service exception
      */
     public Group updateGroup(String groupName, GroupEntity groupEntity) throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_UPDATE_BY_NAME.toString(), groupName, groupEntity);
         Group group;
         if (groupEntity != null && !groupEntity.getName().isEmpty()) {
             if (groupName.equals(groupEntity.getName())) {
@@ -251,6 +256,7 @@ public class GroupController {
      *             the service exception
      */
     public void deleteGroup(String groupName) throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_DELETE.toString(), groupName);
         try {
             Group group = GroupManager.getInstance().getGroup(groupName);
             GroupManager.getInstance().deleteGroup(group);
