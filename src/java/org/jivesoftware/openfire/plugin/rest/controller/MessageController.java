@@ -22,6 +22,7 @@ import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.plugin.rest.entity.MessageEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils;
 
 /**
  * The Class MessageController.
@@ -48,6 +49,7 @@ public class MessageController {
      *             the service exception
      */
     public void sendBroadcastMessage(MessageEntity messageEntity) throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MESSAGE_BROADCAST, messageEntity);
         if (messageEntity.getBody() != null && !messageEntity.getBody().isEmpty()) {
             SessionManager.getInstance().sendServerMessage(null, messageEntity.getBody());
         } else {

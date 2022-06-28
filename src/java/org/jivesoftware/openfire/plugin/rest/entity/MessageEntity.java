@@ -53,4 +53,9 @@ public class MessageEntity {
     public void setBody(String body) {
         this.body = body;
     }
+    
+    @Override
+    public String toString() {
+        return "MessageEntity [body=" + body + "]";
+    }
 }

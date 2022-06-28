@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class LoggingUtils {
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("RestAPI-Plugin-Audit");
@@ -41,7 +40,34 @@ public class LoggingUtils {
         GROUPS_DELETE,
 
         //JustMarried
-        USER_CHANGE_NAME
+        USER_CHANGE_NAME,
+
+        //Messages
+        MESSAGE_BROADCAST,
+
+        //Message Archive
+        MESSAGE_ARCHIVE_UNREAD_COUNT,
+
+        //MUC
+        // - MUC Affiliations
+        MUC_LIST_AFFILIATED_USERS_FOR_AFFILIATION,
+        MUC_REPLACE_AFFILIATED_USERS_FOR_AFFILIATION,
+        MUC_REMOVE_AFFILIATED_USER_OR_GROUP_FOR_AFFILIATION,
+        MUC_ADD_AFFILIATED_USERS_FOR_AFFILIATION,
+        MUC_ADD_AFFILIATED_USER_OR_GROUP_AS_ADMIN,
+        MUC_ADD_AFFILIATED_USER_OR_GROUP_AS_MEMBER,
+        MUC_ADD_AFFILIATED_USER_OR_GROUP_AS_OUTCAST,
+        MUC_ADD_AFFILIATED_USER_OR_GROUP_AS_OWNER,
+        // - MUC Rooms
+        MUC_LIST_ROOMS,
+        MUC_GET_ROOM,
+        MUC_DELETE_ROOM,
+        MUC_CREATE_ROOM,
+        MUC_UPDATE_ROOM,
+        MUC_GET_PARTICIPANT_LIST,
+        MUC_GET_OCCUPANT_LIST,
+        MUC_GET_ROOM_HISTORY,
+        MUC_INVITE_USER,
         ;
     }
 
@@ -55,11 +81,14 @@ public class LoggingUtils {
             String logMessage = "Event: " + event;
             logMessage += " - ";
             logMessage += "Parameters: + " + parameterString;
+            logMessage += " - ";
+            logMessage += "Caller: " + getCaller();
             AUDIT_LOG.info(logMessage);
         };
     }
 
     private static String parseParameters(Object[] parameters) {
+        //TODO: Does this belong here?
         ArrayList<String> parsed = new ArrayList<>();
         for (Object obj: parameters) {
             if(obj == null){
@@ -73,5 +102,21 @@ public class LoggingUtils {
             }
         }
         return parsed.toString();
+    }
+
+    /*
+    * Returns the name and method of the calling class.
+    */
+    private static String getCaller() {
+        try {
+            StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+            for (StackTraceElement element : stackTrace) {
+                if(element.getClassName().equals(LoggingUtils.class.getName())){
+                    continue;
+                }
+                return element.getClassName() + "." + element.getMethodName();
+            }
+        } catch (Exception ignored) {}
+        return "unknown";
     }
 }

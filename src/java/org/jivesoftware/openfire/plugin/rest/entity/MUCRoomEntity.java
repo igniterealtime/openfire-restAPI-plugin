@@ -18,6 +18,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.glassfish.jersey.internal.guava.MoreObjects;
 import org.xmpp.packet.JID;
 
 import java.util.Date;
@@ -361,6 +362,34 @@ public class MUCRoomEntity {
 
     public void setAdminGroups(List<String> adminGroups) {
         this.adminGroups = adminGroups;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+            .add("roomName", roomName)
+            .add("description", description)
+            .add("persistent", persistent)
+            .add("publicRoom", publicRoom)
+            .add("registrationEnabled", registrationEnabled)
+            .add("canAnyoneDiscoverJID", canAnyoneDiscoverJID)
+            .add("canOccupantsChangeSubject", canOccupantsChangeSubject)
+            .add("canOccupantsInvite", canOccupantsInvite)
+            .add("canChangeNickname", canChangeNickname)
+            .add("logEnabled", logEnabled)
+            .add("loginRestrictedToNickname", loginRestrictedToNickname)
+            .add("membersOnly", membersOnly)
+            .add("moderated", moderated)
+            .add("broadcastPresenceRoles", broadcastPresenceRoles)
+            .add("owners", owners)
+            .add("ownerGroups", ownerGroups)
+            .add("members", members)
+            .add("memberGroups", memberGroups)
+            .add("outcasts", outcasts)
+            .add("outcastGroups", outcastGroups)
+            .add("admins", admins)
+            .add("adminGroups", adminGroups)
+            .toString();
     }
 
 }

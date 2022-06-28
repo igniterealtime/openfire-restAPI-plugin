@@ -38,4 +38,8 @@ public class MUCInvitationEntity {
     public void setReason(String reason) {
         this.reason = reason;
     }
+    @Override
+    public String toString() {
+        return "MUCInvitationEntity [reason=" + reason + "]";
+    }
 }

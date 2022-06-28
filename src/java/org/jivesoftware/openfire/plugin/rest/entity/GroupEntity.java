@@ -17,9 +17,9 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.MoreObjects;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.glassfish.jersey.internal.guava.MoreObjects;
 import org.jivesoftware.util.StringUtils;
 
 import java.util.List;
