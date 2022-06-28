@@ -28,61 +28,50 @@ public class LoggingUtils {
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("RestAPI-Plugin-Audit");
 
     public enum AuditEvent {
-        CLUSTERING_GET_STATUS("GetClusterStatus", "Get current status of clustering"),
-        CLUSTERING_GET_NODES("GetClusterNodes", "Get info on all cluster nodes"),
-        CLUSTERING_GET_NODE("GetClusterNode", "Get info on a specific cluster node by ID"),
+        //Clustering
+        CLUSTERING_GET_STATUS,
+        CLUSTERING_GET_NODES,
+        CLUSTERING_GET_NODE,
 
-        GROUPS_LIST("GetGroups", "List all groups"),
-        GROUPS_GET_BY_NAME("GetGroupByName", "Fetch a group given the name"),
-        GROUPS_CREATE("CreateGroup", "Create a group given the definition"),
-        GROUPS_UPDATE_BY_NAME("UpdateGroup", "Update the named group with the given definition"),
-        GROUPS_DELETE("DeleteGroup", "Delete group with the given name"),
+        //Groups
+        GROUPS_LIST,
+        GROUPS_GET_BY_NAME,
+        GROUPS_CREATE,
+        GROUPS_UPDATE_BY_NAME,
+        GROUPS_DELETE,
+
+        //JustMarried
+        USER_CHANGE_NAME
         ;
-
-        private final String name;
-        private final String description;
-        AuditEvent(final String name, final String description){
-            this.name = name;
-            this.description = description;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        @Override
-        public String toString() {
-            return getName();
-        }
     }
 
-    public static void auditEvent(String event){
+    public static void auditEvent(AuditEvent event){
         auditEvent(event, "");
     }
 
-    public static void auditEvent(String event, Object... parameters){
+    public static void auditEvent(AuditEvent event, Object... parameters){
         if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
-            String[] parsedParameters = parseParameters(parameters);
+            String parameterString = parseParameters(parameters);
             String logMessage = "Event: " + event;
             logMessage += " - ";
-            logMessage += "Parameters: + " + Arrays.toString(parsedParameters);
+            logMessage += "Parameters: + " + parameterString;
             AUDIT_LOG.info(logMessage);
         };
     }
 
-    private static String[] parseParameters(Object[] parameters) {
+    private static String parseParameters(Object[] parameters) {
         ArrayList<String> parsed = new ArrayList<>();
         for (Object obj: parameters) {
             if(obj == null){
                 parsed.add("null");
             } else {
-                parsed.add(obj.toString());
+                try {
+                    parsed.add(obj.toString());
+                } catch (Exception e) {
+                    parsed.add("unparseable");
+                }
             }
         }
-        return parsed.toArray(new String[0]);
+        return parsed.toString();
     }
 }

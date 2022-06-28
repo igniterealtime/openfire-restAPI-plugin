@@ -53,7 +53,7 @@ public class ClusteringController {
     }
 
     public String getClusterStatus() {
-        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_STATUS.toString());
+        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_STATUS);
         if (ClusterManager.isClusteringEnabled()) {
             if (ClusterManager.isClusteringStarted()) {
                 if (ClusterManager.isSeniorClusterMember()) {
@@ -74,13 +74,13 @@ public class ClusteringController {
     }
 
     public Optional<ClusterNodeEntity> getNodeEntity(String nodeId) {
-        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_NODE.toString(), nodeId);
+        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_NODE, nodeId);
         final Optional<ClusterNodeInfo> nodeInfo = ClusterManager.getNodeInfo(NodeID.getInstance(nodeId.getBytes(StandardCharsets.UTF_8)));
         return nodeInfo.map(ClusterNodeEntity::from);
     }
 
     public ClusterNodeEntities getNodeEntities() {
-        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_NODES.toString());
+        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_NODES);
         final Collection<ClusterNodeInfo> nodesInfo = ClusterManager.getNodesInfo();
         return new ClusterNodeEntities(nodesInfo.stream().map(ClusterNodeEntity::from).collect(Collectors.toList()));
     }

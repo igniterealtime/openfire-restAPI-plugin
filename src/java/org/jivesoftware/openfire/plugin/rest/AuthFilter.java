@@ -106,6 +106,7 @@ public class AuthFilter implements ContainerRequestFilter {
         String auth = containerRequest.getHeaderString("authorization");
 
         if (auth == null) {
+            LOG.warn("REST API request with no Authorization header rejected");
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
 

@@ -56,7 +56,7 @@ public class GroupController {
      *             the service exception
      */
     public List<GroupEntity> getGroups() throws ServiceException {
-        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_LIST.toString());
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_LIST);
         Collection<Group> groups = GroupManager.getInstance().getGroups();
         List<GroupEntity> groupEntities = new ArrayList<>();
         for (Group group : groups) {
@@ -77,7 +77,7 @@ public class GroupController {
      *             the service exception
      */
     public GroupEntity getGroup(String groupName) throws ServiceException {
-        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_GET_BY_NAME.toString(), groupName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_GET_BY_NAME, groupName);
         Group group;
         try {
             group = GroupManager.getInstance().getGroup(groupName);
@@ -104,7 +104,7 @@ public class GroupController {
      *             the service exception
      */
     public Group createGroup(GroupEntity groupEntity) throws ServiceException {
-        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_CREATE.toString(), groupEntity);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_CREATE, groupEntity);
         Group group;
         if (groupEntity != null && !groupEntity.getName().isEmpty()) {
             try {
@@ -167,7 +167,7 @@ public class GroupController {
      * @throws ServiceException the service exception
      */
     public Group updateGroup(String groupName, GroupEntity groupEntity) throws ServiceException {
-        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_UPDATE_BY_NAME.toString(), groupName, groupEntity);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_UPDATE_BY_NAME, groupName, groupEntity);
         Group group;
         if (groupEntity != null && !groupEntity.getName().isEmpty()) {
             if (groupName.equals(groupEntity.getName())) {
@@ -256,7 +256,7 @@ public class GroupController {
      *             the service exception
      */
     public void deleteGroup(String groupName) throws ServiceException {
-        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_DELETE.toString(), groupName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.GROUPS_DELETE, groupName);
         try {
             Group group = GroupManager.getInstance().getGroup(groupName);
             GroupManager.getInstance().deleteGroup(group);

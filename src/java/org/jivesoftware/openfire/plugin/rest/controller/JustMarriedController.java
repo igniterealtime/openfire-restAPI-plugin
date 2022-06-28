@@ -30,6 +30,7 @@ import org.jivesoftware.openfire.group.GroupManager;
 import org.jivesoftware.openfire.lockout.LockOutManager;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils;
 import org.jivesoftware.openfire.roster.Roster;
 import org.jivesoftware.openfire.roster.RosterItem;
 import org.jivesoftware.openfire.session.ClientSession;
@@ -65,6 +66,13 @@ public class JustMarriedController {
     public static boolean changeName(String currentUserName, String newUserName, boolean deleteOldUser,
             String newEmail, String newRealName) throws ServiceException {
         UserManager userManager = UserManager.getInstance();
+
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.USER_CHANGE_NAME,
+            "currentUserName", currentUserName,
+            "newUserName", newUserName,
+            "deleteOldUser", deleteOldUser,
+            "newEmail", newEmail,
+            "newRealName", newRealName);
 
         try {
             User currentUser = userManager.getUser(currentUserName);
