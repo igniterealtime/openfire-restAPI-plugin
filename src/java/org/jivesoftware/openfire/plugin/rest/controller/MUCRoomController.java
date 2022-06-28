@@ -21,6 +21,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.ConcurrentGroupList;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.muc.*;
+import org.jivesoftware.openfire.muc.spi.MUCRoomSearchInfo;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
@@ -29,6 +30,7 @@ import org.jivesoftware.openfire.plugin.rest.utils.MUCRoomUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
 import org.jivesoftware.util.AlreadyExistsException;
 import org.jivesoftware.util.JiveGlobals;
+import org.jivesoftware.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
@@ -168,13 +170,17 @@ public class MUCRoomController {
     {
         log("Get the chat rooms");
         final MultiUserChatService service = getService(serviceName);
-        Set<String> roomNames = service.getAllRoomNames();
+        Collection<MUCRoomSearchInfo> roomsInfo = service.getAllRoomSearchInfo();
 
         List<MUCRoomEntity> mucRoomEntities = new ArrayList<>();
 
-        for (String roomName : roomNames) {
+        for (MUCRoomSearchInfo roomInfo : roomsInfo) {
+            String roomName = "";
             if (roomSearch != null) {
-                if (!roomName.contains(roomSearch)) {
+                if (StringUtils.containsIgnoringCase(roomInfo.getName(), roomSearch) ||
+                    StringUtils.containsIgnoringCase(roomInfo.getNaturalLanguageName(), roomSearch)) {
+                    roomName = roomInfo.getName();
+                } else {
                     continue;
                 }
             }
