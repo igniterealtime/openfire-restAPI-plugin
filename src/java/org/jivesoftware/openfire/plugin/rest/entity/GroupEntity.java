@@ -19,11 +19,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.glassfish.jersey.internal.guava.MoreObjects;
-import org.jivesoftware.util.StringUtils;
-
 import java.util.List;
-import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -178,14 +174,13 @@ public class GroupEntity {
     @Override
     public String toString() {
 
-        return MoreObjects.toStringHelper(this)
-            .add("name", this.name)
-            .add("description", this.description)
-            .add( "admins", this.admins)
-            .add("members", this.members)
-            .add("shared", this.shared)
-            .toString();
-
+        return "GroupEntity [" +
+            "name='" + name +
+            ", description='" + description +
+            ", admins=" + admins +
+            ", members=" + members +
+            ", shared=" + shared +
+            "]";
     }
 
 }

@@ -86,16 +86,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
         if (!plugin.getAllowedIPs().isEmpty()) {
             // Get client's IP address
-            String ipAddress = httpRequest.getHeader("x-forwarded-for");
-            if (ipAddress == null) {
-                ipAddress = httpRequest.getHeader("X_FORWARDED_FOR");
-                if (ipAddress == null) {
-                    ipAddress = httpRequest.getHeader("X-Forward-For");
-                    if (ipAddress == null) {
-                        ipAddress = httpRequest.getRemoteAddr();
-                    }
-                }
-            }
+            String ipAddress = getClientIPAddressForRequest(httpRequest);
             if (!plugin.getAllowedIPs().contains(ipAddress)) {
                 LOG.warn("REST API rejected service for IP address: " + ipAddress);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
@@ -106,7 +97,8 @@ public class AuthFilter implements ContainerRequestFilter {
         String auth = containerRequest.getHeaderString("authorization");
 
         if (auth == null) {
-            LOG.warn("REST API request with no Authorization header rejected");
+            LOG.warn("REST API request with no Authorization header rejected. [Request IP: {}, Request URI: {}]",
+                    getClientIPAddressForRequest(httpRequest), containerRequest.getUriInfo().getRequestUri());
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
 
@@ -152,5 +144,19 @@ public class AuthFilter implements ContainerRequestFilter {
             path.startsWith("/plugins/restapi/v1/system/liveness/") ||
             path.equals("/plugins/restapi/v1/system/readiness") ||
             path.startsWith("/plugins/restapi/v1/system/readiness/");
+    }
+
+    private String getClientIPAddressForRequest(HttpServletRequest request) {
+        String ipAddress = request.getHeader("x-forwarded-for");
+        if (ipAddress == null) {
+            ipAddress = request.getHeader("X_FORWARDED_FOR");
+            if (ipAddress == null) {
+                ipAddress = request.getHeader("X-Forward-For");
+                if (ipAddress == null) {
+                    ipAddress = request.getRemoteAddr();
+                }
+            }
+        }
+        return ipAddress;
     }
 }

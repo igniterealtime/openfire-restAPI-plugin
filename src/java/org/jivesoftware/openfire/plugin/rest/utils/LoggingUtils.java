@@ -16,6 +16,7 @@
 
 package org.jivesoftware.openfire.plugin.rest.utils;
 
+import org.eclipse.jetty.util.log.Log;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 
 public class LoggingUtils {
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("RestAPI-Plugin-Audit");
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingUtils.class);
 
     public enum AuditEvent {
         //Clustering
@@ -116,7 +118,9 @@ public class LoggingUtils {
                 }
                 return element.getClassName() + "." + element.getMethodName();
             }
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            LOG.error("Unable to get caller of the logger. This should be impossible.", e);
+        }
         return "unknown";
     }
 }
