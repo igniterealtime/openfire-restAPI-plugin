@@ -175,12 +175,10 @@ public class MUCRoomController {
         List<MUCRoomEntity> mucRoomEntities = new ArrayList<>();
 
         for (MUCRoomSearchInfo roomInfo : roomsInfo) {
-            String roomName = "";
+            String roomName = roomInfo.getName();
             if (roomSearch != null) {
-                if (StringUtils.containsIgnoringCase(roomInfo.getName(), roomSearch) ||
-                    StringUtils.containsIgnoringCase(roomInfo.getNaturalLanguageName(), roomSearch)) {
-                    roomName = roomInfo.getName();
-                } else {
+                if (!StringUtils.containsIgnoringCase(roomInfo.getName(), roomSearch) &&
+                    !StringUtils.containsIgnoringCase(roomInfo.getNaturalLanguageName(), roomSearch)) {
                     continue;
                 }
             }
