@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,7 @@ import javax.xml.bind.annotation.XmlType;
         "modificationDate", "maxUsers", "persistent", "publicRoom", "registrationEnabled", "canAnyoneDiscoverJID",
         "canOccupantsChangeSubject", "canOccupantsInvite", "canChangeNickname", "logEnabled",
         "loginRestrictedToNickname", "membersOnly", "moderated", "broadcastPresenceRoles", "owners", "admins",
-        "members", "outcasts", "ownerGroups", "adminGroups", "memberGroups", "outcastGroups" })
+        "members", "outcasts", "ownerGroups", "adminGroups", "memberGroups", "outcastGroups", "allowPM" })
 public class MUCRoomEntity {
 
     private String roomName;
@@ -56,6 +57,7 @@ public class MUCRoomEntity {
     private boolean loginRestrictedToNickname;
     private boolean membersOnly;
     private boolean moderated;
+    private String allowPM;
 
     private List<String> broadcastPresenceRoles;
 
@@ -253,6 +255,16 @@ public class MUCRoomEntity {
 
     public void setModerated(boolean moderated) {
         this.moderated = moderated;
+    }
+
+    @XmlElement
+    @Schema(description = "Defines who is allowed to send private messages to other occupants. Must be one of \"anyone\", \"participants\", \"moderators\" or \"none\".", example = "anyone")
+    public String getAllowPM() {
+        return allowPM == null ? "anyone" : allowPM;
+    }
+
+    public void setAllowPM(String allowPM) {
+        this.allowPM = allowPM == null ? "anyone" : allowPM;
     }
 
     @XmlElement(name = "broadcastPresenceRole")
