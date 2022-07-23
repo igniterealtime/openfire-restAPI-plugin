@@ -81,40 +81,6 @@ public class MUCRoomController {
     }
 
     /**
-     * Returns the MultiUserChatService instance for the provided name.
-     *
-     * This method returns any service that matches the provided name case-insensitively, but prefers a case-sensitive
-     * match.
-     *
-     * @param serviceName The name of the service.
-     * @return The service
-     * @throws ServiceException When no service for the provided name exists.
-     */
-    @Nonnull
-    protected static MultiUserChatService getService(@Nonnull final String serviceName) throws ServiceException
-    {
-        Set<MultiUserChatService> services = XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices()
-            .stream().filter(multiUserChatService -> multiUserChatService.getServiceName().equalsIgnoreCase(serviceName))
-            .collect(Collectors.toSet());
-
-        if (services.isEmpty()) {
-            throw new ServiceException("Chat service does not exist or is not accessible.", serviceName, ExceptionType.MUCSERVICE_NOT_FOUND, Response.Status.NOT_FOUND);
-        }
-
-        if (services.size() > 1) {
-            // Multiple services by the name case-insensitive name. This is dodgy. Try finding an exact (by case) match.
-            final Optional<MultiUserChatService> exactMatch = services.stream().filter(multiUserChatService -> multiUserChatService.getServiceName().equals(serviceName)).findAny();
-            if (exactMatch.isPresent()) {
-                return exactMatch.get();
-            }
-            // This is even more dodgy (and really shouldn't occur).
-            LOG.warn("Found multiple services matching the service name '{}' when doing a case-insensitive lookup, but none when doing a case-sensitive lookup. Returning an arbitrary one of those that match case-insensitively.", serviceName);
-        }
-
-        return services.iterator().next();
-    }
-
-    /**
      * Returns the chat room instance for the provided name.
      *
      * This method returns any room that matches the provided room name case-insensitively, but prefers a case-sensitive
@@ -129,7 +95,7 @@ public class MUCRoomController {
     @Nonnull
     protected static MUCRoom getRoom(@Nonnull final String serviceName, @Nonnull final String roomName) throws ServiceException
     {
-        final MultiUserChatService service = getService(serviceName);
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
 
         // Try finding an exact match first (iterating over all chat room names is pretty resource intensive, so do that
         // only as a last resort.
@@ -169,7 +135,7 @@ public class MUCRoomController {
     public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) throws ServiceException
     {
         log("Get the chat rooms");
-        final MultiUserChatService service = getService(serviceName);
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
         Collection<MUCRoomSearchInfo> roomsInfo = service.getAllRoomSearchInfo();
 
         List<MUCRoomEntity> mucRoomEntities = new ArrayList<>();
@@ -305,6 +271,7 @@ public class MUCRoomController {
      * @throws ConflictException
      *             the conflict exception
      * @throws AlreadyExistsException
+     *             the already exists exception
      */
     private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName) throws NotAllowedException,
         ForbiddenException, ConflictException, AlreadyExistsException, ServiceException
@@ -326,7 +293,7 @@ public class MUCRoomController {
             XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(serviceName, serviceName, false);
         }
 
-        MUCRoom room = getService(serviceName).getChatRoom(mucRoomEntity.getRoomName().toLowerCase(), owner);
+        MUCRoom room = MUCServiceController.getService(serviceName).getChatRoom(mucRoomEntity.getRoomName().toLowerCase(), owner);
 
         // Set values
         room.setNaturalLanguageName(mucRoomEntity.getNaturalName());
@@ -380,7 +347,7 @@ public class MUCRoomController {
             room.saveToDB();
         }
 
-        getService(serviceName).syncChatRoom(room);
+        MUCServiceController.getService(serviceName).syncChatRoom(room);
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
