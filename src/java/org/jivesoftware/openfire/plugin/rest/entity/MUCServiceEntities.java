@@ -20,7 +20,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
-@XmlRootElement(name = "services")
+@XmlRootElement(name = "chatServices")
 public class MUCServiceEntities {
     List<MUCServiceEntity> services;
 
@@ -31,7 +31,7 @@ public class MUCServiceEntities {
         this.services = services;
     }
 
-    @XmlElement(name = "service")
+    @XmlElement(name = "chatService")
     public List<MUCServiceEntity> getServices() {
         return services;
     }
