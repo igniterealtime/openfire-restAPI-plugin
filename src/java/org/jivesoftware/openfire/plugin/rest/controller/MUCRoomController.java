@@ -269,7 +269,7 @@ public class MUCRoomController {
      * @throws ServiceException
      *              the service exception
      */
-    public RoomsCreationResult createMultipleChatRooms(String serviceName, MUCRoomEntities mucRoomEntities) throws ServiceException {
+    public RoomCreationResultEntities createMultipleChatRooms(String serviceName, MUCRoomEntities mucRoomEntities) throws ServiceException {
         List<MUCRoomEntity> roomsToCreate = mucRoomEntities.getMucRooms();
         log("Create " + roomsToCreate.size() + " chat rooms");
         List<RoomCreationResultEntity> results = new ArrayList<>();
@@ -289,7 +289,7 @@ public class MUCRoomController {
             }
             results.add(result);
         }
-        return new RoomsCreationResult(results);
+        return new RoomCreationResultEntities(results);
     }
 
     /**

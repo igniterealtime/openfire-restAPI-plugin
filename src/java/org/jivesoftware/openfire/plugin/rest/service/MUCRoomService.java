@@ -123,14 +123,14 @@ public class MUCRoomService {
     @Operation( summary = "Create multiple chat rooms",
         description = "Create a number of new multi-user chat rooms.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Request has been processed. Results are reported in the response.", content = @Content(schema = @Schema(implementation = RoomsCreationResult.class))),
+            @ApiResponse(responseCode = "200", description = "Request has been processed. Results are reported in the response.", content = @Content(schema = @Schema(implementation = RoomCreationResultEntities.class))),
             @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "MUC Service does not exist or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public RoomsCreationResult createMUCRooms(
+    public RoomCreationResultEntities createMUCRooms(
         @Parameter(description = "The name of the MUC service in which to create a chat room.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
         @RequestBody(description = "The MUC rooms that need to be created.", required = true) MUCRoomEntities mucRoomEntities)
         throws ServiceException
