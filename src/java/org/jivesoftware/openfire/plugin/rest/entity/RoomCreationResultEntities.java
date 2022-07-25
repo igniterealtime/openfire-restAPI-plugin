@@ -21,13 +21,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement(name = "results")
-public class RoomsCreationResult {
+public class RoomCreationResultEntities {
     List<RoomCreationResultEntity> results;
 
-    public RoomsCreationResult() {
+    public RoomCreationResultEntities() {
     }
 
-    public RoomsCreationResult(List<RoomCreationResultEntity> results) {
+    public RoomCreationResultEntities(List<RoomCreationResultEntity> results) {
         this.results = results;
     }
 
