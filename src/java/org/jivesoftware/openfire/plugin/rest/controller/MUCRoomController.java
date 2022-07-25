@@ -38,7 +38,6 @@ import org.xmpp.packet.Message;
 import org.xmpp.packet.Presence;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletException;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -256,6 +255,41 @@ public class MUCRoomController {
             throw new ServiceException("Could not create the channel", mucRoomEntity.getRoomName(),
                     ExceptionType.ALREADY_EXISTS, Response.Status.CONFLICT, e);
         }
+    }
+
+    /**
+     * Creates multiple chat rooms.
+     *
+     * @param serviceName
+     *              the service name
+     * @param mucRoomEntities
+     *              the chat rooms to create
+     * @return
+     *              a report detailing which creates were successful and which weren't
+     * @throws ServiceException
+     *              the service exception
+     */
+    public RoomsCreationResult createMultipleChatRooms(String serviceName, MUCRoomEntities mucRoomEntities) throws ServiceException {
+        List<MUCRoomEntity> roomsToCreate = mucRoomEntities.getMucRooms();
+        log("Create " + roomsToCreate.size() + " chat rooms");
+        List<RoomCreationResultEntity> results = new ArrayList<>();
+        for (MUCRoomEntity roomToCreate : roomsToCreate) {
+            RoomCreationResultEntity result = new RoomCreationResultEntity();
+            result.setRoomName(roomToCreate.getRoomName());
+            try {
+                createRoom(roomToCreate, serviceName);
+                result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Success);
+                result.setMessage("Room was successfully created");
+            } catch (AlreadyExistsException e) {
+                result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Success);
+                result.setMessage("Room already existed and therefore not created again");
+            } catch (NotAllowedException | ForbiddenException | ConflictException e) {
+                result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Failure);
+                result.setMessage("Room creation failed due to " + e.getClass().getSimpleName() + ": " + e.getMessage());
+            }
+            results.add(result);
+        }
+        return new RoomsCreationResult(results);
     }
 
     /**
