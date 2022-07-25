@@ -41,6 +41,20 @@ import javax.ws.rs.core.Response.Status;
 @Tag(name = "Chat service", description = "Managing Multi-User chat services.")
 public class MUCServiceService {
 
+    @GET
+    @Operation( summary = "Get chat services",
+        description = "Get a list of all multi-user chat services.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "All chat services", content = @Content(schema = @Schema(implementation = MUCServiceEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        })
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public MUCServiceEntities getMUCServices()
+    {
+        return MUCServiceController.getInstance().getChatServices();
+    }
+
     @POST
     @Operation( summary = "Create new multi-user chat service",
         description = "Create a new multi-user chat service.",

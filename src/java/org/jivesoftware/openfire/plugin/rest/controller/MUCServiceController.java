@@ -22,6 +22,7 @@ import org.jivesoftware.openfire.muc.ForbiddenException;
 import org.jivesoftware.openfire.muc.MultiUserChatService;
 import org.jivesoftware.openfire.muc.NotAllowedException;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
+import org.jivesoftware.openfire.plugin.rest.entity.MUCServiceEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCServiceEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
@@ -146,6 +147,19 @@ public class MUCServiceController {
             mucServiceEntity.getServiceName(),
             mucServiceEntity.getDescription(),
             mucServiceEntity.isHidden()
+        );
+    }
+
+    /**
+     * Returns all available chat services.
+     * @return
+     *              all available chat services
+     */
+    public MUCServiceEntities getChatServices() {
+        return new MUCServiceEntities(
+            XMPPServer.getInstance().getMultiUserChatManager().getMultiUserChatServices().stream()
+            .map(mucs -> new MUCServiceEntity(mucs.getServiceName(), mucs.getDescription(), mucs.isHidden()))
+            .collect(Collectors.toList())
         );
     }
 }

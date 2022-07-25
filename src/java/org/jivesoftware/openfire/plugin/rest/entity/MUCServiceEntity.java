@@ -35,6 +35,12 @@ public class MUCServiceEntity {
         this.serviceName = serviceName;
     }
 
+    public MUCServiceEntity(String serviceName, String description, boolean hidden) {
+        this.serviceName = serviceName;
+        this.description = description;
+        this.hidden = hidden;
+    }
+
     @XmlElement
     public String getServiceName() {
         return serviceName;
