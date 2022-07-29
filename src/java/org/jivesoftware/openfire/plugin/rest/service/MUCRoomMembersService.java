@@ -79,10 +79,11 @@ public class MUCRoomMembersService {
     public Response replaceMUCRoomMembers(
         @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
         @Parameter(description = "The name of the MUC room of which members are to be replaced.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @Parameter(description = "Whether to send invitations to newly affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
         @RequestBody(description = "The new list of room members.", required = true) MemberEntities memberEntities)
         throws ServiceException
     {
-        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.member, memberEntities.getMembers());
+        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.member, memberEntities.getMembers(), sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -102,10 +103,11 @@ public class MUCRoomMembersService {
     public Response addMUCRoomMembers(
         @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
         @Parameter(description = "The name of the MUC room to which members are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @Parameter(description = "Whether to send invitations to newly affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
         @RequestBody(description = "The list of room members to add to the room.", required = true) MemberEntities memberEntities)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.member, memberEntities.getMembers());
+        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.member, memberEntities.getMembers(), sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -123,10 +125,11 @@ public class MUCRoomMembersService {
     public Response addMUCRoomMember(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @Parameter(description = "The (bare) JID of the entity that is to be a registered member.", example = "john@example.org", required = true) @PathParam("jid") String jid,
-            @Parameter(description = "The name of the MUC room to which a member is to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+            @Parameter(description = "The name of the MUC room to which a member is to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+            @Parameter(description = "Whether to send invitation to the newly affiliated user.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addMember(serviceName, roomName, jid);
+        MUCRoomController.getInstance().addMember(serviceName, roomName, jid, sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -144,10 +147,11 @@ public class MUCRoomMembersService {
     public Response addMUCRoomMemberGroup(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @Parameter(description = "The name of the user group from which all members will be registered members of the room.", example = "Operators", required = true) @PathParam("groupname") String groupname,
-            @Parameter(description = "The name of the MUC room to which members are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+            @Parameter(description = "The name of the MUC room to which members are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+            @Parameter(description = "Whether to send invitations to newly affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addMember(serviceName, roomName, groupname);
+        MUCRoomController.getInstance().addMember(serviceName, roomName, groupname, sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 

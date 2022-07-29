@@ -82,7 +82,7 @@ public class MUCRoomOutcastsService {
         @RequestBody(description = "The new list of room outcasts.", required = true) OutcastEntities outcastEntities)
         throws ServiceException
     {
-        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.outcast, outcastEntities.getOutcasts());
+        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.outcast, outcastEntities.getOutcasts(), false);
         return Response.status(Status.CREATED).build();
     }
 
@@ -105,7 +105,7 @@ public class MUCRoomOutcastsService {
         @RequestBody(description = "The list of room outcasts to add to the room.", required = true) OutcastEntities outcastEntities)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.outcast, outcastEntities.getOutcasts());
+        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.outcast, outcastEntities.getOutcasts(), false);
         return Response.status(Status.CREATED).build();
     }
 

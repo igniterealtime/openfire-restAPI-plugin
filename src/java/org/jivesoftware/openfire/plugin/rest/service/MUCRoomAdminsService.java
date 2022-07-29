@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.muc.MUCRole;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.entity.AdminEntities;
-import org.jivesoftware.openfire.plugin.rest.entity.OwnerEntities;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.xmpp.packet.JID;
@@ -79,10 +78,11 @@ public class MUCRoomAdminsService {
     public Response replaceMUCRoomAdmins(
         @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
         @Parameter(description = "The name of the MUC room of which admins are to be replaced.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @Parameter(description = "Whether to send invitations to newly affiliated admin users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
         @RequestBody(description = "The new list of room admins.", required = true) AdminEntities adminEntities)
         throws ServiceException
     {
-        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.admin, adminEntities.getAdmins());
+        MUCRoomController.getInstance().replaceAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.admin, adminEntities.getAdmins(), sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -102,10 +102,11 @@ public class MUCRoomAdminsService {
     public Response addMUCRoomAdmins(
         @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
         @Parameter(description = "The name of the MUC room to which admins are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @Parameter(description = "Whether to send invitations to newly affiliated admin users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
         @RequestBody(description = "The list of room admins to add to the room.", required = true) AdminEntities adminEntities)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.admin, adminEntities.getAdmins());
+        MUCRoomController.getInstance().addAffiliatedUsers(serviceName, roomName, MUCRole.Affiliation.admin, adminEntities.getAdmins(), sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -123,10 +124,11 @@ public class MUCRoomAdminsService {
     public Response addMUCRoomAdmin(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @Parameter(description = "The (bare) JID of the entity that is to be added as an admin.", example = "john@example.org", required = true) @PathParam("jid") String jid,
-            @Parameter(description = "The name of the MUC room to which an administrator is to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+            @Parameter(description = "The name of the MUC room to which an administrator is to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+            @Parameter(description = "Whether to send an invitation to the new admin user.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addAdmin(serviceName, roomName, jid);
+        MUCRoomController.getInstance().addAdmin(serviceName, roomName, jid, sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -144,10 +146,11 @@ public class MUCRoomAdminsService {
     public Response addMUCRoomAdminGroup(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @Parameter(description = "The name of the user group from which all members will be administrators of the room.", example = "Operators", required = true) @PathParam("groupname") String groupname,
-            @Parameter(description = "The name of the MUC room to which administrators are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName)
+            @Parameter(description = "The name of the MUC room to which administrators are to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
+            @Parameter(description = "Whether to send invitations to new admin users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
         throws ServiceException
     {
-        MUCRoomController.getInstance().addAdmin(serviceName, roomName, groupname);
+        MUCRoomController.getInstance().addAdmin(serviceName, roomName, groupname, sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 

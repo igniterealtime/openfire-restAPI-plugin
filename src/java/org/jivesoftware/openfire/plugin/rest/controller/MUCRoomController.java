@@ -41,6 +41,7 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -200,17 +201,15 @@ public class MUCRoomController {
     /**
      * Creates the chat room.
      *
-     * @param serviceName
-     *            the service name
-     * @param mucRoomEntity
-     *            the MUC room entity
-     * @throws ServiceException
-     *             the service exception
+     * @param serviceName   the service name
+     * @param mucRoomEntity the MUC room entity
+     * @param sendInvitations   whether to send invitations to affiliated users
+     * @throws ServiceException the service exception
      */
-    public void createChatRoom(String serviceName, MUCRoomEntity mucRoomEntity) throws ServiceException {
+    public void createChatRoom(String serviceName, MUCRoomEntity mucRoomEntity, boolean sendInvitations) throws ServiceException {
         log("Create a chat room: " + mucRoomEntity.getRoomName());
         try {
-            createRoom(mucRoomEntity, serviceName);
+            createRoom(mucRoomEntity, serviceName, sendInvitations);
         } catch (NotAllowedException | ForbiddenException e) {
             throw new ServiceException("Could not create the channel", mucRoomEntity.getRoomName(),
                     ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
@@ -230,12 +229,14 @@ public class MUCRoomController {
      *              the service name
      * @param mucRoomEntities
      *              the chat rooms to create
+     * @param sendInvitations
+     *              whether to send invitations to affiliated users
      * @return
      *              a report detailing which creates were successful and which weren't
      * @throws ServiceException
      *              the service exception
      */
-    public RoomCreationResultEntities createMultipleChatRooms(String serviceName, MUCRoomEntities mucRoomEntities) throws ServiceException {
+    public RoomCreationResultEntities createMultipleChatRooms(String serviceName, MUCRoomEntities mucRoomEntities, boolean sendInvitations) throws ServiceException {
         List<MUCRoomEntity> roomsToCreate = mucRoomEntities.getMucRooms();
         log("Create " + roomsToCreate.size() + " chat rooms");
         List<RoomCreationResultEntity> results = new ArrayList<>();
@@ -243,7 +244,7 @@ public class MUCRoomController {
             RoomCreationResultEntity result = new RoomCreationResultEntity();
             result.setRoomName(roomToCreate.getRoomName());
             try {
-                createRoom(roomToCreate, serviceName);
+                createRoom(roomToCreate, serviceName, sendInvitations);
                 result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Success);
                 result.setMessage("Room was successfully created");
             } catch (AlreadyExistsException e) {
@@ -267,10 +268,12 @@ public class MUCRoomController {
      *            the service name
      * @param mucRoomEntity
      *            the MUC room entity
+     * @param sendInvitations
+     *            whether to send invitations to affiliated users
      * @throws ServiceException
      *             the service exception
      */
-    public void updateChatRoom(String roomName, String serviceName, MUCRoomEntity mucRoomEntity)
+    public void updateChatRoom(String roomName, String serviceName, MUCRoomEntity mucRoomEntity, boolean sendInvitations)
             throws ServiceException {
         log("Update a chat room: " + mucRoomEntity.getRoomName());
         try {
@@ -280,7 +283,7 @@ public class MUCRoomController {
                         "Could not update the channel. The room name is different to the entity room name.", roomName,
                         ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
             }
-            createRoom(mucRoomEntity, serviceName);
+            createRoom(mucRoomEntity, serviceName, sendInvitations);
         } catch (NotAllowedException | ForbiddenException e) {
             throw new ServiceException("Could not update the channel", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
@@ -295,9 +298,11 @@ public class MUCRoomController {
      * Creates the room.
      *
      * @param mucRoomEntity
-     *            the MUC room entity
+     *             the MUC room entity
      * @param serviceName
-     *            the service name
+     *             the service name
+     * @param sendInvitations
+     *             whether to send invitations to affiliated users
      * @throws NotAllowedException
      *             the not allowed exception
      * @throws ForbiddenException
@@ -307,7 +312,7 @@ public class MUCRoomController {
      * @throws AlreadyExistsException
      *             the already exists exception
      */
-    private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName) throws NotAllowedException,
+    private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName, boolean sendInvitations) throws NotAllowedException,
         ForbiddenException, ConflictException, AlreadyExistsException, ServiceException
     {
         log("Create a chat room: " + mucRoomEntity.getRoomName());
@@ -383,6 +388,10 @@ public class MUCRoomController {
         }
 
         MUCServiceController.getService(serviceName).syncChatRoom(room);
+
+        if (sendInvitations) {
+            sendInvitationsFromRoom(room, null, null, null, true);
+        }
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
@@ -510,28 +519,208 @@ public class MUCRoomController {
     }
 
     /**
-     * Invites the user to the MUC room.
+     * Invites the user(s) or group(s) to the MUC room. This method differs from the other 'sendInvitations' methods in
+     * that no checks are performed. This really just sends the invitation stanza(s).
      *
      * @param serviceName
      *            the service name
      * @param roomName
      *            the room name
-     * @param jid
-     *            the jid to invite
+     * @param mucInvitationEntity
+     *            the invitation entity containing invitation reason and jids to invite
      * @throws ServiceException
      *             the service exception
      */
-    public void inviteUser(String serviceName, String roomName, String jid, MUCInvitationEntity mucInvitationEntity)
+    public void inviteUsersAndOrGroups(String serviceName, String roomName, MUCInvitationEntity mucInvitationEntity)
             throws ServiceException {
         MUCRoom room = getRoom(serviceName, roomName);
 
-        try {
-            room.sendInvitation(UserUtils.checkAndGetJID(jid), mucInvitationEntity.getReason(), room.getRole(), null);
-        } catch (ForbiddenException | CannotBeInvitedException e) {
-            throw new ServiceException("Could not invite user", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        // First determine where to send all the invitations
+        Set<JID> targetJIDs = new HashSet<>();
+        for (String jidString : mucInvitationEntity.getJidsToInvite()) {
+            JID jid = UserUtils.checkAndGetJID(jidString);
+            // Is it a group? Then unpack and send to every single group member.
+            Group g = UserUtils.getGroupIfIsGroup(jid);
+            if (g != null) {
+                targetJIDs.addAll(g.getAll());
+            } else {
+                targetJIDs.add(jid);
+            }
+        }
+
+        // And now send
+        for (JID jid : targetJIDs) {
+            try {
+                room.sendInvitation(jid, mucInvitationEntity.getReason(), room.getRole(), null);
+            } catch (ForbiddenException | CannotBeInvitedException e) {
+                throw new ServiceException("Could not invite user", jid.toString(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+            }
         }
     }
 
+    /**
+     * Sends invitations "from the room" to a single user that is affiliated to the room.
+     *
+     * @see #sendInvitationsFromRoom(MUCRoom, EnumSet, Collection, String, boolean)
+     *
+     * @param room
+     *          The room
+     * @param affiliations
+     *          The set of affiliations for which to send invitations, with a default of admin+owner+member when left
+     *          unspecified (null)
+     * @param limitToThisUserOrGroup
+     *          The user or group for which to send invitations
+     * @param reason
+     *          The reason to include in the invitation, with a sensible default when left unspecified (null)
+     * @param performAffiliationCheck
+     *          Whether to validate if the user or group is actually affiliated to the room in the correct way
+     * @throws ForbiddenException
+     *          The forbidden exception
+     */
+    private void sendInvitationsToSingleJID(
+        MUCRoom room,
+        EnumSet<MUCRole.Affiliation> affiliations,
+        JID limitToThisUserOrGroup,
+        String reason,
+        boolean performAffiliationCheck
+    ) throws ForbiddenException {
+        Set<JID> setOfOneJID = new HashSet<>();
+        setOfOneJID.add(limitToThisUserOrGroup);
+        sendInvitationsFromRoom(room, affiliations, setOfOneJID, reason, performAffiliationCheck);
+    }
+
+    /**
+     * Sends invitations "from the room" to users that are affiliated to the room. The target audience can be limited to
+     * a specific set of JIDs through the #limitToTheseUsers parameter. If this parameter is left null, invitations are
+     * sent to all users with the specified affiliations.
+     *
+     * Before sending any invitation, this method checks whether the invitation recipient is actually affiliated to the
+     * room in the way that the invitation expresses.
+     *
+     * @param room
+     *          The room
+     * @param affiliations
+     *          The set of affiliations for which to send invitations, with a default of admin+owner+member when left
+     *          unspecified (null)
+     * @param limitToTheseUsers
+     *          The collection of users for which to send invitations, with a default of "all" affiliated users when
+     *          left unspecified (null)
+     * @param reason
+     *          The reason to include in the invitation, with a sensible default when left unspecified (null)
+     * @param performAffiliationCheck
+     *          Whether to validate if the user or group is actually affiliated to the room in the correct way
+     * @throws ForbiddenException
+     *          The forbidden exception
+     */
+    private void sendInvitationsFromRoom(
+        MUCRoom room,
+        EnumSet<MUCRole.Affiliation> affiliations,
+        Collection<JID> limitToTheseUsers,
+        String reason,
+        boolean performAffiliationCheck
+    ) throws ForbiddenException {
+
+        if (affiliations == null) {
+            affiliations = EnumSet.of(MUCRole.Affiliation.admin, MUCRole.Affiliation.member, MUCRole.Affiliation.owner);
+        }
+        MUCRole roomRole = MUCRole.createRoomRole(room);
+
+        if (affiliations.contains(MUCRole.Affiliation.admin)) {
+            Collection<JID> sendHere = limitToTheseUsers == null ? room.getAdmins() : limitToTheseUsers;
+            for (JID roomAdmin : sendHere) {
+                sendSingleInvitationFromRoom(
+                    roomAdmin,
+                    room,
+                    roomRole,
+                    MUCRole.Affiliation.admin,
+                    reason == null ? "You are admin of room " + room.getName() : reason,
+                    performAffiliationCheck ? (r, j) -> r.getAdmins().contains(j) : null
+                );
+            }
+        }
+        if (affiliations.contains(MUCRole.Affiliation.owner)) {
+            Collection<JID> sendHere = limitToTheseUsers == null ? room.getOwners() : limitToTheseUsers;
+            for (JID roomOwner : sendHere) {
+                sendSingleInvitationFromRoom(
+                    roomOwner,
+                    room,
+                    roomRole,
+                    MUCRole.Affiliation.owner,
+                    reason == null ? "You are owner of room " + room.getName() : reason,
+                    performAffiliationCheck ? (r, j) -> r.getOwners().contains(j) : null
+                );
+            }
+        }
+        if (affiliations.contains(MUCRole.Affiliation.member)) {
+            Collection<JID> sendHere = limitToTheseUsers == null ? room.getMembers() : limitToTheseUsers;
+            for (JID roomMember : sendHere) {
+                sendSingleInvitationFromRoom(
+                    roomMember,
+                    room,
+                    roomRole,
+                    MUCRole.Affiliation.member,
+                    reason == null ? "You are member of room " + room.getName() : reason,
+                    performAffiliationCheck ? (r, j) -> r.getMembers().contains(j) : null
+                );
+            }
+        }
+    }
+
+    /**
+     * Sends an invitation for a specific affiliation to a single JID, (optionally) performing a check if that JID is
+     * actually affiliated to the room that way.
+     *
+     * @param sendHere
+     *          The JID to send the invitation to
+     * @param room
+     *          The room
+     * @param roomRole
+     *          Role of the room (added for optimisation, to prevent the MUCRole.createRoomRole(room) from being called
+     *          many times)
+     * @param affiliation
+     *          The affiliation for which the jid is invited
+     * @param invitationReason
+     *          The reason to include in the invitation message
+     * @param validation
+     *          Function to apply to the room and the jid to check whether the jid is actually affiliated in the correct
+     *          way (or null if no validation is required)
+     * @throws ForbiddenException
+     *          The forbidden exception
+     */
+    private void sendSingleInvitationFromRoom(
+        JID sendHere,
+        MUCRoom room,
+        MUCRole roomRole,
+        MUCRole.Affiliation affiliation,
+        String invitationReason,
+        BiFunction<MUCRoom, JID, Boolean> validation
+    ) throws ForbiddenException {
+        boolean jidIsGroup = false;
+
+        if (validation != null && !validation.apply(room, sendHere)) {
+            log("User or group " + sendHere + " can not be invited to be " + affiliation + " of room " + room.getName() + " because it is not affiliated that way");
+        } else {
+            // First handle group behavior
+            Group g = UserUtils.getGroupIfIsGroup(sendHere);
+            if (g != null) {
+                jidIsGroup = true;
+                // This is a group jid, so we need to send the invitation to every single group member
+                for (JID singleGroupMemberJID : g.getAll()) {
+                    // Skip affiliation check, because it has already been done for the group, and the single user may not
+                    // actually be known to be affiliated on its own merits
+                    sendSingleInvitationFromRoom(singleGroupMemberJID, room, roomRole, affiliation, invitationReason, null);
+                }
+            }
+
+            if (!jidIsGroup) {
+                try {
+                    room.sendInvitation(sendHere, invitationReason, roomRole, null);
+                } catch (CannotBeInvitedException e) {
+                    log("User " + sendHere + " can not be invited to be " + affiliation + " of room " + room.getName());
+                }
+            }
+        }
+    }
 
     /**
      * Convert to MUC room entity.
@@ -667,17 +856,28 @@ public class MUCRoomController {
      *            the room name
      * @param jid
      *            the jid
+     * @param sendInvitation
+     *            whether to send an invitation to the newly affiliated user
      * @throws ServiceException
      *             the service exception
      */
-    public void addAdmin(String serviceName, String roomName, String jid) throws ServiceException {
+    public void addAdmin(String serviceName, String roomName, String jid, boolean sendInvitation) throws ServiceException {
         MUCRoom room = getRoom(serviceName, roomName);
+        JID userOrGroupJID = UserUtils.checkAndGetJID(jid);
         try {
-            room.addAdmin(UserUtils.checkAndGetJID(jid), room.getRole());
+            room.addAdmin(userOrGroupJID, room.getRole());
         } catch (ForbiddenException e) {
             throw new ServiceException("Could not add admin", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
             throw new ServiceException("Could not add admin", jid, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
+        }
+
+        if (sendInvitation) {
+            try {
+                sendInvitationsToSingleJID(room, EnumSet.of(MUCRole.Affiliation.admin), userOrGroupJID, null, true);
+            } catch (ForbiddenException e) {
+                throw new ServiceException("Could not invite admin", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+            }
         }
     }
 
@@ -690,15 +890,26 @@ public class MUCRoomController {
      *            the room name
      * @param jid
      *            the jid
+     * @param sendInvitation
+     *            whether to send an invitation to the newly affiliated user
      * @throws ServiceException
      *             the service exception
      */
-    public void addOwner(String serviceName, String roomName, String jid) throws ServiceException {
+    public void addOwner(String serviceName, String roomName, String jid, boolean sendInvitation) throws ServiceException {
         MUCRoom room = getRoom(serviceName, roomName);
+        JID userOrGroupJID = UserUtils.checkAndGetJID(jid);
         try {
-            room.addOwner(UserUtils.checkAndGetJID(jid), room.getRole());
+            room.addOwner(userOrGroupJID, room.getRole());
         } catch (ForbiddenException e) {
             throw new ServiceException("Could not add owner", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        }
+
+        if (sendInvitation) {
+            try {
+                sendInvitationsToSingleJID(room, EnumSet.of(MUCRole.Affiliation.owner), userOrGroupJID, null, true);
+            } catch (ForbiddenException e) {
+                throw new ServiceException("Could not invite owner", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+            }
         }
     }
 
@@ -711,15 +922,26 @@ public class MUCRoomController {
      *            the room name
      * @param jid
      *            the jid
+     * @param sendInvitation
+     *            whether to send an invitation to the newly affiliated user
      * @throws ServiceException
      *             the service exception
      */
-    public void addMember(String serviceName, String roomName, String jid) throws ServiceException {
+    public void addMember(String serviceName, String roomName, String jid, boolean sendInvitation) throws ServiceException {
         MUCRoom room = getRoom(serviceName, roomName);
+        JID userOrGroupJID = UserUtils.checkAndGetJID(jid);
         try {
-            room.addMember(UserUtils.checkAndGetJID(jid), null, room.getRole());
+            room.addMember(userOrGroupJID, null, room.getRole());
         } catch (ForbiddenException | ConflictException e) {
             throw new ServiceException("Could not add member", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        }
+
+        if (sendInvitation) {
+            try {
+                sendInvitationsToSingleJID(room, EnumSet.of(MUCRole.Affiliation.member), userOrGroupJID, null, true);
+            } catch (ForbiddenException e) {
+                throw new ServiceException("Could not invite member", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+            }
         }
     }
 
@@ -792,9 +1014,11 @@ public class MUCRoomController {
      *            the affiliation for which to replace all users
      * @param jids
      *            the new list of affiliated users
+     * @param sendInvitations
+     *            whether to send invitations to newly affiliated users
      * @throws ServiceException On any issue looking up the room or changing its affiliated users.
      */
-    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids) throws ServiceException
+    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids, boolean sendInvitations) throws ServiceException
     {
         final Collection<JID> replacements = new HashSet<>();
 
@@ -853,6 +1077,14 @@ public class MUCRoomController {
         } catch (ConflictException e) {
             throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
         }
+
+        try {
+            if (sendInvitations) {
+                sendInvitationsFromRoom(room, EnumSet.of(affiliation), toAdd, null, true);
+            }
+        } catch (ForbiddenException e) {
+            throw new ServiceException("Can not send invitation to newly affiliated " + affiliation + " users or groups", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        }
     }
 
     /**
@@ -867,9 +1099,11 @@ public class MUCRoomController {
      *            the affiliation for which to add users
      * @param jids
      *            the list of additional affiliated users
+     * @param sendInvitations
+     *            whether to send invitations to newly affiliated users
      * @throws ServiceException On any issue looking up the room or changing its affiliated users.
      */
-    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids) throws ServiceException
+    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids, boolean sendInvitations) throws ServiceException
     {
         final Collection<JID> additions = new HashSet<>();
 
@@ -918,6 +1152,14 @@ public class MUCRoomController {
             throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
             throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
+        }
+
+        try {
+            if (sendInvitations) {
+                sendInvitationsFromRoom(room, EnumSet.of(affiliation), toAdd, null, true);
+            }
+        } catch (ForbiddenException e) {
+            throw new ServiceException("Can not send invitation to newly affiliated " + affiliation + " users or groups", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         }
     }
 
