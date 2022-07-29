@@ -804,9 +804,10 @@ Endpoint to create a new chat room.
 
 ### Possible parameters
 
-| Parameter   | Parameter Type	 | Description                         | Default value |
-|-------------|-----------------|-------------------------------------|---------------|
-| servicename | @QueryParam     | 	The name of the Group Chat Service | conference    |
+| Parameter       | Parameter Type	 | Description                                     | Default value |
+|-----------------|-----------------|-------------------------------------------------|---------------|
+| servicename     | @QueryParam     | 	The name of the Group Chat Service             | conference    |
+| sendInvitations | @QueryParam     | Whether to send invitations to affiliated users | false         |
 
 ### XML Examples
 
@@ -1035,9 +1036,10 @@ Endpoint to create multiple new chat rooms at once.
 ```
 ### Possible parameters
 
-| Parameter   | Parameter Type	 | Description                         | Default value |
-|-------------|-----------------|-------------------------------------|---------------|
-| servicename | @QueryParam     | 	The name of the Group Chat Service | conference    |
+| Parameter       | Parameter Type	 | Description                                           | Default value |
+|-----------------|-----------------|-------------------------------------------------------|---------------|
+| servicename     | @QueryParam     | 	The name of the Group Chat Service                   | conference    |
+| sendInvitations | @QueryParam     | Whether to send invitations to newly affiliated users | false         |
 
 ### XML Examples
 
@@ -1125,10 +1127,11 @@ Endpoint to update a chat room.
 
 ### Possible parameters
 
-| Parameter   | 	Parameter Type | Description                        | Default value |
-|-------------|-----------------|------------------------------------|---------------|
-| roomname    | 	@Path	         | Exact room name                    |               |
-| servicename | 	@QueryParam	   | The name of the Group Chat Service | conference    |
+| Parameter       | Parameter Type | Description                                           | Default value |
+|-----------------|----------------|-------------------------------------------------------|---------------|
+| roomname        | @Path          | Exact room name                                       |               |
+| servicename     | @QueryParam    | The name of the Group Chat Service                    | conference    |
+| sendInvitations | @QueryParam    | Whether to send invitations to newly affiliated users | false         |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
@@ -1178,9 +1181,9 @@ Endpoint to update a chat room.
 </chatRoom>
 ```
 
-## Invite user to a chat Room
+## Invite user or user group to a chat Room
 
-Endpoint to invite a user to a room.
+Endpoint to invite a user or a user group to a room.
 > **Header:** Authorization: Basic YWRtaW46MTIzNDU=
 > 
 > **Header:** Content-Type: application/xml
@@ -1198,10 +1201,40 @@ Endpoint to invite a user to a room.
 **Return value:** HTTP status 200 (OK)
 
 ### Possible parameters
-| Parameter | 	Parameter Type | Description                        | Default value |
-|-----------|-----------------|------------------------------------|---------------|
-| roomname  | 	@Path	         | Exact room name                    |               |
-| name      | @Path	          | The local username or the user JID |               |
+| Parameter | 	Parameter Type | Description                                                   | Default value |
+|-----------|-----------------|---------------------------------------------------------------|---------------|
+| roomname  | 	@Path	         | Exact room name                                               |               |
+| name      | @Path	          | The local username or group name or the user JID or group JID |               |
+
+## Invite multiple users and/or user groups to a chat Room
+
+Endpoint to invite multiple users and/or user groups to a room. Works both with JIDs and (user/group) names.
+> **Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+> **Header:** Content-Type: application/xml
+>
+> **POST** http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite
+
+**Payload Example:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mucInvitation>
+    <reason>Hello, come to this room, it is nice</reason>
+    <jidsToInvite>
+        <jid>jane@example.org</jid>
+        <jid>ADNMQP8=@example.org/695c6ae413c00446733d926ccadefd8b</jid>
+        <jid>john</jid>
+        <jid>SomeGroupName</jid>
+    </jidsToInvite>
+</mucInvitation>
+```
+**Return value:** HTTP status 200 (OK)
+
+### Possible parameters
+| Parameter | 	Parameter Type | Description                                                   | Default value |
+|-----------|-----------------|---------------------------------------------------------------|---------------|
+| roomname  | 	@Path	         | Exact room name                                               |               |
 
 ##  Get all users with a particular affiliation in a chat room
 Retrieves a list of JIDs for all users with the specified affiliation in a multi-user chat room.
@@ -1246,12 +1279,13 @@ Endpoint to add a new user with affiliation to a room.
 
 ### Possible parameters
 
-| Parameter   | 	Parameter Type | Description                                                                                | Default value |
-|-------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname    | 	@Path	         | Exact room name                                                                            |               |
-| name        | 	@Path	         | The local username or the user JID                                                         |               |
-| affiliation | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
+| Parameter       | 	Parameter Type | Description                                                                                | Default value |
+|-----------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname        | 	@Path	         | Exact room name                                                                            |               |
+| name            | 	@Path	         | The local username or the user JID                                                         |               |
+| affiliation     | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename     | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
+| sendInvitations | @QueryParam     | Whether to send invitation to the newly affiliated user                                    | false         |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
@@ -1264,7 +1298,7 @@ Endpoint to add a new user with affiliation to a room.
 > 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser
 > 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser
+>**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser?sendInvitations=true
 > 
 >**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser
 > 
@@ -1280,11 +1314,12 @@ Endpoint to replace all users with a particular affiliation in a multi-user chat
 
 ### Possible parameters
 
-| Parameter   | 	Parameter Type | Description                                                                                | Default value |
-|-------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname    | 	@Path	         | Exact room name                                                                            |               |
-| affiliation | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
+| Parameter       | 	Parameter Type | Description                                                                                | Default value |
+|-----------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname        | 	@Path	         | Exact room name                                                                            |               |
+| affiliation     | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename     | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
+| sendInvitations | @QueryParam     | Whether to send invitation to newly affiliated users                                       | false         |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
@@ -1312,11 +1347,12 @@ Endpoint to add multiple users with an affiliation to a multi-user chat room. No
 
 ### Possible parameters
 
-| Parameter    | 	Parameter Type | Description                                                                         | Default value |
-|--------------|-----------------|-------------------------------------------------------------------------------------|---------------|
-| roomname     | 	@Path	         | Exact room name                                                                     |               |
-| affiliation  | 	@Path	         | Available affiliation: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename  | 	@QueryParam	   | The name of the Group Chat Service                                                  | conference    |
+| Parameter       | 	Parameter Type | Description                                                                               | Default value |
+|-----------------|-----------------|-------------------------------------------------------------------------------------------|---------------|
+| roomname        | 	@Path	         | Exact room name                                                                           |               |
+| affiliation     | 	@Path	         | Available affiliation: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename     | 	@QueryParam	   | The name of the Group Chat Service                                                        | conference    |
+| sendInvitations | @QueryParam     | Whether to send invitations to newly affiliated users                                     | false         |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=
@@ -1344,12 +1380,13 @@ Endpoint to add a new group with affiliation to a room.
 
 ### Possible parameters
 
-| Parameter   | Parameter Type | Description                                                                                | Default value |
-|-------------|----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname    | @Path          | Exact room name                                                                            |               |
-| name        | @Path          | The group name                                                                             |               |
-| affiliation | @Path          | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | @QueryParam    | The name of the Group Chat Service                                                         | conference    |
+| Parameter       | Parameter Type | Description                                                                                | Default value |
+|-----------------|----------------|--------------------------------------------------------------------------------------------|---------------|
+| roomname        | @Path          | Exact room name                                                                            |               |
+| name            | @Path          | The group name                                                                             |               |
+| affiliation     | @Path          | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
+| servicename     | @QueryParam    | The name of the Group Chat Service                                                         | conference    |
+| sendInvitations | @QueryParam    | Whether to send invitations to the users in the newly affiliated groups                    | false         |
 
 ### Examples
 >**Header:** Authorization: Basic YWRtaW46MTIzNDU=

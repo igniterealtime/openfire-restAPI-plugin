@@ -111,10 +111,11 @@ public class MUCRoomService {
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response createMUCRoom(
             @Parameter(description = "The name of the MUC service in which to create a chat room.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+            @Parameter(description = "Whether to send invitations to affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
             @RequestBody(description = "The MUC room that needs to be created.", required = true) MUCRoomEntity mucRoomEntity)
         throws ServiceException
     {
-        MUCRoomController.getInstance().createChatRoom(serviceName, mucRoomEntity);
+        MUCRoomController.getInstance().createChatRoom(serviceName, mucRoomEntity, sendInvitations);
         return Response.status(Status.CREATED).build();
     }
 
@@ -132,10 +133,11 @@ public class MUCRoomService {
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public RoomCreationResultEntities createMUCRooms(
         @Parameter(description = "The name of the MUC service in which to create a chat room.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @Parameter(description = "Whether to send invitations to newly affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
         @RequestBody(description = "The MUC rooms that need to be created.", required = true) MUCRoomEntities mucRoomEntities)
         throws ServiceException
     {
-        return MUCRoomController.getInstance().createMultipleChatRooms(serviceName, mucRoomEntities);
+        return MUCRoomController.getInstance().createMultipleChatRooms(serviceName, mucRoomEntities, sendInvitations);
     }
 
     @PUT
@@ -154,10 +156,11 @@ public class MUCRoomService {
     public Response updateMUCRoom(
             @Parameter(description = "The name of the chat room that needs to be updated", example = "lobby", required = true) @PathParam("roomName") String roomName,
             @Parameter(description = "The name of the MUC service in which to update a chat room.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+            @Parameter(description = "Whether to send invitations to newly affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations,
             @RequestBody(description = "The new MUC room definition that needs to overwrite the old definition.", required = true) MUCRoomEntity mucRoomEntity)
         throws ServiceException
     {
-        MUCRoomController.getInstance().updateChatRoom(roomName, serviceName, mucRoomEntity);
+        MUCRoomController.getInstance().updateChatRoom(roomName, serviceName, mucRoomEntity, sendInvitations);
         return Response.status(Status.OK).build();
     }
 
@@ -220,8 +223,8 @@ public class MUCRoomService {
 
     @POST
     @Path("/{roomName}/invite/{jid}")
-    @Operation( summary = "Invite user",
-        description = "Invites a user to join a specific multi-user chat room.",
+    @Operation( summary = "Invite user or group",
+        description = "Invites a user or group to join a specific multi-user chat room.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Invitation sent"),
             @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -230,14 +233,39 @@ public class MUCRoomService {
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    public Response inviteUserToMUCRoom(
-            @Parameter(description = "The name of the chat room in which to invite a user", example = "lobby", required = true) @PathParam("roomName") String roomName,
+    public Response inviteUserOrGroupToMUCRoom(
+            @Parameter(description = "The name of the chat room in which to invite a user or group", example = "lobby", required = true) @PathParam("roomName") String roomName,
             @Parameter(description = "The JID of the entity to invite into the room", example = "john@example.org", required = true) @PathParam("jid") String jid,
             @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
-            @RequestBody(description = "The invitation message to send.", required = true) MUCInvitationEntity mucInvitationEntity)
+            @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationEntity mucInvitationEntity)
         throws ServiceException
     {
-        MUCRoomController.getInstance().inviteUser(serviceName, roomName, jid, mucInvitationEntity);
+        if (!mucInvitationEntity.getJidsToInvite().contains(jid)) {
+            mucInvitationEntity.getJidsToInvite().add(jid);
+        }
+        MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, mucInvitationEntity);
+        return Response.status(Status.OK).build();
+    }
+
+    @POST
+    @Path("/{roomName}/invite")
+    @Operation( summary = "Invite a collection of users and/or groups",
+        description = "Invites a collection of users and/or groups to join a specific multi-user chat room.",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Invitation sent"),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Not allowed to invite a user or group to this room.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The chat room (or its service) can not be found or is not accessible.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+        })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response inviteUsersAndOrGroupsToMUCRoom(
+        @Parameter(description = "The name of the chat room in which to invite a user or group", example = "lobby", required = true) @PathParam("roomName") String roomName,
+        @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
+        @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationEntity mucInvitationEntity)
+        throws ServiceException
+    {
+        MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, mucInvitationEntity);
         return Response.status(Status.OK).build();
     }
 
