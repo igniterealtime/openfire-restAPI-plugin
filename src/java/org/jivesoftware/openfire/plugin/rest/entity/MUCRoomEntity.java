@@ -17,7 +17,9 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -259,6 +261,9 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "broadcastPresenceRoles")
     @JsonProperty(value = "broadcastPresenceRoles")
     public List<String> getBroadcastPresenceRoles() {
+        if (broadcastPresenceRoles == null) {
+            broadcastPresenceRoles = new ArrayList<>();
+        }
         return broadcastPresenceRoles;
     }
 
@@ -266,6 +271,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "owner")
     @JsonProperty(value = "owners")
     public List<String> getOwners() {
+        if (owners == null) {
+            owners = new ArrayList<>();
+        }
         return owners;
     }
 
@@ -273,6 +281,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "ownerGroup")
     @JsonProperty(value = "ownerGroups")
     public List<String> getOwnerGroups() {
+        if (ownerGroups == null) {
+            ownerGroups = new ArrayList<>();
+        }
         return ownerGroups;
     }
 
@@ -288,6 +299,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "member")
     @JsonProperty(value = "members")
     public List<String> getMembers() {
+        if (members == null) {
+            members = new ArrayList<>();
+        }
         return members;
     }
 
@@ -295,6 +309,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "memberGroup")
     @JsonProperty(value = "memberGroups")
     public List<String> getmemberGroups() {
+        if (memberGroups == null) {
+            memberGroups = new ArrayList<>();
+        }
         return memberGroups;
     }
 
@@ -310,6 +327,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "outcast")
     @JsonProperty(value = "outcasts")
     public List<String> getOutcasts() {
+        if (outcasts == null) {
+            outcasts = new ArrayList<>();
+        }
         return outcasts;
     }
 
@@ -317,6 +337,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "outcastGroup")
     @JsonProperty(value = "outcastGroups")
     public List<String> getoutcastGroups() {
+        if (outcastGroups == null) {
+            outcastGroups = new ArrayList<>();
+        }
         return outcastGroups;
     }
 
@@ -332,6 +355,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "admin")
     @JsonProperty(value = "admins")
     public List<String> getAdmins() {
+        if (admins == null) {
+            admins = new ArrayList<>();
+        }
         return admins;
     }
 
@@ -339,6 +365,9 @@ public class MUCRoomEntity {
     @XmlElement(name = "adminGroup")
     @JsonProperty(value = "adminGroups")
     public List<String> getadminGroups() {
+        if (adminGroups == null) {
+            adminGroups = new ArrayList<>();
+        }
         return adminGroups;
     }
 
