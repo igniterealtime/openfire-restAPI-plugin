@@ -623,6 +623,68 @@ Endpoint to update a roster entry
 
 # Chat room related REST Endpoints
 
+## Retrieve all chat services
+
+Endpoint to get all chat services
+>**GET** /chatservices
+
+**Payload:** none
+
+**Return value:** Chat services
+
+**Possible parameters:** none
+
+### Examples
+
+>**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/chatservices
+
+## Create a chat service
+Endpoint to create a new chat service.
+>**POST** /chatservices
+
+**Payload:** Chatservice
+
+**Return value:** HTTP status 201 (Created)
+
+**Possible parameters:** none
+
+### XML Examples
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/xml
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatservices
+
+**Payload Example (available parameters):**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<chatService>
+    <serviceName>new-chat-service-name</serviceName>
+    <description>A mightily fine service</description>
+    <hidden>false</hidden>
+</chatService>
+```
+
+### JSON Examples
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/json
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatservices
+
+**Payload Example (available parameters):**
+```json
+{
+	"serviceName": "new-chat-service-name",
+	"description": "A mightily fine service",
+	"hidden": false
+}
+```
+
 ## Retrieve all chat rooms 
 Endpoint to get all chat rooms
 >**GET** /chatrooms

@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -42,6 +44,7 @@ public class MUCServiceEntity {
     }
 
     @XmlElement
+    @Schema(description = "The name of the chat service", example = "conference")
     public String getServiceName() {
         return serviceName;
     }
@@ -51,6 +54,7 @@ public class MUCServiceEntity {
     }
 
     @XmlElement
+    @Schema(description = "The description of the chat service", example = "A public service")
     public String getDescription() {
         return description;
     }
@@ -60,6 +64,7 @@ public class MUCServiceEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the service is hidden", example = "false")
     public boolean isHidden() {
         return hidden;
     }
