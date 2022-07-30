@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -34,6 +36,7 @@ public class RoomCreationResultEntity {
     String message;
 
     @XmlElement
+    @Schema(description = "The name of the room that was to be created", example = "open_chat")
     public String getRoomName() {
         return roomName;
     }
@@ -43,6 +46,7 @@ public class RoomCreationResultEntity {
     }
 
     @XmlElement
+    @Schema(description = "The result of creating the room", example = "Failure")
     public RoomCreationResultType getResultType() {
         return resultType;
     }
@@ -52,6 +56,7 @@ public class RoomCreationResultEntity {
     }
 
     @XmlElement
+    @Schema(description = "A message describing the result", example = "Room already existed and therefore not created again")
     public String getMessage() {
         return message;
     }
