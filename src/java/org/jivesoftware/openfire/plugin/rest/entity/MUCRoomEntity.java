@@ -294,7 +294,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "memberGroups")
     @XmlElement(name = "memberGroup")
     @JsonProperty(value = "memberGroups")
-    public List<String> getmemberGroups() {
+    public List<String> getMemberGroups() {
         return memberGroups;
     }
 
@@ -316,7 +316,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "outcastGroups")
     @XmlElement(name = "outcastGroup")
     @JsonProperty(value = "outcastGroups")
-    public List<String> getoutcastGroups() {
+    public List<String> getOutcastGroups() {
         return outcastGroups;
     }
 
@@ -338,7 +338,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "adminGroups")
     @XmlElement(name = "adminGroup")
     @JsonProperty(value = "adminGroups")
-    public List<String> getadminGroups() {
+    public List<String> getAdminGroups() {
         return adminGroups;
     }
 
