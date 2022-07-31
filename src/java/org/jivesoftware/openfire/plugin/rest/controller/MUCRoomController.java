@@ -870,127 +870,6 @@ public class MUCRoomController {
     }
 
     /**
-     * Adds the admin.
-     *
-     * @param serviceName
-     *            the service name
-     * @param roomName
-     *            the room name
-     * @param jid
-     *            the jid
-     * @param sendInvitation
-     *            whether to send an invitation to the newly affiliated user
-     * @throws ServiceException
-     *             the service exception
-     */
-    public void addAdmin(String serviceName, String roomName, String jid, boolean sendInvitation) throws ServiceException {
-        MUCRoom room = getRoom(serviceName, roomName);
-        JID userOrGroupJID = UserUtils.checkAndGetJID(jid);
-        try {
-            room.addAdmin(userOrGroupJID, room.getRole());
-        } catch (ForbiddenException e) {
-            throw new ServiceException("Could not add admin", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ConflictException e) {
-            throw new ServiceException("Could not add admin", jid, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
-        }
-
-        if (sendInvitation) {
-            try {
-                sendInvitationsToSingleJID(room, EnumSet.of(MUCRole.Affiliation.admin), userOrGroupJID, null, true);
-            } catch (ForbiddenException e) {
-                throw new ServiceException("Could not invite admin", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-            }
-        }
-    }
-
-    /**
-     * Adds the owner.
-     *
-     * @param serviceName
-     *            the service name
-     * @param roomName
-     *            the room name
-     * @param jid
-     *            the jid
-     * @param sendInvitation
-     *            whether to send an invitation to the newly affiliated user
-     * @throws ServiceException
-     *             the service exception
-     */
-    public void addOwner(String serviceName, String roomName, String jid, boolean sendInvitation) throws ServiceException {
-        MUCRoom room = getRoom(serviceName, roomName);
-        JID userOrGroupJID = UserUtils.checkAndGetJID(jid);
-        try {
-            room.addOwner(userOrGroupJID, room.getRole());
-        } catch (ForbiddenException e) {
-            throw new ServiceException("Could not add owner", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        }
-
-        if (sendInvitation) {
-            try {
-                sendInvitationsToSingleJID(room, EnumSet.of(MUCRole.Affiliation.owner), userOrGroupJID, null, true);
-            } catch (ForbiddenException e) {
-                throw new ServiceException("Could not invite owner", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-            }
-        }
-    }
-
-    /**
-     * Adds the member.
-     *
-     * @param serviceName
-     *            the service name
-     * @param roomName
-     *            the room name
-     * @param jid
-     *            the jid
-     * @param sendInvitation
-     *            whether to send an invitation to the newly affiliated user
-     * @throws ServiceException
-     *             the service exception
-     */
-    public void addMember(String serviceName, String roomName, String jid, boolean sendInvitation) throws ServiceException {
-        MUCRoom room = getRoom(serviceName, roomName);
-        JID userOrGroupJID = UserUtils.checkAndGetJID(jid);
-        try {
-            room.addMember(userOrGroupJID, null, room.getRole());
-        } catch (ForbiddenException | ConflictException e) {
-            throw new ServiceException("Could not add member", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        }
-
-        if (sendInvitation) {
-            try {
-                sendInvitationsToSingleJID(room, EnumSet.of(MUCRole.Affiliation.member), userOrGroupJID, null, true);
-            } catch (ForbiddenException e) {
-                throw new ServiceException("Could not invite member", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-            }
-        }
-    }
-
-    /**
-     * Adds the outcast.
-     *
-     * @param serviceName
-     *            the service name
-     * @param roomName
-     *            the room name
-     * @param jid
-     *            the jid
-     * @throws ServiceException
-     *             the service exception
-     */
-    public void addOutcast(String serviceName, String roomName, String jid) throws ServiceException {
-        MUCRoom room = getRoom(serviceName, roomName);
-        try {
-            room.addOutcast(UserUtils.checkAndGetJID(jid), null, room.getRole());
-        } catch (NotAllowedException | ForbiddenException e) {
-            throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ConflictException e) {
-            throw new ServiceException("Could not add outcast", jid, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
-        }
-    }
-
-    /**
      * Returns a collection of user addresses of every user that has a particular affiliation to a room.
      *
      * @param serviceName
@@ -1040,7 +919,7 @@ public class MUCRoomController {
      *            whether to send invitations to newly affiliated users
      * @throws ServiceException On any issue looking up the room or changing its affiliated users.
      */
-    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids, boolean sendInvitations) throws ServiceException
+    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
     {
         final Collection<JID> replacements = new HashSet<>();
 
@@ -1125,14 +1004,14 @@ public class MUCRoomController {
      *            whether to send invitations to newly affiliated users
      * @throws ServiceException On any issue looking up the room or changing its affiliated users.
      */
-    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, @Nonnull final Collection<String> jids, boolean sendInvitations) throws ServiceException
+    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
     {
         final Collection<JID> additions = new HashSet<>();
 
         // Input validation.
         for (String replacement : jids) {
             try {
-                additions.add(new JID(replacement));
+                additions.add(UserUtils.checkAndGetJID(replacement));
             } catch (IllegalArgumentException e) {
                 throw new ServiceException("Unable to parse value as jid: " + replacement, roomName, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST, e);
             }
@@ -1194,14 +1073,19 @@ public class MUCRoomController {
      *            the room name
      * @param jid
      *            the jid
+     * @param affiliation
+     *            the type of affiliation to remove. Null to remove any affiliation.
      * @throws ServiceException
      *             the service exception
      */
-    public void deleteAffiliation(String serviceName, String roomName, String jid) throws ServiceException {
+    public void deleteAffiliation(String serviceName, String roomName, MUCRole.Affiliation affiliation, String jid) throws ServiceException {
         MUCRoom room = getRoom(serviceName, roomName);
         try {
               JID userJid = UserUtils.checkAndGetJID(jid);
 
+              if (affiliation != null && room.getAffiliation(userJid) != affiliation) {
+                  throw new ConflictException("Entity does not have this affiliation with the room.");
+              }
               // Send a presence to other room members
               List<Presence> addNonePresence = room.addNone(userJid, room.getRole());
               for (Presence presence : addNonePresence) {

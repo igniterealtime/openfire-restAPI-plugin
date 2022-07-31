@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement(name = "outcasts")
-public class OutcastEntities
+public class OutcastEntities extends AffiliatedEntities
 {
     List<String> outcasts;
 
@@ -42,5 +42,11 @@ public class OutcastEntities
 
     public void setOutcasts(List<String> outcasts) {
         this.outcasts = outcasts;
+    }
+
+    @Override
+    public String[] asUserReferences()
+    {
+        return outcasts == null ? new String[0] : outcasts.toArray(new String[0]);
     }
 }

@@ -115,6 +115,16 @@ public class MUCRoomUtils {
     }
 
     /**
+     * Returns a MUCRole.Affiliation type for a String value that potentially is a plural (eg: MUCRole.Affiliation.member for 'members').
+     *
+     * @param affiliation The value for which to return an Affiliation type.
+     * @return A string representation of an affiliation (can be in plural form).
+     */
+    public static MUCRole.Affiliation convertPluralStringToAffiliation(String affiliation) {
+        return MUCRole.Affiliation.valueOf( affiliation.endsWith("s") ? affiliation.substring(0, affiliation.length()-1) : affiliation);
+    }
+
+    /**
      * Wrapper around MUCRoom::send
      *
      * Attempts to call the legacy implementation of MUCRoom::send, if an Openfire version < 4.6 is used.

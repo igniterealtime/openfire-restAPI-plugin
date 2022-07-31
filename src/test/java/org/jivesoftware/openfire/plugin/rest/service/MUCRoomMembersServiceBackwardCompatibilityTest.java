@@ -68,7 +68,7 @@ public class MUCRoomMembersServiceBackwardCompatibilityTest extends JerseyTest {
     @Override
     protected Application configure() {
         // Configures the Jersey web application. This should mimic JerseyWrapper's implementation.
-        return new ResourceConfig(MUCRoomMembersService.class, RESTExceptionMapper.class, CustomJacksonMapperProvider.class);
+        return new ResourceConfig(MUCRoomAffiliationsService.class, RESTExceptionMapper.class, CustomJacksonMapperProvider.class);
     }
 
     /**
