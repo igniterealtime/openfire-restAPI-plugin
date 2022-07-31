@@ -18,6 +18,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -57,6 +58,9 @@ public class UserEntities {
     @XmlElement(name = "user")
     @JsonProperty(value = "users")
     public List<UserEntity> getUsers() {
+        if (users == null) {
+            users = new ArrayList<>();
+        }
         return users;
     }
 

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "clusterNodes")
@@ -36,6 +37,9 @@ public class ClusterNodeEntities
     @XmlElement(name = "clusterNode")
     @JsonProperty(value = "clusterNodes")
     public List<ClusterNodeEntity> getClusterNodeEntities() {
+        if (clusterNodeEntities == null) {
+            clusterNodeEntities = new ArrayList<>();
+        }
         return clusterNodeEntities;
     }
 

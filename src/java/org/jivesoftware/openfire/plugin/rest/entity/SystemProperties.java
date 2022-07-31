@@ -16,6 +16,7 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -44,6 +45,9 @@ public class SystemProperties {
      */
     @XmlElement(name = "property")
     public List<SystemProperty> getProperties() {
+        if (properties == null) {
+            properties = new ArrayList<>();
+        }
         return properties;
     }
 

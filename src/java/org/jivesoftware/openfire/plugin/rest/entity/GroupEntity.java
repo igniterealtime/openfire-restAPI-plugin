@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,6 +122,9 @@ public class GroupEntity {
     @JsonProperty(value = "admins")
     @ArraySchema(schema = @Schema(example = "jane.smith"), arraySchema = @Schema(description = "List of admins of the group"))
     public List<String> getAdmins() {
+        if (admins == null) {
+            admins = new ArrayList<>();
+        }
         return admins;
     }
 
@@ -134,6 +138,9 @@ public class GroupEntity {
     @JsonProperty(value = "members")
     @ArraySchema(schema = @Schema(example = "john.jones"), arraySchema = @Schema(description = "List of members of the group"))
     public List<String> getMembers() {
+        if (members == null) {
+            members = new ArrayList<>();
+        }
         return members;
     }
 

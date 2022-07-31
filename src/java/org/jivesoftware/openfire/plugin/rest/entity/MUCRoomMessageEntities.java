@@ -18,6 +18,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "messages")
@@ -33,6 +34,9 @@ public class MUCRoomMessageEntities {
 
     @XmlElement(name = "message")
     public List<MUCRoomMessageEntity> getMessages() {
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
         return messages;
     }
 

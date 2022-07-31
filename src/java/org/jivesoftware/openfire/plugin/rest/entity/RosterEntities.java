@@ -16,6 +16,7 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -54,6 +55,9 @@ public class RosterEntities {
      */
     @XmlElement(name = "rosterItem")
     public List<RosterItemEntity> getRoster() {
+        if (roster == null) {
+            roster = new ArrayList<>();
+        }
         return roster;
     }
 

@@ -18,6 +18,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -37,6 +38,9 @@ public class SessionEntities {
     @XmlElement(name = "session")
     @JsonProperty(value = "sessions")
     public List<SessionEntity> getSessions() {
+        if (sessions == null) {
+            sessions = new ArrayList<>();
+        }
         return sessions;
     }
 

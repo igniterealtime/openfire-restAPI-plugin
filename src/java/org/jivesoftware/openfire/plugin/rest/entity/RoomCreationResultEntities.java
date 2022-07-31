@@ -68,6 +68,9 @@ public class RoomCreationResultEntities {
     @JsonProperty(value = "success")
     @Schema(description = "All creation results of type success")
     public List<RoomCreationResultEntity> getSuccessResults() {
+        if (successResults == null) {
+            successResults = new ArrayList<>();
+        }
         return successResults;
     }
 
@@ -76,6 +79,9 @@ public class RoomCreationResultEntities {
     @JsonProperty(value = "failure")
     @Schema(description = "All creation results of type failure")
     public List<RoomCreationResultEntity> getFailureResults() {
+        if (failureResults == null) {
+            failureResults = new ArrayList<>();
+        }
         return failureResults;
     }
 
@@ -84,6 +90,9 @@ public class RoomCreationResultEntities {
     @JsonProperty(value = "other")
     @Schema(description = "All creation results of a type other than success or failure")
     public List<RoomCreationResultEntity> getOtherResults() {
+        if (otherResults == null) {
+            otherResults = new ArrayList<>();
+        }
         return otherResults;
     }
 }

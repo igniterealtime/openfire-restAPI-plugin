@@ -18,6 +18,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -37,8 +38,11 @@ public class SecurityAuditLogs {
 	@XmlElement(name = "log")
 	@JsonProperty(value = "logs")
 	public List<SecurityAuditLog> getSecurityAuditLog() {
-		return securityAuditLog;
-	}
+        if (securityAuditLog == null) {
+            securityAuditLog = new ArrayList<>();
+        }
+        return securityAuditLog;
+    }
 
 	public void setSecurityAuditLog(List<SecurityAuditLog> securityAuditLog) {
 		this.securityAuditLog = securityAuditLog;

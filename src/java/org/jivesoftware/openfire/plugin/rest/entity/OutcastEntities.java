@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "outcasts")
@@ -37,6 +38,9 @@ public class OutcastEntities
     @XmlElement(name = "outcast")
     @JsonProperty(value = "outcasts")
     public List<String> getOutcasts() {
+        if (outcasts == null) {
+            outcasts = new ArrayList<>();
+        }
         return outcasts;
     }
 

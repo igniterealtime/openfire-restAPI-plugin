@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "members")
@@ -37,6 +38,9 @@ public class MemberEntities
     @XmlElement(name = "member")
     @JsonProperty(value = "members")
     public List<String> getMembers() {
+        if (members == null) {
+            members = new ArrayList<>();
+        }
         return members;
     }
 
