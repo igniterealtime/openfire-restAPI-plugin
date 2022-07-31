@@ -347,6 +347,7 @@ public class MUCRoomController {
         room.setMaxUsers(mucRoomEntity.getMaxUsers());
         room.setMembersOnly(mucRoomEntity.isMembersOnly());
         room.setModerated(mucRoomEntity.isModerated());
+        room.setCanSendPrivateMessage(mucRoomEntity.getAllowPM());
 
         // Set broadcast presence roles
         if (mucRoomEntity.getBroadcastPresenceRoles() != null) {
@@ -558,6 +559,7 @@ public class MUCRoomController {
         mucRoomEntity.setMaxUsers(room.getMaxUsers());
         mucRoomEntity.setMembersOnly(room.isMembersOnly());
         mucRoomEntity.setModerated(room.isModerated());
+        mucRoomEntity.setAllowPM(room.canSendPrivateMessage());
 
         ConcurrentGroupList<JID> owners = new ConcurrentGroupList<>(room.getOwners());
         ConcurrentGroupList<JID> admins = new ConcurrentGroupList<>(room.getAdmins());

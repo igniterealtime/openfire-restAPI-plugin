@@ -848,6 +848,7 @@ Endpoint to create a new chat room.
     <loginRestrictedToNickname>false</loginRestrictedToNickname>
     <membersOnly>false</membersOnly>
     <moderated>false</moderated>
+    <allowPM>anyone</allowPM>
     <broadcastPresenceRoles>
         <broadcastPresenceRole>moderator</broadcastPresenceRole>
         <broadcastPresenceRole>participant</broadcastPresenceRole>
@@ -907,6 +908,7 @@ Endpoint to create a new chat room.
     "loginRestrictedToNickname": "true",
     "membersOnly": "false",
     "moderated": "false",
+    "allowPM": "anyone",
     "broadcastPresenceRoles": {
         "broadcastPresenceRole": [
             "moderator",
@@ -959,6 +961,7 @@ Endpoint to create a new chat room.
     "loginRestrictedToNickname": "true",
     "membersOnly": "false",
     "moderated": "false",
+    "allowPM": "anyone",
     "broadcastPresenceRoles": [
         "moderator",
         "participant",
@@ -1157,6 +1160,7 @@ Endpoint to update a chat room.
     <loginRestrictedToNickname>false</loginRestrictedToNickname>
     <membersOnly>false</membersOnly>
     <moderated>false</moderated>
+    <allowPM>anyone</allowPM>
     <broadcastPresenceRoles/>
     <owners>
         <owner>owner@localhost</owner>
@@ -1924,6 +1928,7 @@ If you want to create a resource with JSON data format, please add "**Content-Ty
 | loginRestrictedToNickname | Yes      | Can be "true" or "false". True if registered users can only join the room using their registered nickname. By default, registered users can join the room using any nickname.                                                                                                                                                                                    |
 | membersOnly               | Yes      | Can be "true" or "false". True if the room requires an invitation to enter. That is if the room is members-only.                                                                                                                                                                                                                                                 |
 | moderated                 | Yes      | Can be "true" or "false". True if the room in which only those with "voice" may send messages to all occupants.                                                                                                                                                                                                                                                  |
+| allowPM                   | Yes      | One of "anyone", "participants", "moderators" or "none". Controls who is allowed to send private messages to other occupants in the room.                                                                                                                                                                                                                        |
 | broadcastPresenceRoles    | Yes      | The list of roles of which presence will be broadcasted to the rest of the occupants.                                                                                                                                                                                                                                                                            |
 | owners                    | Yes      | A collection with the current list of owners. The collection contains the bareJID of the users with owner affiliation.                                                                                                                                                                                                                                           |
 | admins                    | Yes      | A collection with the current list of admins. The collection contains the bareJID of the users with admin affiliation.                                                                                                                                                                                                                                           |
