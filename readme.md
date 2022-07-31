@@ -623,6 +623,68 @@ Endpoint to update a roster entry
 
 # Chat room related REST Endpoints
 
+## Retrieve all chat services
+
+Endpoint to get all chat services
+>**GET** /chatservices
+
+**Payload:** none
+
+**Return value:** Chat services
+
+**Possible parameters:** none
+
+### Examples
+
+>**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/chatservices
+
+## Create a chat service
+Endpoint to create a new chat service.
+>**POST** /chatservices
+
+**Payload:** Chatservice
+
+**Return value:** HTTP status 201 (Created)
+
+**Possible parameters:** none
+
+### XML Examples
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/xml
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatservices
+
+**Payload Example (available parameters):**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<chatService>
+    <serviceName>new-chat-service-name</serviceName>
+    <description>A mightily fine service</description>
+    <hidden>false</hidden>
+</chatService>
+```
+
+### JSON Examples
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/json
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatservices
+
+**Payload Example (available parameters):**
+```json
+{
+	"serviceName": "new-chat-service-name",
+	"description": "A mightily fine service",
+	"hidden": false
+}
+```
+
 ## Retrieve all chat rooms 
 Endpoint to get all chat rooms
 >**GET** /chatrooms
@@ -732,7 +794,7 @@ Endpoint to get the chat message history of a specified room.
 | roomname    | @Path           | Exact room name                    |               |
 | servicename | @QueryParam     | The name of the Group Chat Service | conference    |
 
-## Create a chat room 
+## Create a chat room
 Endpoint to create a new chat room.
 >**POST** /chatrooms
 
@@ -919,6 +981,116 @@ Endpoint to create a new chat room.
     ]
 }
 ```
+
+
+
+
+
+
+
+## Create multiple chat room
+Endpoint to create multiple new chat rooms at once.
+>**POST** /chatrooms/bulk
+
+**Payload:** Chatrooms
+
+**Return value:** Result list, ordered by successes and failures
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<results>
+    <success>
+        <result>
+            <roomName>room1</roomName>
+            <resultType>Success</resultType>
+            <message>Room was successfully created</message>
+        </result>
+        <result>
+            <roomName>room2</roomName>
+            <resultType>Success</resultType>
+            <message>Room was successfully created</message>
+        </result>
+    </success>
+    <failure/>
+    <other/>
+</results>
+```
+
+```json
+{
+    "success": [
+        {
+            "roomName": "room1",
+            "resultType": "Success",
+            "message": "Room was successfully created"
+        },
+        {
+            "roomName": "room2",
+            "resultType": "Success",
+            "message": "Room was successfully created"
+        }
+    ],
+    "failure": [],
+    "other": []
+}
+```
+### Possible parameters
+
+| Parameter   | Parameter Type	 | Description                         | Default value |
+|-------------|-----------------|-------------------------------------|---------------|
+| servicename | @QueryParam     | 	The name of the Group Chat Service | conference    |
+
+### XML Examples
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/xml
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/bulk
+
+**Payload Example:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<chatRooms>
+    <chatRoom>
+        <roomName>room1</roomName>
+        <description>description1</description>
+    </chatRoom>
+    <chatRoom>
+        <roomName>room2</roomName>
+        <description>description1</description>
+    </chatRoom>
+</chatRooms>
+```
+
+For more examples, with more parameters, see the [create a chat room](#create-a-chat-room) endpoint.
+
+### JSON Examples
+
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type: application/json
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/chatrooms
+
+**Payload Example 1 (required parameters):**
+```json
+{
+    "chatRooms": [
+        { "roomName": "room1", "description": "description1" },
+        { "roomName": "room2", "description": "description2" }
+    ]
+}
+```
+
+For more examples, with more parameters, see the [create a chat room](#create-a-chat-room) endpoint.
+
+
+
+
+
+
+
+
 
 ## Delete a chat room 
 Endpoint to delete a chat room.
