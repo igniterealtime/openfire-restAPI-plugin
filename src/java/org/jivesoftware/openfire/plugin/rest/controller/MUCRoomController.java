@@ -360,9 +360,11 @@ public class MUCRoomController {
         } else {
             room.setRolesToBroadcastPresence(new ArrayList<>());
         }
+
         // Set all roles
+        Collection<JID> allUsersWithNewAffiliations = null;
         if (!equalToAffiliations(room, mucRoomEntity)) {
-            setRoles(room, mucRoomEntity);
+            allUsersWithNewAffiliations = setRoles(room, mucRoomEntity);
         }
 
         // Set creation date
@@ -389,8 +391,8 @@ public class MUCRoomController {
 
         MUCServiceController.getService(serviceName).syncChatRoom(room);
 
-        if (sendInvitations) {
-            sendInvitationsFromRoom(room, null, null, null, true);
+        if (sendInvitations && allUsersWithNewAffiliations != null) {
+            sendInvitationsFromRoom(room, null, allUsersWithNewAffiliations, null, true);
         }
     }
 
@@ -795,6 +797,8 @@ public class MUCRoomController {
      *            the room
      * @param mucRoomEntity
      *            the muc room entity
+     * @return
+     *             all users for which a role was added
      * @throws ForbiddenException
      *             the forbidden exception
      * @throws NotAllowedException
@@ -802,8 +806,10 @@ public class MUCRoomController {
      * @throws ConflictException
      *             the conflict exception
      */
-    private void setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException,
+    private Collection<JID> setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException,
             ConflictException {
+        Collection<JID> allNewAffiliations = new ArrayList<>();
+
         List<JID> roles = new ArrayList<>();
         Collection<JID> existingOwners = new ArrayList<>();
 
@@ -819,7 +825,6 @@ public class MUCRoomController {
 
         // Don't delete the same owners
         owners.removeAll(existingOwners);
-        room.addOwners(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners()), room.getRole());
 
         // Collect all roles to reset
         roles.addAll(owners);
@@ -831,20 +836,37 @@ public class MUCRoomController {
             room.addNone(jid, room.getRole());
         }
 
-        room.addOwners(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners()), room.getRole());
+        // Owners
+        List<JID> ownersToAdd = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners());
+        allNewAffiliations.addAll(ownersToAdd);
+        room.addOwners(ownersToAdd, room.getRole());
+
+        // Admins
         if (mucRoomEntity.getAdmins() != null) {
-            room.addAdmins(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getAdmins()), room.getRole());
+            List<JID> newAdmins = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getAdmins());
+            newAdmins.removeAll(room.getAdmins());
+            allNewAffiliations.addAll(newAdmins);
+            room.addAdmins(newAdmins, room.getRole());
         }
+
+        // Members
         if (mucRoomEntity.getMembers() != null) {
-            for (String memberJid : mucRoomEntity.getMembers()) {
-                room.addMember(new JID(memberJid), null, room.getRole());
+            List<JID> newMembers = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getMembers());
+            newMembers.removeAll(room.getMembers());
+            allNewAffiliations.addAll(newMembers);
+            for (JID memberJid : newMembers) {
+                room.addMember(memberJid, null, room.getRole());
             }
         }
+
+        // Outcasts
         if (mucRoomEntity.getOutcasts() != null) {
             for (String outcastJid : mucRoomEntity.getOutcasts()) {
                 room.addOutcast(new JID(outcastJid), null, room.getRole());
             }
         }
+
+        return allNewAffiliations;
     }
 
     /**
