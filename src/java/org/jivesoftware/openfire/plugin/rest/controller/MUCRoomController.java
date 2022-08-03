@@ -20,6 +20,7 @@ import org.dom4j.Element;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.ConcurrentGroupList;
 import org.jivesoftware.openfire.group.Group;
+import org.jivesoftware.openfire.group.GroupJID;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.muc.spi.MUCRoomSearchInfo;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
@@ -400,19 +401,40 @@ public class MUCRoomController {
         if (mucRoomEntity == null || room == null) {
             return false;
         }
-        Set<String> admins = mucRoomEntity.getAdmins() != null ? new HashSet<>(mucRoomEntity.getAdmins()) : new HashSet<>();
-        Set<String> owners = mucRoomEntity.getOwners() != null ? new HashSet<>(mucRoomEntity.getOwners()) : new HashSet<>();
-        Set<String> members = mucRoomEntity.getMembers() != null ? new HashSet<>(mucRoomEntity.getMembers()) : new HashSet<>();
-        Set<String> outcasts = mucRoomEntity.getOutcasts() != null ? new HashSet<>(mucRoomEntity.getOutcasts()) : new HashSet<>();
 
-        Set<String> roomAdmins = room.getAdmins() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getAdmins())) : new HashSet<>();
-        Set<String> roomOwners = room.getOwners() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOwners())) : new HashSet<>();
-        Set<String> roomMembers = room.getMembers() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getMembers())) : new HashSet<>();
-        Set<String> roomOutcasts = room.getOutcasts() != null ? new HashSet<>(MUCRoomUtils.convertJIDsToStringList(room.getOutcasts())) : new HashSet<>();
-        return admins.equals(roomAdmins)
-            && owners.equals(roomOwners)
-            && members.equals(roomMembers)
-            && outcasts.equals(roomOutcasts);
+        ConcurrentGroupList<JID> owners = new ConcurrentGroupList<>(room.getOwners());
+        ConcurrentGroupList<JID> admins = new ConcurrentGroupList<>(room.getAdmins());
+        ConcurrentGroupList<JID> members = new ConcurrentGroupList<>(room.getMembers());
+        ConcurrentGroupList<JID> outcasts = new ConcurrentGroupList<>(room.getOutcasts());
+
+        Set<String> roomOwners = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(owners)); // convertJIDsToStringList ignores group JIDs.
+        Set<String> roomAdmins = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(admins));
+        Set<String> roomMembers = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(members));
+        Set<String> roomOutcasts = new HashSet<>(MUCRoomUtils.convertJIDsToStringList(outcasts));
+
+        Set<String> entityOwners = mucRoomEntity.getOwners() != null ? new HashSet<>(mucRoomEntity.getOwners()) : new HashSet<>();
+        Set<String> entityAdmins = mucRoomEntity.getAdmins() != null ? new HashSet<>(mucRoomEntity.getAdmins()) : new HashSet<>();
+        Set<String> entityMembers = mucRoomEntity.getMembers() != null ? new HashSet<>(mucRoomEntity.getMembers()) : new HashSet<>();
+        Set<String> entityOutcasts = mucRoomEntity.getOutcasts() != null ? new HashSet<>(mucRoomEntity.getOutcasts()) : new HashSet<>();
+
+        Set<String> roomOwnerGroups = new HashSet<>(MUCRoomUtils.convertGroupsToStringList(owners.getGroups()));
+        Set<String> roomAdminGroups = new HashSet<>(MUCRoomUtils.convertGroupsToStringList(admins.getGroups()));
+        Set<String> roomMemberGroups = new HashSet<>(MUCRoomUtils.convertGroupsToStringList(members.getGroups()));
+        Set<String> roomOutcastGroups = new HashSet<>(MUCRoomUtils.convertGroupsToStringList(outcasts.getGroups()));
+
+        Set<String> entityOwnerGroups = mucRoomEntity.getOwnerGroups() != null ? new HashSet<>(mucRoomEntity.getOwnerGroups()) : new HashSet<>();
+        Set<String> entityAdminGroups = mucRoomEntity.getAdminGroups() != null ? new HashSet<>(mucRoomEntity.getAdminGroups()) : new HashSet<>();
+        Set<String> entityMemberGroups = mucRoomEntity.getMemberGroups() != null ? new HashSet<>(mucRoomEntity.getMemberGroups()) : new HashSet<>();
+        Set<String> entityOutcastGroups = mucRoomEntity.getOutcastGroups() != null ? new HashSet<>(mucRoomEntity.getOutcastGroups()) : new HashSet<>();
+
+        return entityOwners.equals(roomOwners)
+            && entityAdmins.equals(roomAdmins)
+            && entityMembers.equals(roomMembers)
+            && entityOutcasts.equals(roomOutcasts)
+            && entityOwnerGroups.equals(roomOwnerGroups)
+            && entityAdminGroups.equals(roomAdminGroups)
+            && entityMemberGroups.equals(roomMemberGroups)
+            && entityOutcastGroups.equals(roomOutcastGroups);
     }
 
     /**
@@ -840,6 +862,13 @@ public class MUCRoomController {
         List<JID> ownersToAdd = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners());
         allNewAffiliations.addAll(ownersToAdd);
         room.addOwners(ownersToAdd, room.getRole());
+        if (mucRoomEntity.getOwnerGroups() != null) {
+            for (final String groupName : mucRoomEntity.getOwnerGroups()) {
+                final JID groupJID = UserUtils.checkAndGetJID(groupName);
+                room.addOwner(groupJID, room.getRole());
+                allNewAffiliations.add(groupJID);
+            }
+        }
 
         // Admins
         if (mucRoomEntity.getAdmins() != null) {
@@ -847,6 +876,13 @@ public class MUCRoomController {
             newAdmins.removeAll(room.getAdmins());
             allNewAffiliations.addAll(newAdmins);
             room.addAdmins(newAdmins, room.getRole());
+        }
+        if (mucRoomEntity.getAdminGroups() != null) {
+            for (final String groupName : mucRoomEntity.getAdminGroups()) {
+                final JID groupJID = UserUtils.checkAndGetJID(groupName);
+                room.addAdmin(groupJID, room.getRole());
+                allNewAffiliations.add(groupJID);
+            }
         }
 
         // Members
@@ -858,6 +894,13 @@ public class MUCRoomController {
                 room.addMember(memberJid, null, room.getRole());
             }
         }
+        if (mucRoomEntity.getMemberGroups() != null) {
+            for (final String groupName : mucRoomEntity.getMemberGroups()) {
+                final JID groupJID = UserUtils.checkAndGetJID(groupName);
+                room.addMember(groupJID, null, room.getRole());
+                allNewAffiliations.add(groupJID);
+            }
+        }
 
         // Outcasts
         if (mucRoomEntity.getOutcasts() != null) {
@@ -865,7 +908,12 @@ public class MUCRoomController {
                 room.addOutcast(new JID(outcastJid), null, room.getRole());
             }
         }
-
+        if (mucRoomEntity.getOutcastGroups() != null) {
+            for (final String groupName : mucRoomEntity.getOutcastGroups()) {
+                final JID groupJID = UserUtils.checkAndGetJID(groupName);
+                room.addOutcast(groupJID, null, room.getRole());
+            }
+        }
         return allNewAffiliations;
     }
 
