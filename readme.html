@@ -46,15 +46,19 @@
             </li>
             <li><a href="#chat-room-related-rest-endpoints">Chat room related REST Endpoints</a>
                 <ul>
+                    <li><a href="#retrieve-all-chat-services">Retrieve all chat services</a></li>
+                    <li><a href="#create-a-chat-service">Create a chat service</a></li>
                     <li><a href="#retrieve-all-chat-rooms-endpoint-to-get-all-chat-rooms">Retrieve all chat rooms Endpoint to get all chat rooms</a></li>
                     <li><a href="#retrieve-a-chat-room">Retrieve a chat room</a></li>
                     <li><a href="#retrieve-chat-room-participants-endpoint-to-get-all-participants-with-a-role-of-specified-room.">Retrieve chat room participants Endpoint to get all participants with a role of specified room.</a></li>
                     <li><a href="#retrieve-chat-room-occupants">Retrieve chat room occupants</a></li>
                     <li><a href="#retrieve-chat-room-message-history">Retrieve chat room message history</a></li>
-                    <li><a href="#create-a-chat-room-endpoint-to-create-a-new-chat-room.">Create a chat room Endpoint to create a new chat room.</a></li>
+                    <li><a href="#create-a-chat-room">Create a chat room</a></li>
+                    <li><a href="#create-multiple-chat-room">Create multiple chat room</a></li>
                     <li><a href="#delete-a-chat-room-endpoint-to-delete-a-chat-room.">Delete a chat room Endpoint to delete a chat room.</a></li>
                     <li><a href="#update-a-chat-room-endpoint-to-update-a-chat-room.">Update a chat room Endpoint to update a chat room.</a></li>
-                    <li><a href="#invite-user-to-a-chat-room">Invite user to a chat Room</a></li>
+                    <li><a href="#invite-user-or-user-group-to-a-chat-room">Invite user or user group to a chat Room</a></li>
+                    <li><a href="#invite-multiple-users-andor-user-groups-to-a-chat-room">Invite multiple users and/or user groups to a chat Room</a></li>
                     <li><a href="#get-all-users-with-a-particular-affiliation-in-a-chat-room">Get all users with a particular affiliation in a chat room</a></li>
                     <li><a href="#add-user-with-affiliation-to-chat-room">Add user with affiliation to chat room</a></li>
                     <li><a href="#replace-all-users-with-a-affiliation-in-a-chat-room">Replace all users with a affiliation in a chat room</a></li>
@@ -866,6 +870,48 @@
  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>peter@pan.de<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>nickname</span><span class="token punctuation">&gt;</span></span>Peter Pan<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>nickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subscriptionType</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subscriptionType</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groups</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>group</span><span class="token punctuation">&gt;</span></span>Support<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>group</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groups</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>rosterItem</span><span class="token punctuation">&gt;</span></span>
 </code></pre>
         <h1 id="chat-room-related-rest-endpoints">Chat room related REST Endpoints</h1>
+        <h2 id="retrieve-all-chat-services">Retrieve all chat services</h2>
+        <p>Endpoint to get all chat services</p>
+        <blockquote>
+            <p><strong>GET</strong> /chatservices</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> Chat services</p>
+        <p><strong>Possible parameters:</strong> none</p>
+        <h3 id="examples-16">Examples</h3>
+        <blockquote>
+            <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatservices">http://example.org:9090/plugins/restapi/v1/chatservices</a></p>
+        </blockquote>
+        <h2 id="create-a-chat-service">Create a chat service</h2>
+        <p>Endpoint to create a new chat service.</p>
+        <blockquote>
+            <p><strong>POST</strong> /chatservices</p>
+        </blockquote>
+        <p><strong>Payload:</strong> Chatservice</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <p><strong>Possible parameters:</strong> none</p>
+        <h3 id="xml-examples-1">XML Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>Header:</strong> Content-Type: application/xml</p>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatservices">http://example.org:9090/plugins/restapi/v1/chatservices</a></p>
+        </blockquote>
+        <p><strong>Payload Example (available parameters):</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatService</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>serviceName</span><span class="token punctuation">&gt;</span></span>new-chat-service-name<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>serviceName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>A mightily fine service<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>hidden</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>hidden</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatService</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h3 id="json-examples-1">JSON Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>Header:</strong> Content-Type: application/json</p>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatservices">http://example.org:9090/plugins/restapi/v1/chatservices</a></p>
+        </blockquote>
+        <p><strong>Payload Example (available parameters):</strong></p>
+        <pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+ <span class="token string">"serviceName"</span><span class="token punctuation">:</span> <span class="token string">"new-chat-service-name"</span><span class="token punctuation">,</span> <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"A mightily fine service"</span><span class="token punctuation">,</span> <span class="token string">"hidden"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">}</span>
+</code></pre>
         <h2 id="retrieve-all-chat-rooms-endpoint-to-get-all-chat-rooms">Retrieve all chat rooms Endpoint to get all chat rooms</h2>
         <blockquote>
             <p><strong>GET</strong> /chatrooms</p>
@@ -903,7 +949,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-16">Examples</h3>
+        </table><h3 id="examples-17">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -945,7 +991,7 @@
                 <td>conference</td>
             </tr>
             </tbody>
-        </table><h3 id="examples-17">Examples</h3>
+        </table><h3 id="examples-18">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -984,7 +1030,7 @@
                 <td>conference</td>
             </tr>
             </tbody>
-        </table><h3 id="examples-18">Examples</h3>
+        </table><h3 id="examples-19">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1023,7 +1069,7 @@
                 <td>conference</td>
             </tr>
             </tbody>
-        </table><h3 id="examples-19">Examples</h3>
+        </table><h3 id="examples-20">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1062,7 +1108,8 @@
                 <td>conference</td>
             </tr>
             </tbody>
-        </table><h2 id="create-a-chat-room-endpoint-to-create-a-new-chat-room.">Create a chat room Endpoint to create a new chat room.</h2>
+        </table><h2 id="create-a-chat-room">Create a chat room</h2>
+        <p>Endpoint to create a new chat room.</p>
         <blockquote>
             <p><strong>POST</strong> /chatrooms</p>
         </blockquote>
@@ -1086,8 +1133,14 @@
                 <td>The name of the Group Chat Service</td>
                 <td>conference</td>
             </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitations to affiliated users</td>
+                <td>false</td>
+            </tr>
             </tbody>
-        </table><h3 id="xml-examples-1">XML Examples</h3>
+        </table><h3 id="xml-examples-2">XML Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1105,7 +1158,7 @@
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>global<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>naturalName</span><span class="token punctuation">&gt;</span></span>global-2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>naturalName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Global Chat Room<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subject</span><span class="token punctuation">&gt;</span></span>global-2 Subject<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subject</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationDate</span><span class="token punctuation">&gt;</span></span>2014-02-12T15:52:37.592+01:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationDate</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modificationDate</span><span class="token punctuation">&gt;</span></span>2014-09-12T15:35:54.702+02:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modificationDate</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maxUsers</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maxUsers</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>persistent</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>persistent</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>publicRoom</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>publicRoom</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>logEnabled</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>logEnabled</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>membersOnly</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>membersOnly</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>moderated</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>moderated</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>allowPM</span><span class="token punctuation">&gt;</span></span>anyone<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>allowPM</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRoles</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>moderator<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>participant<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span>visitor<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRole</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>broadcastPresenceRoles</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owners</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owner</span><span class="token punctuation">&gt;</span></span>owner@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owner</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owners</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admins</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admin</span><span class="token punctuation">&gt;</span></span>admin@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admin</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admins</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcasts</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcast</span><span class="token punctuation">&gt;</span></span>outcast1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcast</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcasts</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
 </code></pre>
-        <h3 id="json-examples-1">JSON Examples</h3>
+        <h3 id="json-examples-2">JSON Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1125,12 +1178,20 @@
         <pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
  <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"global-1"</span><span class="token punctuation">,</span> <span class="token string">"naturalName"</span><span class="token punctuation">:</span> <span class="token string">"global-1_test_hello"</span><span class="token punctuation">,</span> <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room"</span><span class="token punctuation">,</span> <span class="token string">"subject"</span><span class="token punctuation">:</span> <span class="token string">"Global chat room subject"</span><span class="token punctuation">,</span> <span class="token string">"creationDate"</span><span class="token punctuation">:</span> <span class="token string">"2012-10-18T16:55:12.803+02:00"</span><span class="token punctuation">,</span> <span class="token string">"modificationDate"</span><span class="token punctuation">:</span> <span class="token string">"2014-07-10T09:49:12.411+02:00"</span><span class="token punctuation">,</span> <span class="token string">"maxUsers"</span><span class="token punctuation">:</span> <span class="token string">"0"</span><span class="token punctuation">,</span> <span class="token string">"persistent"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span> <span class="token string">"publicRoom"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span> <span class="token string">"registrationEnabled"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span> <span class="token string">"canAnyoneDiscoverJID"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span> <span class="token string">"canOccupantsChangeSubject"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span> <span class="token string">"canOccupantsInvite"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span> <span class="token string">"canChangeNickname"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span> <span class="token string">"logEnabled"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span> <span class="token string">"loginRestrictedToNickname"</span><span class="token punctuation">:</span> <span class="token string">"true"</span><span class="token punctuation">,</span> <span class="token string">"membersOnly"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span> <span class="token string">"moderated"</span><span class="token punctuation">:</span> <span class="token string">"false"</span><span class="token punctuation">,</span> <span class="token string">"allowPM"</span><span class="token punctuation">:</span> <span class="token string">"anyone"</span><span class="token punctuation">,</span> <span class="token string">"broadcastPresenceRoles"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token string">"moderator"</span><span class="token punctuation">,</span> <span class="token string">"participant"</span><span class="token punctuation">,</span> <span class="token string">"visitor"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"owners"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token string">"owner@localhost"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"admins"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token string">"admin@localhost"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"members"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token string">"member@localhost"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"outcasts"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token string">"outcast@localhost"</span> <span class="token punctuation">]</span><span class="token punctuation">}</span>
 </code></pre>
-        <h2 id="delete-a-chat-room-endpoint-to-delete-a-chat-room.">Delete a chat room Endpoint to delete a chat room.</h2>
+        <h2 id="create-multiple-chat-room">Create multiple chat room</h2>
+        <p>Endpoint to create multiple new chat rooms at once.</p>
         <blockquote>
-            <p><strong>DELETE</strong> /chatrooms/{roomName}</p>
+            <p><strong>POST</strong> /chatrooms/bulk</p>
         </blockquote>
-        <p><strong>Payload:</strong> none</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <p><strong>Payload:</strong> Chatrooms</p>
+        <p><strong>Return value:</strong> Result list, ordered by successes and failures</p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>results</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>success</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>room1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>resultType</span><span class="token punctuation">&gt;</span></span>Success<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>resultType</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">&gt;</span></span>Room was successfully created<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>room2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>resultType</span><span class="token punctuation">&gt;</span></span>Success<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>resultType</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">&gt;</span></span>Room was successfully created<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>success</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>failure</span><span class="token punctuation">/&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>other</span><span class="token punctuation">/&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>results</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+ <span class="token string">"success"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token punctuation">{</span> <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"room1"</span><span class="token punctuation">,</span> <span class="token string">"resultType"</span><span class="token punctuation">:</span> <span class="token string">"Success"</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Room was successfully created"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"room2"</span><span class="token punctuation">,</span> <span class="token string">"resultType"</span><span class="token punctuation">:</span> <span class="token string">"Success"</span><span class="token punctuation">,</span> <span class="token string">"message"</span><span class="token punctuation">:</span> <span class="token string">"Room was successfully created"</span> <span class="token punctuation">}</span> <span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"failure"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"other"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">}</span>
+</code></pre>
         <h3 id="possible-parameters-21">Possible parameters</h3>
 
         <table>
@@ -1144,31 +1205,46 @@
             </thead>
             <tbody>
             <tr>
-                <td>roomname</td>
-                <td>@Path</td>
-                <td>Exact room name</td>
-                <td></td>
-            </tr>
-            <tr>
                 <td>servicename</td>
                 <td>@QueryParam</td>
                 <td>The name of the Group Chat Service</td>
                 <td>conference</td>
             </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitations to newly affiliated users</td>
+                <td>false</td>
+            </tr>
             </tbody>
-        </table><h3 id="examples-20">Examples</h3>
+        </table><h3 id="xml-examples-3">XML Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/testroom">http://example.org:9090/plugins/restapi/v1/chatrooms/testroom</a><br>
-                    <strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/testroom?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/testroom?servicename=privateconf</a></p>
-            </blockquote>
+            <p><strong>Header:</strong> Content-Type: application/xml</p>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/bulk">http://example.org:9090/plugins/restapi/v1/chatrooms/bulk</a></p>
         </blockquote>
-        <h2 id="update-a-chat-room-endpoint-to-update-a-chat-room.">Update a chat room Endpoint to update a chat room.</h2>
+        <p><strong>Payload Example:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRooms</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>room1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>description1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>room2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>description1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRooms</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <p>For more examples, with more parameters, see the <a href="#create-a-chat-room">create a chat room</a> endpoint.</p>
+        <h3 id="json-examples-3">JSON Examples</h3>
         <blockquote>
-            <p><strong>PUT</strong> /chatrooms/{roomName}</p>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>Header:</strong> Content-Type: application/json</p>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms">http://example.org:9090/plugins/restapi/v1/chatrooms</a></p>
         </blockquote>
-        <p><strong>Payload:</strong> Chatroom</p>
+        <p><strong>Payload Example 1 (required parameters):</strong></p>
+        <pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+ <span class="token string">"chatRooms"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span> <span class="token punctuation">{</span> <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"room1"</span><span class="token punctuation">,</span> <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"description1"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string">"roomName"</span><span class="token punctuation">:</span> <span class="token string">"room2"</span><span class="token punctuation">,</span> <span class="token string">"description"</span><span class="token punctuation">:</span> <span class="token string">"description2"</span> <span class="token punctuation">}</span> <span class="token punctuation">]</span><span class="token punctuation">}</span>
+</code></pre>
+        <p>For more examples, with more parameters, see the <a href="#create-a-chat-room">create a chat room</a> endpoint.</p>
+        <h2 id="delete-a-chat-room-endpoint-to-delete-a-chat-room.">Delete a chat room Endpoint to delete a chat room.</h2>
+        <blockquote>
+            <p><strong>DELETE</strong> /chatrooms/{roomName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
         <h3 id="possible-parameters-22">Possible parameters</h3>
 
@@ -1199,29 +1275,15 @@
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
-                <p><strong>Header:</strong> Content-Type application/xml<br>
-                    <strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global">http://example.org:9090/plugins/restapi/v1/chatrooms/global</a></p>
+                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/testroom">http://example.org:9090/plugins/restapi/v1/chatrooms/testroom</a><br>
+                    <strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/testroom?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/testroom?servicename=privateconf</a></p>
             </blockquote>
         </blockquote>
-        <p><strong>Payload:</strong></p>
-        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
- <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>global<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>naturalName</span><span class="token punctuation">&gt;</span></span>global-2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>naturalName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Global Chat Room edit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subject</span><span class="token punctuation">&gt;</span></span>New subject<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subject</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>password</span><span class="token punctuation">&gt;</span></span>test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>password</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationDate</span><span class="token punctuation">&gt;</span></span>2014-02-12T15:52:37.592+01:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationDate</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modificationDate</span><span class="token punctuation">&gt;</span></span>2014-09-12T14:20:56.286+02:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modificationDate</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maxUsers</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maxUsers</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>persistent</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>persistent</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>publicRoom</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>publicRoom</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>logEnabled</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>logEnabled</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>membersOnly</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>membersOnly</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>moderated</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>moderated</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>allowPM</span><span class="token punctuation">&gt;</span></span>anyone<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>allowPM</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRoles</span><span class="token punctuation">/&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owners</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owner</span><span class="token punctuation">&gt;</span></span>owner@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owner</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owners</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admins</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admin</span><span class="token punctuation">&gt;</span></span>admin@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admin</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admins</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcasts</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcast</span><span class="token punctuation">&gt;</span></span>outcast1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcast</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcasts</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
-</code></pre>
-        <h2 id="invite-user-to-a-chat-room">Invite user to a chat Room</h2>
-        <p>Endpoint to invite a user to a room.</p>
+        <h2 id="update-a-chat-room-endpoint-to-update-a-chat-room.">Update a chat room Endpoint to update a chat room.</h2>
         <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>Header:</strong> Content-Type: application/xml<br>
-                    <strong>POST</strong> <a href="http://localhost:9090/plugins/restapi/v1/chatrooms/%7BroomName%7D/invite/%7Bname%7D">http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite/{name}</a></p>
-            </blockquote>
+            <p><strong>PUT</strong> /chatrooms/{roomName}</p>
         </blockquote>
-        <p><strong>Payload Example:</strong></p>
-        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mucInvitation</span><span class="token punctuation">&gt;</span></span>
- <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reason</span><span class="token punctuation">&gt;</span></span>Hello, come to this room, it is nice<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reason</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mucInvitation</span><span class="token punctuation">&gt;</span></span>
-</code></pre>
+        <p><strong>Payload:</strong> Chatroom</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
         <h3 id="possible-parameters-23">Possible parameters</h3>
 
@@ -1242,18 +1304,45 @@
                 <td></td>
             </tr>
             <tr>
-                <td>name</td>
-                <td>@Path</td>
-                <td>The local username or the user JID</td>
-                <td></td>
+                <td>servicename</td>
+                <td>@QueryParam</td>
+                <td>The name of the Group Chat Service</td>
+                <td>conference</td>
+            </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitations to newly affiliated users</td>
+                <td>false</td>
             </tr>
             </tbody>
-        </table><h2 id="get-all-users-with-a-particular-affiliation-in-a-chat-room">Get all users with a particular affiliation in a chat room</h2>
-        <p>Retrieves a list of JIDs for all users with the specified affiliation in a multi-user chat room.</p>
+        </table><h3 id="examples-22">Examples</h3>
         <blockquote>
-            <p><strong>GET</strong> /chatrooms/{roomName}/{affiliation}</p>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>Header:</strong> Content-Type application/xml<br>
+                    <strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global">http://example.org:9090/plugins/restapi/v1/chatrooms/global</a></p>
+            </blockquote>
         </blockquote>
-        <p><strong>Payload:</strong> none</p>
+        <p><strong>Payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>roomName</span><span class="token punctuation">&gt;</span></span>global<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>roomName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>naturalName</span><span class="token punctuation">&gt;</span></span>global-2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>naturalName</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>description</span><span class="token punctuation">&gt;</span></span>Global Chat Room edit<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>description</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>subject</span><span class="token punctuation">&gt;</span></span>New subject<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>subject</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>password</span><span class="token punctuation">&gt;</span></span>test<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>password</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>creationDate</span><span class="token punctuation">&gt;</span></span>2014-02-12T15:52:37.592+01:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>creationDate</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>modificationDate</span><span class="token punctuation">&gt;</span></span>2014-09-12T14:20:56.286+02:00<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>modificationDate</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>maxUsers</span><span class="token punctuation">&gt;</span></span>0<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>maxUsers</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>persistent</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>persistent</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>publicRoom</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>publicRoom</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>registrationEnabled</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canAnyoneDiscoverJID</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsChangeSubject</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canOccupantsInvite</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>canChangeNickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>logEnabled</span><span class="token punctuation">&gt;</span></span>true<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>logEnabled</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>loginRestrictedToNickname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>membersOnly</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>membersOnly</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>moderated</span><span class="token punctuation">&gt;</span></span>false<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>moderated</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>allowPM</span><span class="token punctuation">&gt;</span></span>anyone<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>allowPM</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>broadcastPresenceRoles</span><span class="token punctuation">/&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owners</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>owner</span><span class="token punctuation">&gt;</span></span>owner@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owner</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>owners</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admins</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>admin</span><span class="token punctuation">&gt;</span></span>admin@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admin</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>admins</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcasts</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>outcast</span><span class="token punctuation">&gt;</span></span>outcast1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcast</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>outcasts</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>chatRoom</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h2 id="invite-user-or-user-group-to-a-chat-room">Invite user or user group to a chat Room</h2>
+        <p>Endpoint to invite a user or a user group to a room.</p>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>Header:</strong> Content-Type: application/xml<br>
+                    <strong>POST</strong> <a href="http://localhost:9090/plugins/restapi/v1/chatrooms/%7BroomName%7D/invite/%7Bname%7D">http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite/{name}</a></p>
+            </blockquote>
+        </blockquote>
+        <p><strong>Payload Example:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mucInvitation</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reason</span><span class="token punctuation">&gt;</span></span>Hello, come to this room, it is nice<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reason</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mucInvitation</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
         <h3 id="possible-parameters-24">Possible parameters</h3>
 
@@ -1274,36 +1363,25 @@
                 <td></td>
             </tr>
             <tr>
-                <td>affiliation</td>
+                <td>name</td>
                 <td>@Path</td>
-                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td>The local username or group name or the user JID or group JID</td>
                 <td></td>
             </tr>
-            <tr>
-                <td>servicename</td>
-                <td>@QueryParam</td>
-                <td>The name of the Group Chat Service</td>
-                <td>conference</td>
-            </tr>
             </tbody>
-        </table><h3 id="examples-22">Examples</h3>
+        </table><h2 id="invite-multiple-users-andor-user-groups-to-a-chat-room">Invite multiple users and/or user groups to a chat Room</h2>
+        <p>Endpoint to invite multiple users and/or user groups to a room. Works both with JIDs and (user/group) names.</p>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <p><strong>Header:</strong> Content-Type application/xml</p>
-            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/member">http://example.org:9090/plugins/restapi/v1/chatrooms/global/member</a></p>
+            <p><strong>Header:</strong> Content-Type: application/xml</p>
+            <p><strong>POST</strong> <a href="http://localhost:9090/plugins/restapi/v1/chatrooms/%7BroomName%7D/invite">http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite</a></p>
         </blockquote>
-        <p><strong>Return payload:</strong></p>
+        <p><strong>Payload Example:</strong></p>
         <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
- <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>mucInvitation</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>reason</span><span class="token punctuation">&gt;</span></span>Hello, come to this room, it is nice<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>reason</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jidsToInvite</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>jane@example.org<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>ADNMQP8=@example.org/695c6ae413c00446733d926ccadefd8b<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>john<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>jid</span><span class="token punctuation">&gt;</span></span>SomeGroupName<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jid</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>jidsToInvite</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>mucInvitation</span><span class="token punctuation">&gt;</span></span>
 </code></pre>
-        <h2 id="add-user-with-affiliation-to-chat-room">Add user with affiliation to chat room</h2>
-        <p>Endpoint to add a new user with affiliation to a room.</p>
-        <blockquote>
-            <p><strong>POST</strong> /chatrooms/{roomName}/{affiliation}/{name}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> none</p>
-        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
         <h3 id="possible-parameters-25">Possible parameters</h3>
 
         <table>
@@ -1322,45 +1400,14 @@
                 <td>Exact room name</td>
                 <td></td>
             </tr>
-            <tr>
-                <td>name</td>
-                <td>@Path</td>
-                <td>The local username or the user JID</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>affiliation</td>
-                <td>@Path</td>
-                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td>servicename</td>
-                <td>@QueryParam</td>
-                <td>The name of the Group Chat Service</td>
-                <td>conference</td>
-            </tr>
             </tbody>
-        </table><h3 id="examples-23">Examples</h3>
+        </table><h2 id="get-all-users-with-a-particular-affiliation-in-a-chat-room">Get all users with a particular affiliation in a chat room</h2>
+        <p>Retrieves a list of JIDs for all users with the specified affiliation in a multi-user chat room.</p>
         <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>Header:</strong> Content-Type application/xml<br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser</a><br>
-                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf</a></p>
-            </blockquote>
+            <p><strong>GET</strong> /chatrooms/{roomName}/{affiliation}</p>
         </blockquote>
-        <h2 id="replace-all-users-with-a-affiliation-in-a-chat-room">Replace all users with a affiliation in a chat room</h2>
-        <p>Endpoint to replace all users with a particular affiliation in a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.</p>
-        <blockquote>
-            <p><strong>PUT</strong> /chatrooms/{roomName}/{affiliation}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> list of affiliations</p>
-        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
         <h3 id="possible-parameters-26">Possible parameters</h3>
 
         <table>
@@ -1392,7 +1439,125 @@
                 <td>conference</td>
             </tr>
             </tbody>
+        </table><h3 id="examples-23">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>Header:</strong> Content-Type application/xml</p>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/member">http://example.org:9090/plugins/restapi/v1/chatrooms/global/member</a></p>
+        </blockquote>
+        <p><strong>Return payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>members</span><span class="token punctuation">&gt;</span></span>
+ <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member2@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>member</span><span class="token punctuation">&gt;</span></span>member1@localhost<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>member</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>members</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+        <h2 id="add-user-with-affiliation-to-chat-room">Add user with affiliation to chat room</h2>
+        <p>Endpoint to add a new user with affiliation to a room.</p>
+        <blockquote>
+            <p><strong>POST</strong> /chatrooms/{roomName}/{affiliation}/{name}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-27">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>roomname</td>
+                <td>@Path</td>
+                <td>Exact room name</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>name</td>
+                <td>@Path</td>
+                <td>The local username or the user JID</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>affiliation</td>
+                <td>@Path</td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>servicename</td>
+                <td>@QueryParam</td>
+                <td>The name of the Group Chat Service</td>
+                <td>conference</td>
+            </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitation to the newly affiliated user</td>
+                <td>false</td>
+            </tr>
+            </tbody>
         </table><h3 id="examples-24">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
+                <p><strong>Header:</strong> Content-Type application/xml<br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser?sendInvitations=true">http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser?sendInvitations=true</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser">http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser</a><br>
+                    <strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf">http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf</a></p>
+            </blockquote>
+        </blockquote>
+        <h2 id="replace-all-users-with-a-affiliation-in-a-chat-room">Replace all users with a affiliation in a chat room</h2>
+        <p>Endpoint to replace all users with a particular affiliation in a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.</p>
+        <blockquote>
+            <p><strong>PUT</strong> /chatrooms/{roomName}/{affiliation}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> list of affiliations</p>
+        <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-28">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>roomname</td>
+                <td>@Path</td>
+                <td>Exact room name</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>affiliation</td>
+                <td>@Path</td>
+                <td>Available affiliations: <br><strong>owners</strong>  <br> <strong>admins</strong> <br> <strong>members</strong> <br> <strong>outcasts</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>servicename</td>
+                <td>@QueryParam</td>
+                <td>The name of the Group Chat Service</td>
+                <td>conference</td>
+            </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitation to newly affiliated users</td>
+                <td>false</td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-25">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>Header:</strong> Content-Type application/xml</p>
@@ -1410,7 +1575,7 @@
         </blockquote>
         <p><strong>Payload:</strong> list of affiliations</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="possible-parameters-27">Possible parameters</h3>
+        <h3 id="possible-parameters-29">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1440,8 +1605,14 @@
                 <td>The name of the Group Chat Service</td>
                 <td>conference</td>
             </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitations to newly affiliated users</td>
+                <td>false</td>
+            </tr>
             </tbody>
-        </table><h3 id="examples-25">Examples</h3>
+        </table><h3 id="examples-26">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>Header:</strong> Content-Type application/xml</p>
@@ -1459,7 +1630,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="possible-parameters-28">Possible parameters</h3>
+        <h3 id="possible-parameters-30">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1495,8 +1666,14 @@
                 <td>The name of the Group Chat Service</td>
                 <td>conference</td>
             </tr>
+            <tr>
+                <td>sendInvitations</td>
+                <td>@QueryParam</td>
+                <td>Whether to send invitations to the users in the newly affiliated groups</td>
+                <td>false</td>
+            </tr>
             </tbody>
-        </table><h3 id="examples-26">Examples</h3>
+        </table><h3 id="examples-27">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1516,7 +1693,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-29">Possible parameters</h3>
+        <h3 id="possible-parameters-31">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1553,7 +1730,7 @@
                 <td>conference</td>
             </tr>
             </tbody>
-        </table><h3 id="examples-27">Examples</h3>
+        </table><h3 id="examples-28">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1573,7 +1750,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> System properties</p>
-        <h3 id="examples-28">Examples</h3>
+        <h3 id="examples-29">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1586,7 +1763,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> System property</p>
-        <h3 id="possible-parameters-30">Possible parameters</h3>
+        <h3 id="possible-parameters-32">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1605,7 +1782,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-29">Examples</h3>
+        </table><h3 id="examples-30">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain">http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain</a></p>
@@ -1616,7 +1793,7 @@
         </blockquote>
         <p><strong>Payload:</strong> System Property</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="examples-30">Examples</h3>
+        <h3 id="examples-31">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1635,40 +1812,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-31">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>propertyName</td>
-                <td>@Path</td>
-                <td>The name of system property</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-31">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
-            </blockquote>
-        </blockquote>
-        <h2 id="update-a-system-property">Update a system property</h2>
-        <p>Endpoint to update / overwrite a system property</p>
-        <blockquote>
-            <p><strong>PUT</strong> /system/properties/{propertyName}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> System property</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-32">Possible parameters</h3>
+        <h3 id="possible-parameters-33">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1691,6 +1835,39 @@
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
+                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
+            </blockquote>
+        </blockquote>
+        <h2 id="update-a-system-property">Update a system property</h2>
+        <p>Endpoint to update / overwrite a system property</p>
+        <blockquote>
+            <p><strong>PUT</strong> /system/properties/{propertyName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> System property</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-34">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>propertyName</td>
+                <td>@Path</td>
+                <td>The name of system property</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-33">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
                 <p><strong>Header:</strong> Content-Type application/xml<br>
                     <strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/propertyName">http://example.org:9090/plugins/restapi/v1/system/properties/propertyName</a></p>
             </blockquote>
@@ -1706,7 +1883,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Sessions count</p>
-        <h3 id="examples-33">Examples</h3>
+        <h3 id="examples-34">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/statistics/sessions">http://example.org:9090/plugins/restapi/v1/system/statistics/sessions</a></p>
@@ -1767,7 +1944,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value</strong>: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.</p>
-        <h3 id="possible-parameters-33">Possible parameters</h3>
+        <h3 id="possible-parameters-35">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1799,7 +1976,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Groups</p>
-        <h3 id="examples-34">Examples</h3>
+        <h3 id="examples-35">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1812,7 +1989,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Group</p>
-        <h3 id="possible-parameters-34">Possible parameters</h3>
+        <h3 id="possible-parameters-36">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1831,7 +2008,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-35">Examples</h3>
+        </table><h3 id="examples-36">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/moderators">http://example.org:9090/plugins/restapi/v1/groups/moderators</a></p>
@@ -1842,7 +2019,7 @@
         </blockquote>
         <p><strong>Payload:</strong> Group</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="examples-36">Examples</h3>
+        <h3 id="examples-37">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1862,40 +2039,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-35">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>groupName</td>
-                <td>@Path</td>
-                <td>The name of the group</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-37">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <blockquote>
-                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupToDelete">http://example.org:9090/plugins/restapi/v1/groups/groupToDelete</a></p>
-            </blockquote>
-        </blockquote>
-        <h2 id="update-a-group">Update a group</h2>
-        <p>Endpoint to update / overwrite a group</p>
-        <blockquote>
-            <p><strong>PUT</strong> /groups/{groupName}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> Group</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-36">Possible parameters</h3>
+        <h3 id="possible-parameters-37">Possible parameters</h3>
 
         <table>
             <thead>
@@ -1918,6 +2062,39 @@
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
+                <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupToDelete">http://example.org:9090/plugins/restapi/v1/groups/groupToDelete</a></p>
+            </blockquote>
+        </blockquote>
+        <h2 id="update-a-group">Update a group</h2>
+        <p>Endpoint to update / overwrite a group</p>
+        <blockquote>
+            <p><strong>PUT</strong> /groups/{groupName}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> Group</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-38">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>groupName</td>
+                <td>@Path</td>
+                <td>The name of the group</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-39">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <blockquote>
                 <p><strong>Header:</strong> Content-Type application/xml<br>
                     <strong>PUT</strong> <a href="http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate">http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate</a></p>
             </blockquote>
@@ -1935,7 +2112,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Sessions</p>
-        <h3 id="examples-39">Examples</h3>
+        <h3 id="examples-40">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -1949,38 +2126,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Sessions</p>
-        <h3 id="possible-parameters-37">Possible parameters</h3>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Parameter</th>
-                <th>Parameter Type</th>
-                <th>Description</th>
-                <th>Default value</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>username</td>
-                <td>@Path</td>
-                <td>The username of the user</td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table><h3 id="examples-40">Examples</h3>
-        <blockquote>
-            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
-            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
-        </blockquote>
-        <h2 id="close-all-user-sessions">Close all user sessions</h2>
-        <p>Endpoint to close/kick sessions from a user</p>
-        <blockquote>
-            <p><strong>DELETE</strong> /sessions/{username}</p>
-        </blockquote>
-        <p><strong>Payload:</strong> none</p>
-        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
-        <h3 id="possible-parameters-38">Possible parameters</h3>
+        <h3 id="possible-parameters-39">Possible parameters</h3>
 
         <table>
             <thead>
@@ -2002,6 +2148,37 @@
         </table><h3 id="examples-41">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
+        </blockquote>
+        <h2 id="close-all-user-sessions">Close all user sessions</h2>
+        <p>Endpoint to close/kick sessions from a user</p>
+        <blockquote>
+            <p><strong>DELETE</strong> /sessions/{username}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none</p>
+        <p><strong>Return value:</strong> HTTP status 200 (OK)</p>
+        <h3 id="possible-parameters-40">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>username</td>
+                <td>@Path</td>
+                <td>The username of the user</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-42">Examples</h3>
+        <blockquote>
+            <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>DELETE</strong> <a href="http://example.org:9090/plugins/restapi/v1/sessions/testuser">http://example.org:9090/plugins/restapi/v1/sessions/testuser</a></p>
         </blockquote>
         <h1 id="message-related-rest-endpoints">Message related REST Endpoints</h1>
@@ -2012,7 +2189,7 @@
         </blockquote>
         <p><strong>Payload:</strong> Message</p>
         <p><strong>Return value:</strong> HTTP status 201 (Created)</p>
-        <h3 id="examples-42">Examples</h3>
+        <h3 id="examples-43">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -2032,7 +2209,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> Security Audit Logs</p>
-        <h3 id="possible-parameters-39">Possible parameters</h3>
+        <h3 id="possible-parameters-41">Possible parameters</h3>
 
         <table>
             <thead>
@@ -2075,7 +2252,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-43">Examples</h3>
+        </table><h3 id="examples-44">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <blockquote>
@@ -2091,7 +2268,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> ClusterNodes</p>
-        <h3 id="examples-44">Examples</h3>
+        <h3 id="examples-45">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/clustering/nodes">http://example.org:9090/plugins/restapi/v1/clustering/nodes</a></p>
@@ -2104,7 +2281,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> ClusterNode</p>
-        <h3 id="possible-parameters-40">Possible parameters</h3>
+        <h3 id="possible-parameters-42">Possible parameters</h3>
 
         <table>
             <thead>
@@ -2123,7 +2300,7 @@
                 <td></td>
             </tr>
             </tbody>
-        </table><h3 id="examples-45">Examples</h3>
+        </table><h3 id="examples-46">Examples</h3>
         <blockquote>
             <p><strong>Header:</strong> Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/clustering/nodes/52a89928-66f7-45fd-9bb8-096de07400ac">http://example.org:9090/plugins/restapi/v1/clustering/nodes/52a89928-66f7-45fd-9bb8-096de07400ac</a></p>
@@ -2135,7 +2312,7 @@
         </blockquote>
         <p><strong>Payload:</strong> none</p>
         <p><strong>Return value:</strong> String describing the clustering status of this Openfire instance</p>
-        <h3 id="examples-46">Examples</h3>
+        <h3 id="examples-47">Examples</h3>
         <blockquote>
             <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/clustering/status">http://example.org:9090/plugins/restapi/v1/clustering/status</a></p>
