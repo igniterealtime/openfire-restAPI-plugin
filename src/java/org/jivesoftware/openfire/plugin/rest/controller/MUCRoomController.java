@@ -550,18 +550,18 @@ public class MUCRoomController {
      *            the service name
      * @param roomName
      *            the room name
-     * @param mucInvitationEntity
+     * @param mucInvitationsEntity
      *            the invitation entity containing invitation reason and jids to invite
      * @throws ServiceException
      *             the service exception
      */
-    public void inviteUsersAndOrGroups(String serviceName, String roomName, MUCInvitationEntity mucInvitationEntity)
+    public void inviteUsersAndOrGroups(String serviceName, String roomName, MUCInvitationsEntity mucInvitationsEntity)
             throws ServiceException {
         MUCRoom room = getRoom(serviceName, roomName);
 
         // First determine where to send all the invitations
         Set<JID> targetJIDs = new HashSet<>();
-        for (String jidString : mucInvitationEntity.getJidsToInvite()) {
+        for (String jidString : mucInvitationsEntity.getJidsToInvite()) {
             JID jid = UserUtils.checkAndGetJID(jidString);
             // Is it a group? Then unpack and send to every single group member.
             Group g = UserUtils.getGroupIfIsGroup(jid);
@@ -575,7 +575,7 @@ public class MUCRoomController {
         // And now send
         for (JID jid : targetJIDs) {
             try {
-                room.sendInvitation(jid, mucInvitationEntity.getReason(), room.getRole(), null);
+                room.sendInvitation(jid, mucInvitationsEntity.getReason(), room.getRole(), null);
             } catch (ForbiddenException | CannotBeInvitedException e) {
                 throw new ServiceException("Could not invite user", jid.toString(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
             }
