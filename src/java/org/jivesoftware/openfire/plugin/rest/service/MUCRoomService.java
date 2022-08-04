@@ -240,10 +240,12 @@ public class MUCRoomService {
             @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationEntity mucInvitationEntity)
         throws ServiceException
     {
-        if (!mucInvitationEntity.getJidsToInvite().contains(jid)) {
-            mucInvitationEntity.getJidsToInvite().add(jid);
+        final MUCInvitationsEntity multiple = new MUCInvitationsEntity();
+        multiple.setReason(mucInvitationEntity.getReason());
+        if (!multiple.getJidsToInvite().contains(jid)) {
+            multiple.getJidsToInvite().add(jid);
         }
-        MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, mucInvitationEntity);
+        MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, multiple);
         return Response.status(Status.OK).build();
     }
 
@@ -262,10 +264,10 @@ public class MUCRoomService {
     public Response inviteUsersAndOrGroupsToMUCRoom(
         @Parameter(description = "The name of the chat room in which to invite a user or group", example = "lobby", required = true) @PathParam("roomName") String roomName,
         @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
-        @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationEntity mucInvitationEntity)
+        @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationsEntity mucInvitationsEntity)
         throws ServiceException
     {
-        MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, mucInvitationEntity);
+        MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, mucInvitationsEntity);
         return Response.status(Status.OK).build();
     }
 
