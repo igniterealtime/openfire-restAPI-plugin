@@ -39,7 +39,7 @@ import javax.ws.rs.core.Response.Status;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Path("restapi/v1/chatrooms/{roomName}/{affiliation}")
+@Path("restapi/v1/chatrooms/{roomName}/{affiliation: (admins|members|outcasts|owners)}")
 @Tag(name = "Chat room", description = "Managing Multi-User chat rooms.")
 public class MUCRoomAffiliationsService
 {
