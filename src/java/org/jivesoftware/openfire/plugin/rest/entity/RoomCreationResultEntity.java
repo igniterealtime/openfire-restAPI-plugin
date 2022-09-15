@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.xmpp.packet.JID;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -42,7 +43,7 @@ public class RoomCreationResultEntity {
     }
 
     public void setRoomName(String roomName) {
-        this.roomName = roomName;
+        this.roomName = JID.nodeprep(roomName);
     }
 
     @XmlElement

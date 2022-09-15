@@ -18,6 +18,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.xmpp.packet.JID;
 
 import java.util.Date;
 import java.util.List;
@@ -78,7 +79,7 @@ public class MUCRoomEntity {
 
     public MUCRoomEntity(String naturalName, String roomName, String description) {
         this.naturalName = naturalName;
-        this.roomName = roomName;
+        this.roomName = roomName == null ? null : JID.nodeprep(roomName);
         this.description = description;
     }
 
@@ -97,7 +98,7 @@ public class MUCRoomEntity {
     }
 
     public void setRoomName(String roomName) {
-        this.roomName = roomName;
+        this.roomName = roomName == null ? null : JID.nodeprep(roomName);;
     }
 
     @XmlElement

@@ -20,7 +20,6 @@ import org.dom4j.Element;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.ConcurrentGroupList;
 import org.jivesoftware.openfire.group.Group;
-import org.jivesoftware.openfire.group.GroupJID;
 import org.jivesoftware.openfire.muc.*;
 import org.jivesoftware.openfire.muc.spi.MUCRoomSearchInfo;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
@@ -32,6 +31,7 @@ import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
 import org.jivesoftware.util.AlreadyExistsException;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
+import org.jivesoftware.util.SystemProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
@@ -50,6 +50,18 @@ import java.util.stream.Collectors;
  */
 public class MUCRoomController {
     private static final Logger LOG = LoggerFactory.getLogger(MUCRoomController.class);
+
+    /**
+     * Names of MUC rooms _should_ be node-prepped. This, however, was not guaranteed the case in some versions of Openfire and this plugin.
+     * Earlier versions of this plugin used a case-insensitive lookup to work around this. As this _should_ be unneeded, and is quite
+     * resource intensive, this behavior has been made configurable (disabled by default).
+     */
+    public static final SystemProperty<Boolean> ROOM_NAME_CASE_INSENSITIVE_LOOKUP_ENABLED = SystemProperty.Builder.ofType(Boolean.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.muc.case-insensitive-lookup.enabled")
+        .setDefaultValue(false)
+        .setDynamic(true)
+        .build();
 
     /** The Constant INSTANCE. */
     private static MUCRoomController INSTANCE = null;
@@ -98,21 +110,21 @@ public class MUCRoomController {
     {
         final MultiUserChatService service = MUCServiceController.getService(serviceName);
 
-        // Try finding an exact match first (iterating over all chat room names is pretty resource intensive, so do that
-        // only as a last resort.
-        MUCRoom room = service.getChatRoom(roomName);
-        if (room == null && !roomName.equals(roomName.toLowerCase())) {
-            // Try avoiding the need for an all-names lookup, by first attempting to get the room by its lowercase name.
-            room = service.getChatRoom(roomName.toLowerCase());
-        }
-        if (room == null) {
+        MUCRoom room = service.getChatRoom(JID.nodeprep(roomName));
+
+        // Names of MUC rooms _should_ be node-prepped. This, however, was not guaranteed the case in some versions of Openfire and this plugin.
+        // Earlier versions of this plugin used a case-insensitive lookup to work around this. As this _should_ be unneeded, and is quite
+        // resource intensive, this behavior has been made configurable (disabled by default).
+        if (room == null && ROOM_NAME_CASE_INSENSITIVE_LOOKUP_ENABLED.getValue())
+        {
             // As a last resort (because it's resource intensive), iterate over all room(name)s for this service.
-            final Set<String> nonExactMatches = service.getAllRoomNames().stream().filter(name -> name.equalsIgnoreCase(roomName)).collect(Collectors.toSet());
-            for (final String nonExactMatch : nonExactMatches) {
-                room = service.getChatRoom(nonExactMatch);
-                if (room != null) {
-                    LOG.info("Could not find a case-sensitive match for room '{}', but did find a case-insensitive match: '{}'. Case insensitive lookups are resource intensive. Consider modifying your search query.", roomName, room.getName());
-                    break;
+            for (String name : service.getAllRoomNames()) {
+                if (name.equalsIgnoreCase(roomName) && (room = service.getChatRoom(roomName)) != null) {
+                    LOG.info("Could not find a case-sensitive match for room '{}', but did find a case-insensitive match: '{}'. Case insensitive lookups are resource intensive. Verify that your database contains properly node-prepped MUC room names.", roomName, room.getName());
+                    return room;
+                } else if (JID.nodeprep(name).equalsIgnoreCase(roomName) && (room = service.getChatRoom(roomName)) != null) {
+                    LOG.info("Could not find a case-sensitive match for room '{}', but did find a case-insensitive match after node-prepping: '{}'. Case insensitive lookups are resource intensive. Verify that your database contains properly node-prepped MUC room names.", roomName, room.getName());
+                    return room;
                 }
             }
         }
@@ -144,7 +156,7 @@ public class MUCRoomController {
         for (MUCRoomSearchInfo roomInfo : roomsInfo) {
             String roomName = roomInfo.getName();
             if (roomSearch != null) {
-                if (!StringUtils.containsIgnoringCase(roomInfo.getName(), roomSearch) &&
+                if (!StringUtils.containsIgnoringCase(roomInfo.getName(), JID.nodeprep(roomSearch)) &&
                     !StringUtils.containsIgnoringCase(roomInfo.getNaturalLanguageName(), roomSearch)) {
                     continue;
                 }
@@ -279,7 +291,7 @@ public class MUCRoomController {
         log("Update a chat room: " + mucRoomEntity.getRoomName());
         try {
             // If the room name is different throw exception
-            if (!roomName.equals(mucRoomEntity.getRoomName())) {
+            if (!JID.nodeprep(roomName).equals(mucRoomEntity.getRoomName())) {
                 throw new ServiceException(
                         "Could not update the channel. The room name is different to the entity room name.", roomName,
                         ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
@@ -333,7 +345,7 @@ public class MUCRoomController {
             XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(serviceName, serviceName, false);
         }
 
-        MUCRoom room = MUCServiceController.getService(serviceName).getChatRoom(mucRoomEntity.getRoomName().toLowerCase(), owner);
+        MUCRoom room = MUCServiceController.getService(serviceName).getChatRoom(mucRoomEntity.getRoomName(), owner);
 
         // Set values
         room.setNaturalLanguageName(mucRoomEntity.getNaturalName());

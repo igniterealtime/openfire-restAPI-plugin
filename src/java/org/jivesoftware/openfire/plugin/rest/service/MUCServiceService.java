@@ -17,20 +17,16 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCServiceController;
-import org.jivesoftware.openfire.plugin.rest.entity.*;
+import org.jivesoftware.openfire.plugin.rest.entity.MUCServiceEntities;
+import org.jivesoftware.openfire.plugin.rest.entity.MUCServiceEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
