@@ -28,6 +28,7 @@ import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.xmpp.packet.JID;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -75,6 +76,7 @@ public class MUCRoomService {
             @Parameter(description = "For all groups defined in owners, admins, members and outcasts, list individual members instead of the group name.", required = false) @DefaultValue("false") @QueryParam("expandGroups") Boolean expand)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         return MUCRoomController.getInstance().getChatRoom(roomName, serviceName, expand);
     }
 
@@ -93,6 +95,7 @@ public class MUCRoomService {
             @Parameter(description = "The name of the MUC service from which to delete a chat room.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         MUCRoomController.getInstance().deleteChatRoom(roomName, serviceName);
         return Response.status(Status.OK).build();
     }
@@ -160,6 +163,7 @@ public class MUCRoomService {
             @RequestBody(description = "The new MUC room definition that needs to overwrite the old definition.", required = true) MUCRoomEntity mucRoomEntity)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         MUCRoomController.getInstance().updateChatRoom(roomName, serviceName, mucRoomEntity, sendInvitations);
         return Response.status(Status.OK).build();
     }
@@ -180,6 +184,7 @@ public class MUCRoomService {
             @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         return MUCRoomController.getInstance().getRoomParticipants(roomName, serviceName);
     }
 
@@ -199,6 +204,7 @@ public class MUCRoomService {
             @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         return MUCRoomController.getInstance().getRoomOccupants(roomName, serviceName);
     }
 
@@ -218,6 +224,7 @@ public class MUCRoomService {
             @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         return MUCRoomController.getInstance().getRoomHistory(roomName, serviceName);
     }
 
@@ -240,6 +247,7 @@ public class MUCRoomService {
             @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationEntity mucInvitationEntity)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCInvitationsEntity multiple = new MUCInvitationsEntity();
         multiple.setReason(mucInvitationEntity.getReason());
         if (!multiple.getJidsToInvite().contains(jid)) {
@@ -267,6 +275,7 @@ public class MUCRoomService {
         @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationsEntity mucInvitationsEntity)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         MUCRoomController.getInstance().inviteUsersAndOrGroups(serviceName, roomName, mucInvitationsEntity);
         return Response.status(Status.OK).build();
     }

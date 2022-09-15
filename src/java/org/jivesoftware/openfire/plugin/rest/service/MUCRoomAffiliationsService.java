@@ -61,6 +61,7 @@ public class MUCRoomAffiliationsService
         @Parameter(description = "The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners' .", example = "members", required = true) @PathParam("affiliation") String affiliations)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
@@ -112,6 +113,7 @@ public class MUCRoomAffiliationsService
         @RequestBody(description = "The new list of users with this particular affiliation.", required = true) AffiliatedEntities affiliatedEntities)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
@@ -143,6 +145,7 @@ public class MUCRoomAffiliationsService
         @RequestBody(description = "The list of users to affiliate to the room.", required = true) AffiliatedEntities affiliatedEntities)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
@@ -173,6 +176,7 @@ public class MUCRoomAffiliationsService
             @Parameter(description = "Whether to send invitations to new admin users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
     throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
@@ -203,6 +207,7 @@ public class MUCRoomAffiliationsService
             @Parameter(description = "Whether to send invitations to new admin users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
     throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
@@ -233,6 +238,7 @@ public class MUCRoomAffiliationsService
             @Parameter(description = "The name of the MUC room from which an affiliation is to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
@@ -263,6 +269,7 @@ public class MUCRoomAffiliationsService
         @Parameter(description = "The name of the MUC room from which affiliations are to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)
         throws ServiceException
     {
+        roomName = JID.nodeprep(roomName);
         final MUCRole.Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);

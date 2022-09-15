@@ -17,6 +17,8 @@ package org.jivesoftware.openfire.plugin.rest.service;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.plugin.rest.CustomJacksonMapperProvider;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.entity.MUCRoomEntities;
@@ -126,8 +128,26 @@ public class MUCRoomServiceBackwardCompatibilityTest extends JerseyTest {
         return controller;
     }
 
+    /**
+     * Constructs a mock of the XmppServer implementation, providing enough metadata to allow these tests to run.
+     *
+     * @return A mock of a XmppServer
+     */
+    public static XMPPServer constructMockXmppServer() {
+        final PluginManager pluginManager = mock(PluginManager.class, withSettings().lenient());
+
+        final XMPPServer xmppServer = mock(XMPPServer.class, withSettings().lenient());
+
+        doAnswer(invocationOnMock -> pluginManager)
+            .when(xmppServer).getPluginManager();
+        return xmppServer;
+    }
+
     @BeforeClass
     public static void setUpClass() throws ServiceException {
+        // A Mock XMPP server used to mock metadata used by the test.
+        XMPPServer.setInstance(constructMockXmppServer());
+
         // Override the service controller with a mock controller.
         MUCRoomController.setInstance(constructMockController());
     }
