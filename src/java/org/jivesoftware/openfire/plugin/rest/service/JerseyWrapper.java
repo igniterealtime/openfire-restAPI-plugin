@@ -20,6 +20,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.jivesoftware.openfire.plugin.rest.AuthFilter;
 import org.jivesoftware.openfire.plugin.rest.CORSFilter;
 import org.jivesoftware.openfire.plugin.rest.CustomJacksonMapperProvider;
+import org.jivesoftware.openfire.plugin.rest.StatisticsFilter;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
 import org.jivesoftware.util.JiveGlobals;
 
@@ -95,6 +96,7 @@ public class JerseyWrapper extends ResourceConfig {
         // Filters
         loadAuthenticationFilter();
         register(CORSFilter.class);
+        register(StatisticsFilter.class);
 
         // Services
         registerClasses(
