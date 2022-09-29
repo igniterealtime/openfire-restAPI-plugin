@@ -34,9 +34,6 @@ import java.util.Map;
  * The Class RESTServicePlugin.
  */
 public class RESTServicePlugin implements Plugin, PropertyEventListener {
-    
-    /** The Constant INSTANCE. */
-    public static final RESTServicePlugin INSTANCE = new RESTServicePlugin();
 
     private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
     public static final String SERVICE_LOGGING_ENABLED = "plugin.restapi.serviceLoggingEnabled";
@@ -66,16 +63,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     
     /** The custom authentication filter */
     private String customAuthFilterClassName;
-
-
-    /**
-     * Gets the single instance of RESTServicePlugin.
-     *
-     * @return single instance of RESTServicePlugin
-     */
-    public static RESTServicePlugin getInstance() {
-        return INSTANCE;
-    }
 
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
