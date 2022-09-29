@@ -20,15 +20,14 @@ import org.jivesoftware.admin.AuthCheckFilter;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
+import org.jivesoftware.openfire.stats.StatisticsManager;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
 import org.jivesoftware.util.StringUtils;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The Class RESTServicePlugin.
@@ -64,6 +63,8 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     /** The custom authentication filter */
     private String customAuthFilterClassName;
 
+    private final Set<String> registeredStatisticKeys = new HashSet<>();
+
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
      */
@@ -77,7 +78,13 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         
         // See if Custom authentication filter has been defined
         customAuthFilterClassName = JiveGlobals.getProperty("plugin.restapi.customAuthFilter", "");
-        
+
+        // Start collecting statistics.
+        for (StatisticsFilter.RestResponseFamilyStatistic statistic : StatisticsFilter.generateAllFamilyStatisticInstances()) {
+            StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
+            registeredStatisticKeys.add(statistic.getKeyName());
+        }
+
         // See if the service is enabled or not.
         enabled = JiveGlobals.getBooleanProperty("plugin.restapi.enabled", false);
 
@@ -100,6 +107,13 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      * @see org.jivesoftware.openfire.container.Plugin#destroyPlugin()
      */
     public void destroyPlugin() {
+        // Stop registering statistics.
+        final Iterator<String> iter = registeredStatisticKeys.iterator();
+        while (iter.hasNext()) {
+            StatisticsManager.getInstance().removeStatistic(iter.next());
+            iter.remove();
+        }
+
         // Release the excluded URL
         AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
         // Stop listening to system property events
