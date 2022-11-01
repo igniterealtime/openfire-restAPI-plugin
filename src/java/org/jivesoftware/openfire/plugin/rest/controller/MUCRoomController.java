@@ -339,15 +339,28 @@ public class MUCRoomController {
     private void createRoom(MUCRoomEntity mucRoomEntity, String serviceName, boolean sendInvitations) throws NotAllowedException,
         ForbiddenException, ConflictException, AlreadyExistsException, ServiceException
     {
-        log("Create a chat room: " + mucRoomEntity.getRoomName());
+        log("Create or updating a chat room: " + mucRoomEntity.getRoomName());
         // Set owner
         JID owner = XMPPServer.getInstance().createJID("admin", null);
         if (mucRoomEntity.getOwners() != null && mucRoomEntity.getOwners().size() > 0) {
             owner = new JID(mucRoomEntity.getOwners().get(0));
         } else {
+            log("Room '" + mucRoomEntity.getRoomName() + "' is being created/updated without an owner. Adding default owner (as having an owner is non-optional).");
             List<String> owners = new ArrayList<>();
             owners.add(owner.toBareJID());
             mucRoomEntity.setOwners(owners);
+        }
+
+        // Issue #159: Do not allow duplicate affiliations.
+        final Collection<JID> allRequestedAffiliations = new LinkedList<>();
+        if (mucRoomEntity.getOwners() != null) allRequestedAffiliations.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners()));
+        if (mucRoomEntity.getAdmins() != null) allRequestedAffiliations.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getAdmins()));
+        if (mucRoomEntity.getMembers() != null) allRequestedAffiliations.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getMembers()));
+        if (mucRoomEntity.getOutcasts() != null) allRequestedAffiliations.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOutcasts()));
+        final Set<JID> uniques = new HashSet<>();
+        final Set<String> duplicates = allRequestedAffiliations.stream().filter(n -> !uniques.add(n)).map(JID::toString).collect(Collectors.toSet());
+        if (!duplicates.isEmpty()) {
+            throw new ConflictException("The requested room defines duplicate affiliations for the following entities: " + String.join(", ", duplicates));
         }
 
         //	Check if chat service is available, if not create a new one
@@ -357,8 +370,9 @@ public class MUCRoomController {
             XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(serviceName, serviceName, false);
         }
 
-        log("Setting initial values for room that is being created: " + mucRoomEntity.getRoomName());
+        log("Setting initial values for room that is being created/updated: " + mucRoomEntity.getRoomName());
         MUCRoom room = MUCServiceController.getService(serviceName).getChatRoom(mucRoomEntity.getRoomName(), owner);
+        log("Room " + mucRoomEntity.getRoomName() + " is being " + (room.isLocked() ? "created" : "updated"));
 
         // Set values
         room.setNaturalLanguageName(mucRoomEntity.getNaturalName());
@@ -388,7 +402,7 @@ public class MUCRoomController {
         }
 
         // Set all roles
-        log("Setting roles for room that is being created: " + mucRoomEntity.getRoomName());
+        log("Setting roles for room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
         Collection<JID> allUsersWithNewAffiliations = null;
         if (!equalToAffiliations(room, mucRoomEntity)) {
             allUsersWithNewAffiliations = setRoles(room, mucRoomEntity);
@@ -409,23 +423,23 @@ public class MUCRoomController {
         }
 
         // Unlock the room, because the default configuration lock the room.  		
-        log("Unlocking room that is being created: " + mucRoomEntity.getRoomName());
+        log("Unlocking room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
         room.unlock(room.getRole());
 
         // Save the room to the DB if the room should be persistent
         if (room.isPersistent()) {
-            log("Persisting room that is being created: " + mucRoomEntity.getRoomName());
+            log("Persisting room that is being created/updated: " + mucRoomEntity.getRoomName());
             room.saveToDB();
         }
 
-        log("Syncing room that is being created: " + mucRoomEntity.getRoomName());
+        log("Syncing room that is being created/updated: " + mucRoomEntity.getRoomName());
         MUCServiceController.getService(serviceName).syncChatRoom(room);
 
         if (sendInvitations && allUsersWithNewAffiliations != null) {
-            log("Sending invitations for room that is being created: " + mucRoomEntity.getRoomName());
+            log("Sending invitations for room that is being created/updated: " + mucRoomEntity.getRoomName());
             sendInvitationsFromRoom(room, null, allUsersWithNewAffiliations, null, true);
         }
-        log("Done creating room: " + mucRoomEntity.getRoomName());
+        log("Done creating/updating room: " + mucRoomEntity.getRoomName());
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
@@ -859,92 +873,103 @@ public class MUCRoomController {
      * @throws ConflictException
      *             the conflict exception
      */
-    private Collection<JID> setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException,
-            ConflictException {
-        Collection<JID> allNewAffiliations = new ArrayList<>();
+    private static Collection<JID> setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException, ConflictException
+    {
+        final Collection<JID> allNewAffiliations = new ArrayList<>();
 
-        List<JID> roles = new ArrayList<>();
-        Collection<JID> existingOwners = new ArrayList<>();
+        // Calculate which affiliations are to be removed from the room. These are all the old affiliations, that are now no longer affiliations.
+        final List<JID> affiliationsToReset = new ArrayList<>();
+        affiliationsToReset.addAll(room.getOwners());
+        affiliationsToReset.addAll(room.getAdmins());
+        affiliationsToReset.addAll(room.getMembers());
+        affiliationsToReset.addAll(room.getOutcasts());
 
-        List<JID> mucRoomEntityOwners = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners());
-        Collection<JID> owners = new ArrayList<>(room.getOwners());
-
-        // Find same owners
-        for (JID jid : owners) {
-            if (mucRoomEntityOwners.contains(jid)) {
-                existingOwners.add(jid);
-            }
+        // Calculate which are the new owners.
+        final Collection<JID> newOwners = new ArrayList<>();
+        if (mucRoomEntity.getOwners() != null) {
+            newOwners.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners()));
         }
-
-        // Don't delete the same owners
-        owners.removeAll(existingOwners);
-
-        // Collect all roles to reset
-        roles.addAll(owners);
-        roles.addAll(room.getAdmins());
-        roles.addAll(room.getMembers());
-        roles.addAll(room.getOutcasts());
-
-        for (JID jid : roles) {
-            room.addNone(jid, room.getRole());
-        }
-
-        // Owners
-        List<JID> ownersToAdd = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOwners());
-        allNewAffiliations.addAll(ownersToAdd);
-        room.addOwners(ownersToAdd, room.getRole());
         if (mucRoomEntity.getOwnerGroups() != null) {
             for (final String groupName : mucRoomEntity.getOwnerGroups()) {
-                final JID groupJID = UserUtils.checkAndGetJID(groupName);
-                room.addOwner(groupJID, room.getRole());
-                allNewAffiliations.add(groupJID);
+                newOwners.add(UserUtils.checkAndGetJID(groupName));
             }
         }
+        affiliationsToReset.removeAll(newOwners); // Do not remove these from the room after we're done re-affiliating everyone!
+        newOwners.removeAll(room.getOwners()); // Removing the ones that are already associated. We don't need to add these again.
 
-        // Admins
+        // Update the room by adding new owners.
+        for (final JID newOwner : newOwners) {
+            log("Adding new 'owner' affiliation for '" + newOwner + "' to room: " + room.getName());
+            room.addOwner(newOwner, room.getRole());
+            allNewAffiliations.add(newOwner);
+        }
+
+        // Calculate which are the new admins.
+        final Collection<JID> newAdmins = new ArrayList<>();
         if (mucRoomEntity.getAdmins() != null) {
-            List<JID> newAdmins = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getAdmins());
-            newAdmins.removeAll(room.getAdmins());
-            allNewAffiliations.addAll(newAdmins);
-            room.addAdmins(newAdmins, room.getRole());
+            newAdmins.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getAdmins()));
         }
         if (mucRoomEntity.getAdminGroups() != null) {
             for (final String groupName : mucRoomEntity.getAdminGroups()) {
-                final JID groupJID = UserUtils.checkAndGetJID(groupName);
-                room.addAdmin(groupJID, room.getRole());
-                allNewAffiliations.add(groupJID);
+                newAdmins.add(UserUtils.checkAndGetJID(groupName));
             }
         }
+        affiliationsToReset.removeAll(newAdmins); // Do not remove these from the room after we're done re-affiliating everyone!
+        newAdmins.removeAll(room.getAdmins()); // Removing the ones that are already associated. We don't need to add these again.
 
-        // Members
+        // Update the room by adding new admins.
+        for (final JID newAdmin : newAdmins) {
+            log("Adding new 'admin' affiliation for '" + newAdmin + "' to room: " + room.getName());
+            room.addAdmin(newAdmin, room.getRole());
+            allNewAffiliations.add(newAdmin);
+        }
+
+        // Calculate which are the new members.
+        final Collection<JID> newMembers = new ArrayList<>();
         if (mucRoomEntity.getMembers() != null) {
-            List<JID> newMembers = MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getMembers());
-            newMembers.removeAll(room.getMembers());
-            allNewAffiliations.addAll(newMembers);
-            for (JID memberJid : newMembers) {
-                room.addMember(memberJid, null, room.getRole());
-            }
+            newMembers.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getMembers()));
         }
         if (mucRoomEntity.getMemberGroups() != null) {
             for (final String groupName : mucRoomEntity.getMemberGroups()) {
-                final JID groupJID = UserUtils.checkAndGetJID(groupName);
-                room.addMember(groupJID, null, room.getRole());
-                allNewAffiliations.add(groupJID);
+                newMembers.add(UserUtils.checkAndGetJID(groupName));
             }
         }
+        affiliationsToReset.removeAll(newMembers); // Do not remove these from the room after we're done re-affiliating everyone!
+        newMembers.removeAll(room.getMembers()); // Removing the ones that are already associated. We don't need to add these again.
 
-        // Outcasts
+        // Update the room by adding new members.
+        for (final JID newMember : newMembers) {
+            log("Adding new 'member' affiliation for '" + newMember + "' to room: " + room.getName());
+            room.addMember(newMember, null, room.getRole());
+            allNewAffiliations.add(newMember);
+        }
+
+        // Calculate which are the new outcasts.
+        final Collection<JID> newOutcasts = new ArrayList<>();
         if (mucRoomEntity.getOutcasts() != null) {
-            for (String outcastJid : mucRoomEntity.getOutcasts()) {
-                room.addOutcast(new JID(outcastJid), null, room.getRole());
-            }
+            newOutcasts.addAll(MUCRoomUtils.convertStringsToJIDs(mucRoomEntity.getOutcasts()));
         }
         if (mucRoomEntity.getOutcastGroups() != null) {
             for (final String groupName : mucRoomEntity.getOutcastGroups()) {
-                final JID groupJID = UserUtils.checkAndGetJID(groupName);
-                room.addOutcast(groupJID, null, room.getRole());
+                newOutcasts.add(UserUtils.checkAndGetJID(groupName));
             }
         }
+        affiliationsToReset.removeAll(newOutcasts); // Do not remove these from the room after we're done re-affiliating everyone!
+        newOutcasts.removeAll(room.getOutcasts()); // Removing the ones that are already associated. We don't need to add these again.
+
+        // Update the room by adding new outcasts.
+        for (final JID newOutcast : newOutcasts) {
+            log("Adding new 'outcast' affiliation for '" + newOutcast + "' to room: " + room.getName());
+            room.addOutcast(newOutcast, null, room.getRole());
+            allNewAffiliations.add(newOutcast);
+        }
+
+        // Finally, clean up every old affiliation that is not carrying over.
+        for (JID affiliationToReset : affiliationsToReset) {
+            log("Removing old affiliation for '" + affiliationToReset + "' from room: " + room.getName());
+            room.addNone(affiliationToReset, room.getRole());
+        }
+
         return allNewAffiliations;
     }
 
