@@ -93,6 +93,12 @@ public class MUCRoomController {
         }
     }
 
+    public static void log(String logMessage, Throwable t) {
+        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
+            LOG.info(logMessage, t);
+        }
+    }
+
     /**
      * Returns the chat room instance for the provided name.
      *
@@ -261,9 +267,11 @@ public class MUCRoomController {
                 result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Success);
                 result.setMessage("Room was successfully created");
             } catch (AlreadyExistsException e) {
+                log("Already exists exception thrown while trying to create room: " + roomToCreate.getRoomName(), e);
                 result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Success);
                 result.setMessage("Room already existed and therefore not created again");
             } catch (NotAllowedException | ForbiddenException | ConflictException e) {
+                log("Failed to create room: " + roomToCreate.getRoomName(), e);
                 result.setResultType(RoomCreationResultEntity.RoomCreationResultType.Failure);
                 result.setMessage("Room creation failed due to " + e.getClass().getSimpleName() + ": " + e.getMessage());
             }
@@ -298,10 +306,13 @@ public class MUCRoomController {
             }
             createRoom(mucRoomEntity, serviceName, sendInvitations);
         } catch (NotAllowedException | ForbiddenException e) {
+            log("Failed to update room: " + mucRoomEntity.getRoomName(), e);
             throw new ServiceException("Could not update the channel", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
+            log("Failed to update room: " + mucRoomEntity.getRoomName(), e);
             throw new ServiceException("Could not update the channel", roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
         } catch (AlreadyExistsException e) {
+            log("Already exists exception thrown while trying to update room: " + mucRoomEntity.getRoomName(), e);
             throw new ServiceException("Could not update the channel", mucRoomEntity.getRoomName(),
                     ExceptionType.ALREADY_EXISTS, Response.Status.CONFLICT, e);
         }
@@ -342,9 +353,11 @@ public class MUCRoomController {
         //	Check if chat service is available, if not create a new one
         boolean serviceRegistered = XMPPServer.getInstance().getMultiUserChatManager().isServiceRegistered(serviceName);
         if(!serviceRegistered) {
+            log("Creating a new service for the chat room that is being created: " + serviceName);
             XMPPServer.getInstance().getMultiUserChatManager().createMultiUserChatService(serviceName, serviceName, false);
         }
 
+        log("Setting initial values for room that is being created: " + mucRoomEntity.getRoomName());
         MUCRoom room = MUCServiceController.getService(serviceName).getChatRoom(mucRoomEntity.getRoomName(), owner);
 
         // Set values
@@ -375,6 +388,7 @@ public class MUCRoomController {
         }
 
         // Set all roles
+        log("Setting roles for room that is being created: " + mucRoomEntity.getRoomName());
         Collection<JID> allUsersWithNewAffiliations = null;
         if (!equalToAffiliations(room, mucRoomEntity)) {
             allUsersWithNewAffiliations = setRoles(room, mucRoomEntity);
@@ -395,18 +409,23 @@ public class MUCRoomController {
         }
 
         // Unlock the room, because the default configuration lock the room.  		
+        log("Unlocking room that is being created: " + mucRoomEntity.getRoomName());
         room.unlock(room.getRole());
 
         // Save the room to the DB if the room should be persistent
         if (room.isPersistent()) {
+            log("Persisting room that is being created: " + mucRoomEntity.getRoomName());
             room.saveToDB();
         }
 
+        log("Syncing room that is being created: " + mucRoomEntity.getRoomName());
         MUCServiceController.getService(serviceName).syncChatRoom(room);
 
         if (sendInvitations && allUsersWithNewAffiliations != null) {
+            log("Sending invitations for room that is being created: " + mucRoomEntity.getRoomName());
             sendInvitationsFromRoom(room, null, allUsersWithNewAffiliations, null, true);
         }
+        log("Done creating room: " + mucRoomEntity.getRoomName());
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
