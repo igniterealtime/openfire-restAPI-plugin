@@ -628,8 +628,7 @@ public class MUCRoomController {
         LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_INVITE_USER,
             "roomName", roomName,
             "serviceName", serviceName,
-            "jid", jid,
-            "invitation" , mucInvitationEntity);
+            "invitation" , mucInvitationsEntity);
         MUCRoom room = getRoom(serviceName, roomName);
 
         // First determine where to send all the invitations
