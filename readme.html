@@ -176,6 +176,13 @@
         </ul>
         <h2 id="installation">Installation</h2>
         <p>Copy restAPI.jar into the plugins directory of your Openfire server. The plugin will be automatically deployed. To upgrade to a newer version, overwrite the restAPI.jar file with the new one.</p>
+
+        <p>
+            <b>Important Step:</b> To enable the plugin make sure to set the system property <code>adminConsole.access.allow-wildcards-in-excludes</code> to <code>true</code>.
+            Without the above step the REST API plugin always <a href="https://discourse.igniterealtime.org/t/when-i-upload-to-4-7-5-the-restapi-always-redirect/92892">redirects to login</a>
+            This was done in response to a <a href="https://discourse.igniterealtime.org/t/cve-2023-32315-openfire-administration-console-authentication-bypass/92869">security issue</a>
+        </p>
+
         <h2 id="explanation-of-rest">Explanation of REST</h2>
         <p>To provide a standard way of accessing the data the plugin is using REST.</p>
 

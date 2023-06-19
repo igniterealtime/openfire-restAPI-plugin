@@ -42,6 +42,11 @@ REST API clients are implementations of the REST API in a specific programming l
 
 Copy restAPI.jar into the plugins directory of your Openfire server. The plugin will be automatically deployed. To upgrade to a newer version, overwrite the restAPI.jar file with the new one.
 
+*Important Step:* To enable the plugin make sure to set the system property `adminConsole.access.allow-wildcards-in-excludes` to `true`
+
+Without the above step the REST API plugin always [redirects to login](https://discourse.igniterealtime.org/t/when-i-upload-to-4-7-5-the-restapi-always-redirect/92892).
+This was done in response to a [security issue](https://discourse.igniterealtime.org/t/cve-2023-32315-openfire-administration-console-authentication-bypass/92869).
+
 ## Explanation of REST
 
 To provide a standard way of accessing the data the plugin is using REST.
