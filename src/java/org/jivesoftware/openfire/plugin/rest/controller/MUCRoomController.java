@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2022-2023 Ignite Realtime Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,18 @@ public class MUCRoomController {
         .setPlugin("REST API")
         .setKey("plugin.restapi.muc.case-insensitive-lookup.enabled")
         .setDefaultValue(false)
+        .setDynamic(true)
+        .build();
+
+    /**
+     * Controls if a mutual exclusion lock, that was introduced in Openfire 4.7.0, is used when an API interacts with a room.
+     *
+     * @see MultiUserChatService#getChatRoomLock(String)
+     */
+    public static final SystemProperty<Boolean> USE_ROOM_MUTEX = SystemProperty.Builder.ofType(Boolean.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.muc.room-mutex.enabled")
+        .setDefaultValue(true)
         .setDynamic(true)
         .build();
 
@@ -99,6 +113,18 @@ public class MUCRoomController {
         }
     }
 
+    public static Lock getLock(@Nonnull final MultiUserChatService service, @Nonnull final String roomName) {
+        if (USE_ROOM_MUTEX.getValue()) {
+            return service.getChatRoomLock(roomName);
+        } else {
+            // Always return a lock, even if we're not using the purposely built mutex from the service. By always
+            // returning a lock, the code that is _potentially_ to be executed under the mutex fromt he service does not
+            // need to deal with null values. The drawback is a small overhead incurred from interacting with lock that
+            // is returned here, but is unlikely to ever used elsewhere, thus never leading to lock contention.
+            return new ReentrantLock();
+        }
+    }
+
     /**
      * Returns the chat room instance for the provided name.
      *
@@ -106,16 +132,17 @@ public class MUCRoomController {
      * match. It will <em>not</em> evaluate more than one service, in case more than one match the provided service name
      * case-insensitively.
      *
-     * @param serviceName The name of the service that contains the chat room.
+     * This method should only be invoked after the caller has obtained and engaged a lock, using {@link #getLock(MultiUserChatService, String)}.
+     *
+     * @param service The service that contains the chat room.
      * @param roomName The name of the chat room.
      * @return The chat room instance
      * @throws ServiceException When no service for the provided name exists, or when that service does not contain a chat room of the provided name.
+     * @see #getLock(MultiUserChatService, String)
      */
     @Nonnull
-    protected static MUCRoom getRoom(@Nonnull final String serviceName, @Nonnull final String roomName) throws ServiceException
+    protected static MUCRoom getRoom(@Nonnull final MultiUserChatService service, @Nonnull final String roomName) throws ServiceException
     {
-        final MultiUserChatService service = MUCServiceController.getService(serviceName);
-
         MUCRoom room = service.getChatRoom(JID.nodeprep(roomName));
 
         // Names of MUC rooms _should_ be node-prepped. This, however, was not guaranteed the case in some versions of Openfire and this plugin.
@@ -168,10 +195,18 @@ public class MUCRoomController {
                 }
             }
 
-            final MUCRoom chatRoom = service.getChatRoom(roomName);
-            if (chatRoom == null) {
-                LOG.warn("Cannot get room '{}' from service '{}' even though service's 'getAllRoomNames()' returns this name.", roomName, serviceName);
-                continue;
+            final MUCRoom chatRoom;
+
+            final Lock lock = getLock(service, roomName);
+            lock.lock();
+            try {
+                chatRoom = service.getChatRoom(roomName);
+                if (chatRoom == null) {
+                    LOG.warn("Cannot get room '{}' from service '{}' even though service's 'getAllRoomNames()' returns this name.", roomName, serviceName);
+                    continue;
+                }
+            } finally {
+                lock.unlock();
             }
 
             if (channelType.equals(MUCChannelType.ALL)) {
@@ -197,7 +232,17 @@ public class MUCRoomController {
      */
     public MUCRoomEntity getChatRoom(String roomName, String serviceName, boolean expand) throws ServiceException {
         log("Get the chat room: " + roomName);
-        final MUCRoom chatRoom = getRoom(serviceName, roomName);
+
+        final MUCRoom chatRoom;
+
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            chatRoom = getRoom(service, roomName);
+        } finally {
+            lock.unlock();
+        }
         return convertToMUCRoomEntity(chatRoom, expand);
     }
 
@@ -213,8 +258,21 @@ public class MUCRoomController {
      */
     public void deleteChatRoom(String roomName, String serviceName) throws ServiceException {
         log("Delete the chat room: " + roomName);
-        final MUCRoom chatRoom = getRoom(serviceName, roomName);
-        chatRoom.destroyRoom(null, null);
+
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            service.getChatRoomLock(roomName);
+
+            final MUCRoom chatRoom = getRoom(service, roomName);
+            chatRoom.destroyRoom(null, null);
+
+            // Make sure that other cluster nodes see the changes made here.
+            service.syncChatRoom(chatRoom);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -371,75 +429,82 @@ public class MUCRoomController {
         }
 
         log("Setting initial values for room that is being created/updated: " + mucRoomEntity.getRoomName());
-        MUCRoom room = MUCServiceController.getService(serviceName).getChatRoom(mucRoomEntity.getRoomName(), owner);
-        log("Room " + mucRoomEntity.getRoomName() + " is being " + (room.isLocked() ? "created" : "updated"));
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, mucRoomEntity.getRoomName());
+        lock.lock();
+        try {
+            MUCRoom room = service.getChatRoom(mucRoomEntity.getRoomName(), owner);
+            log("Room " + mucRoomEntity.getRoomName() + " is being " + (room.isLocked() ? "created" : "updated"));
 
-        // Set values
-        room.setNaturalLanguageName(mucRoomEntity.getNaturalName());
-        room.setSubject(mucRoomEntity.getSubject());
-        room.setDescription(mucRoomEntity.getDescription());
-        room.setPassword(mucRoomEntity.getPassword());
-        room.setPersistent(mucRoomEntity.isPersistent());
-        room.setPublicRoom(mucRoomEntity.isPublicRoom());
-        room.setRegistrationEnabled(mucRoomEntity.isRegistrationEnabled());
-        room.setCanAnyoneDiscoverJID(mucRoomEntity.isCanAnyoneDiscoverJID());
-        room.setCanOccupantsChangeSubject(mucRoomEntity.isCanOccupantsChangeSubject());
-        room.setCanOccupantsInvite(mucRoomEntity.isCanOccupantsInvite());
-        room.setChangeNickname(mucRoomEntity.isCanChangeNickname());
-        room.setModificationDate(mucRoomEntity.getModificationDate());
-        room.setLogEnabled(mucRoomEntity.isLogEnabled());
-        room.setLoginRestrictedToNickname(mucRoomEntity.isLoginRestrictedToNickname());
-        room.setMaxUsers(mucRoomEntity.getMaxUsers());
-        room.setMembersOnly(mucRoomEntity.isMembersOnly());
-        room.setModerated(mucRoomEntity.isModerated());
-        room.setCanSendPrivateMessage(mucRoomEntity.getAllowPM());
-
-        // Set broadcast presence roles
-        if (mucRoomEntity.getBroadcastPresenceRoles() != null) {
-            room.setRolesToBroadcastPresence(MUCRoomUtils.convertStringsToRoles(mucRoomEntity.getBroadcastPresenceRoles()));
-        } else {
-            room.setRolesToBroadcastPresence(new ArrayList<>());
-        }
-
-        // Set all roles
-        log("Setting roles for room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
-        Collection<JID> allUsersWithNewAffiliations = null;
-        if (!equalToAffiliations(room, mucRoomEntity)) {
-            allUsersWithNewAffiliations = setRoles(room, mucRoomEntity);
-        }
-
-        // Set creation date
-        if (mucRoomEntity.getCreationDate() != null) {
-            room.setCreationDate(mucRoomEntity.getCreationDate());
-        } else {
-            room.setCreationDate(new Date());
-        }
-
-        // Set modification date
-        if (mucRoomEntity.getModificationDate() != null) {
+            // Set values
+            room.setNaturalLanguageName(mucRoomEntity.getNaturalName());
+            room.setSubject(mucRoomEntity.getSubject());
+            room.setDescription(mucRoomEntity.getDescription());
+            room.setPassword(mucRoomEntity.getPassword());
+            room.setPersistent(mucRoomEntity.isPersistent());
+            room.setPublicRoom(mucRoomEntity.isPublicRoom());
+            room.setRegistrationEnabled(mucRoomEntity.isRegistrationEnabled());
+            room.setCanAnyoneDiscoverJID(mucRoomEntity.isCanAnyoneDiscoverJID());
+            room.setCanOccupantsChangeSubject(mucRoomEntity.isCanOccupantsChangeSubject());
+            room.setCanOccupantsInvite(mucRoomEntity.isCanOccupantsInvite());
+            room.setChangeNickname(mucRoomEntity.isCanChangeNickname());
             room.setModificationDate(mucRoomEntity.getModificationDate());
-        } else {
-            room.setModificationDate(new Date());
+            room.setLogEnabled(mucRoomEntity.isLogEnabled());
+            room.setLoginRestrictedToNickname(mucRoomEntity.isLoginRestrictedToNickname());
+            room.setMaxUsers(mucRoomEntity.getMaxUsers());
+            room.setMembersOnly(mucRoomEntity.isMembersOnly());
+            room.setModerated(mucRoomEntity.isModerated());
+            room.setCanSendPrivateMessage(mucRoomEntity.getAllowPM());
+
+            // Set broadcast presence roles
+            if (mucRoomEntity.getBroadcastPresenceRoles() != null) {
+                room.setRolesToBroadcastPresence(MUCRoomUtils.convertStringsToRoles(mucRoomEntity.getBroadcastPresenceRoles()));
+            } else {
+                room.setRolesToBroadcastPresence(new ArrayList<>());
+            }
+
+            // Set all roles
+            log("Setting roles for room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
+            Collection<JID> allUsersWithNewAffiliations = null;
+            if (!equalToAffiliations(room, mucRoomEntity)) {
+                allUsersWithNewAffiliations = setRoles(room, mucRoomEntity);
+            }
+
+            // Set creation date
+            if (mucRoomEntity.getCreationDate() != null) {
+                room.setCreationDate(mucRoomEntity.getCreationDate());
+            } else {
+                room.setCreationDate(new Date());
+            }
+
+            // Set modification date
+            if (mucRoomEntity.getModificationDate() != null) {
+                room.setModificationDate(mucRoomEntity.getModificationDate());
+            } else {
+                room.setModificationDate(new Date());
+            }
+
+            // Unlock the room, because the default configuration lock the room.
+            log("Unlocking room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
+            room.unlock(room.getRole());
+
+            // Save the room to the DB if the room should be persistent
+            if (room.isPersistent()) {
+                log("Persisting room that is being created/updated: " + mucRoomEntity.getRoomName());
+                room.saveToDB();
+            }
+
+            log("Syncing room that is being created/updated: " + mucRoomEntity.getRoomName());
+            service.syncChatRoom(room);
+
+            if (sendInvitations && allUsersWithNewAffiliations != null) {
+                log("Sending invitations for room that is being created/updated: " + mucRoomEntity.getRoomName());
+                sendInvitationsFromRoom(room, null, allUsersWithNewAffiliations, null, true);
+            }
+            log("Done creating/updating room: " + mucRoomEntity.getRoomName());
+        } finally {
+            lock.unlock();
         }
-
-        // Unlock the room, because the default configuration lock the room.  		
-        log("Unlocking room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
-        room.unlock(room.getRole());
-
-        // Save the room to the DB if the room should be persistent
-        if (room.isPersistent()) {
-            log("Persisting room that is being created/updated: " + mucRoomEntity.getRoomName());
-            room.saveToDB();
-        }
-
-        log("Syncing room that is being created/updated: " + mucRoomEntity.getRoomName());
-        MUCServiceController.getService(serviceName).syncChatRoom(room);
-
-        if (sendInvitations && allUsersWithNewAffiliations != null) {
-            log("Sending invitations for room that is being created/updated: " + mucRoomEntity.getRoomName());
-            sendInvitationsFromRoom(room, null, allUsersWithNewAffiliations, null, true);
-        }
-        log("Done creating/updating room: " + mucRoomEntity.getRoomName());
     }
 
     private boolean equalToAffiliations(MUCRoom room, MUCRoomEntity mucRoomEntity) {
@@ -496,8 +561,17 @@ public class MUCRoomController {
         log("Get room participants for room: " + roomName);
         ParticipantEntities participantEntities = new ParticipantEntities();
         List<ParticipantEntity> participants = new ArrayList<>();
+        Collection<MUCRole> serverParticipants;
 
-        Collection<MUCRole> serverParticipants = getRoom(serviceName, roomName).getParticipants();
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            service.getChatRoomLock(roomName);
+            serverParticipants = getRoom(service, roomName).getParticipants();
+        } finally {
+            lock.unlock();
+        }
 
         for (MUCRole role : serverParticipants) {
             ParticipantEntity participantEntity = new ParticipantEntity();
@@ -509,6 +583,7 @@ public class MUCRoomController {
         }
 
         participantEntities.setParticipants(participants);
+
         return participantEntities;
     }
 
@@ -527,7 +602,17 @@ public class MUCRoomController {
         OccupantEntities occupantEntities = new OccupantEntities();
         List<OccupantEntity> occupants = new ArrayList<>();
 
-        Collection<MUCRole> serverOccupants = getRoom(serviceName, roomName).getOccupants();
+        Collection<MUCRole> serverOccupants;
+
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            service.getChatRoomLock(roomName);
+            serverOccupants = getRoom(service, roomName).getOccupants();
+        } finally {
+            lock.unlock();
+        }
 
         for (MUCRole role : serverOccupants) {
             OccupantEntity occupantEntity = new OccupantEntity();
@@ -556,9 +641,18 @@ public class MUCRoomController {
         log("Get room history for room: " + roomName);
         MUCRoomMessageEntities mucRoomMessageEntities = new MUCRoomMessageEntities();
         List<MUCRoomMessageEntity> listMessages = new ArrayList<>();
+        MUCRoomHistory mucRH;
 
-        MUCRoom chatRoom = getRoom(serviceName, roomName);
-        MUCRoomHistory mucRH = chatRoom.getRoomHistory();
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            service.getChatRoomLock(roomName);
+            MUCRoom chatRoom = getRoom(service, roomName);
+            mucRH = chatRoom.getRoomHistory();
+        } finally {
+            lock.unlock();
+        }
         Iterator<Message> messageHistory = mucRH.getMessageHistory();
 
         while (messageHistory.hasNext()) {
@@ -602,8 +696,6 @@ public class MUCRoomController {
      */
     public void inviteUsersAndOrGroups(String serviceName, String roomName, MUCInvitationsEntity mucInvitationsEntity)
             throws ServiceException {
-        MUCRoom room = getRoom(serviceName, roomName);
-
         // First determine where to send all the invitations
         Set<JID> targetJIDs = new HashSet<>();
         for (String jidString : mucInvitationsEntity.getJidsToInvite()) {
@@ -618,19 +710,34 @@ public class MUCRoomController {
         }
 
         // And now send
-        for (JID jid : targetJIDs) {
-            try {
-                room.sendInvitation(jid, mucInvitationsEntity.getReason(), room.getRole(), null);
-            } catch (ForbiddenException | CannotBeInvitedException e) {
-                throw new ServiceException("Could not invite user", jid.toString(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            service.getChatRoomLock(roomName);
+            MUCRoom room = getRoom(service, roomName);
+            for (JID jid : targetJIDs) {
+                try {
+                    room.sendInvitation(jid, mucInvitationsEntity.getReason(), room.getRole(), null);
+                } catch (ForbiddenException | CannotBeInvitedException e) {
+                    throw new ServiceException("Could not invite user", jid.toString(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+                }
             }
+
+            // Make sure that other cluster nodes see the changes made here.
+            service.syncChatRoom(room);
+        } finally {
+            lock.unlock();
         }
     }
 
     /**
      * Sends invitations "from the room" to a single user that is affiliated to the room.
      *
+     * This method should only be invoked after the caller has obtained and engaged a lock, using {@link #getLock(MultiUserChatService, String)}.
+     *
      * @see #sendInvitationsFromRoom(MUCRoom, EnumSet, Collection, String, boolean)
+     * @see #getLock(MultiUserChatService, String) 
      *
      * @param room
      *          The room
@@ -666,6 +773,8 @@ public class MUCRoomController {
      * Before sending any invitation, this method checks whether the invitation recipient is actually affiliated to the
      * room in the way that the invitation expresses.
      *
+     * This method should only be invoked after the caller has obtained and engaged a lock, using {@link #getLock(MultiUserChatService, String)}.
+     *
      * @param room
      *          The room
      * @param affiliations
@@ -680,6 +789,7 @@ public class MUCRoomController {
      *          Whether to validate if the user or group is actually affiliated to the room in the correct way
      * @throws ForbiddenException
      *          The forbidden exception
+     * @see #getLock(MultiUserChatService, String) 
      */
     private void sendInvitationsFromRoom(
         MUCRoom room,
@@ -739,6 +849,8 @@ public class MUCRoomController {
      * Sends an invitation for a specific affiliation to a single JID, (optionally) performing a check if that JID is
      * actually affiliated to the room that way.
      *
+     * This method should only be invoked after the caller has obtained and engaged a lock, using {@link #getLock(MultiUserChatService, String)}.
+     *
      * @param sendHere
      *          The JID to send the invitation to
      * @param room
@@ -755,6 +867,7 @@ public class MUCRoomController {
      *          way (or null if no validation is required)
      * @throws ForbiddenException
      *          The forbidden exception
+     * @see #getLock(MultiUserChatService, String) 
      */
     private void sendSingleInvitationFromRoom(
         JID sendHere,
@@ -860,6 +973,8 @@ public class MUCRoomController {
     /**
      * Reset roles.
      *
+     * This method should only be invoked after the caller has obtained and engaged a lock, using {@link #getLock(MultiUserChatService, String)}.
+     *
      * @param room
      *            the room
      * @param mucRoomEntity
@@ -872,6 +987,7 @@ public class MUCRoomController {
      *             the not allowed exception
      * @throws ConflictException
      *             the conflict exception
+     * @see #getLock(MultiUserChatService, String)
      */
     private static Collection<JID> setRoles(MUCRoom room, MUCRoomEntity mucRoomEntity) throws ForbiddenException, NotAllowedException, ConflictException
     {
@@ -987,21 +1103,29 @@ public class MUCRoomController {
      */
     public Collection<JID> getByAffiliation(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation) throws ServiceException
     {
-        final MUCRoom room = getRoom(serviceName, roomName);
-        switch (affiliation) {
-            case admin:
-                return room.getAdmins();
-            case member:
-                return room.getMembers();
-            case owner:
-                return room.getOwners();
-            case outcast:
-                return room.getOutcasts();
-            default:
-                return room.getOccupants().stream()
-                    .filter(o->affiliation.equals(o.getAffiliation()))
-                    .map(MUCRole::getUserAddress)
-                    .collect(Collectors.toSet());
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
+        try {
+            service.getChatRoomLock(roomName);
+            final MUCRoom room = getRoom(service, roomName);
+            switch (affiliation) {
+                case admin:
+                    return room.getAdmins();
+                case member:
+                    return room.getMembers();
+                case owner:
+                    return room.getOwners();
+                case outcast:
+                    return room.getOutcasts();
+                default:
+                    return room.getOccupants().stream()
+                        .filter(o -> affiliation.equals(o.getAffiliation()))
+                        .map(MUCRole::getUserAddress)
+                        .collect(Collectors.toSet());
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -1046,49 +1170,60 @@ public class MUCRoomController {
         final List<JID> toRemove = new ArrayList<>(oldUsers);
         toRemove.removeAll(replacements);
 
-        final MUCRoom room = getRoom(serviceName, roomName);
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
         try {
-            // First, add all new affiliations (some affiliations aren't allowed to be empty, so removing things first could cause issues).
-            switch (affiliation) {
-                case admin:
-                    room.addAdmins(toAdd, room.getRole());
-                    break;
+            service.getChatRoomLock(roomName);
+            final MUCRoom room = getRoom(service, roomName);
+            try {
+                // First, add all new affiliations (some affiliations aren't allowed to be empty, so removing things first could cause issues).
+                switch (affiliation) {
+                    case admin:
+                        room.addAdmins(toAdd, room.getRole());
+                        break;
 
-                case member:
-                    for (final JID add : toAdd) {
-                        room.addMember(add, null, room.getRole());
-                    }
-                    break;
+                    case member:
+                        for (final JID add : toAdd) {
+                            room.addMember(add, null, room.getRole());
+                        }
+                        break;
 
-                case owner:
-                    room.addOwners(toAdd, room.getRole());
-                    break;
+                    case owner:
+                        room.addOwners(toAdd, room.getRole());
+                        break;
 
-                case outcast:
-                    for (final JID add : toAdd) {
-                        room.addOutcast(add, null, room.getRole());
-                    }
-                    break;
-                default:
-                    throw new IllegalStateException("Unrecognized affiliation: " + affiliation);
+                    case outcast:
+                        for (final JID add : toAdd) {
+                            room.addOutcast(add, null, room.getRole());
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException("Unrecognized affiliation: " + affiliation);
+                }
+
+                // Next, remove the affiliations that are no longer wanted.
+                for (final JID remove : toRemove) {
+                    room.addNone(remove, room.getRole());
+                }
+            } catch (ForbiddenException | NotAllowedException e) {
+                throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+            } catch (ConflictException e) {
+                throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
             }
 
-            // Next, remove the affiliations that are no longer wanted.
-            for (final JID remove : toRemove) {
-                room.addNone(remove, room.getRole());
-            }
-        } catch (ForbiddenException | NotAllowedException e) {
-            throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ConflictException e) {
-            throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
-        }
+            // Make sure that other cluster nodes see the changes made here.
+            service.syncChatRoom(room);
 
-        try {
-            if (sendInvitations) {
-                sendInvitationsFromRoom(room, EnumSet.of(affiliation), toAdd, null, true);
+            try {
+                if (sendInvitations) {
+                    sendInvitationsFromRoom(room, EnumSet.of(affiliation), toAdd, null, true);
+                }
+            } catch (ForbiddenException e) {
+                throw new ServiceException("Can not send invitation to newly affiliated " + affiliation + " users or groups", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
             }
-        } catch (ForbiddenException e) {
-            throw new ServiceException("Can not send invitation to newly affiliated " + affiliation + " users or groups", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -1127,44 +1262,55 @@ public class MUCRoomController {
         final List<JID> toAdd = new ArrayList<>(additions);
         toAdd.removeAll(oldUsers);
 
-        final MUCRoom room = getRoom(serviceName, roomName);
+        final MultiUserChatService service = MUCServiceController.getService(serviceName);
+        final Lock lock = getLock(service, roomName);
+        lock.lock();
         try {
-            // Add all new affiliations.
-            switch (affiliation) {
-                case admin:
-                    room.addAdmins(toAdd, room.getRole());
-                    break;
+            service.getChatRoomLock(roomName);
+            final MUCRoom room = getRoom(service, roomName);
+            try {
+                // Add all new affiliations.
+                switch (affiliation) {
+                    case admin:
+                        room.addAdmins(toAdd, room.getRole());
+                        break;
 
-                case member:
-                    for (final JID add : toAdd) {
-                        room.addMember(add, null, room.getRole());
-                    }
-                    break;
+                    case member:
+                        for (final JID add : toAdd) {
+                            room.addMember(add, null, room.getRole());
+                        }
+                        break;
 
-                case owner:
-                    room.addOwners(toAdd, room.getRole());
-                    break;
+                    case owner:
+                        room.addOwners(toAdd, room.getRole());
+                        break;
 
-                case outcast:
-                    for (final JID add : toAdd) {
-                        room.addOutcast(add, null, room.getRole());
-                    }
-                    break;
-                default:
-                    throw new IllegalStateException("Unrecognized affiliation: " + affiliation);
+                    case outcast:
+                        for (final JID add : toAdd) {
+                            room.addOutcast(add, null, room.getRole());
+                        }
+                        break;
+                    default:
+                        throw new IllegalStateException("Unrecognized affiliation: " + affiliation);
+                }
+            } catch (ForbiddenException | NotAllowedException e) {
+                throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+            } catch (ConflictException e) {
+                throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
             }
-        } catch (ForbiddenException | NotAllowedException e) {
-            throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
-        } catch (ConflictException e) {
-            throw new ServiceException("Could not apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.CONFLICT, e);
-        }
 
-        try {
-            if (sendInvitations) {
-                sendInvitationsFromRoom(room, EnumSet.of(affiliation), toAdd, null, true);
+            // Make sure that other cluster nodes see the changes made here.
+            service.syncChatRoom(room);
+
+            try {
+                if (sendInvitations) {
+                    sendInvitationsFromRoom(room, EnumSet.of(affiliation), toAdd, null, true);
+                }
+            } catch (ForbiddenException e) {
+                throw new ServiceException("Can not send invitation to newly affiliated " + affiliation + " users or groups", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
             }
-        } catch (ForbiddenException e) {
-            throw new ServiceException("Can not send invitation to newly affiliated " + affiliation + " users or groups", roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -1183,18 +1329,30 @@ public class MUCRoomController {
      *             the service exception
      */
     public void deleteAffiliation(String serviceName, String roomName, MUCRole.Affiliation affiliation, String jid) throws ServiceException {
-        MUCRoom room = getRoom(serviceName, roomName);
         try {
-              JID userJid = UserUtils.checkAndGetJID(jid);
+            JID userJid = UserUtils.checkAndGetJID(jid);
 
-              if (affiliation != null && room.getAffiliation(userJid) != affiliation) {
-                  throw new ConflictException("Entity does not have this affiliation with the room.");
-              }
-              // Send a presence to other room members
-              List<Presence> addNonePresence = room.addNone(userJid, room.getRole());
-              for (Presence presence : addNonePresence) {
-                  MUCRoomUtils.send(room, presence, room.getRole());
-              }
+            final MultiUserChatService service = MUCServiceController.getService(serviceName);
+            final Lock lock = getLock(service, roomName);
+            lock.lock();
+            try {
+                service.getChatRoomLock(roomName);
+                final MUCRoom room = getRoom(service, roomName);
+
+                if (affiliation != null && room.getAffiliation(userJid) != affiliation) {
+                    throw new ConflictException("Entity does not have this affiliation with the room.");
+                }
+                // Send a presence to other room members
+                List<Presence> addNonePresence = room.addNone(userJid, room.getRole());
+                for (Presence presence : addNonePresence) {
+                    MUCRoomUtils.send(room, presence, room.getRole());
+                }
+
+                // Make sure that other cluster nodes see the changes made here.
+                service.syncChatRoom(room);
+            } finally {
+                lock.unlock();
+            }
         } catch (ForbiddenException e) {
             throw new ServiceException("Could not delete affiliation", jid, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
         } catch (ConflictException e) {
