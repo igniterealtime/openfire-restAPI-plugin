@@ -18,12 +18,10 @@ package org.jivesoftware.openfire.plugin.rest.controller;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.cluster.ClusterNodeInfo;
 import org.jivesoftware.openfire.cluster.NodeID;
-import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.ClusterNodeEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.ClusterNodeEntity;
-import org.jivesoftware.util.JiveGlobals;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils.AuditEvent;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -31,8 +29,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ClusteringController {
-    private static final Logger LOG = LoggerFactory.getLogger(ClusteringController.class);
-
     private static ClusteringController INSTANCE = null;
 
     /**
@@ -56,13 +52,8 @@ public class ClusteringController {
         ClusteringController.INSTANCE = instance;
     }
 
-    public static void log(String logMessage) {
-        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
-            LOG.info(logMessage);
-        }
-    }
-
     public String getClusterStatus() {
+        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_STATUS);
         if (ClusterManager.isClusteringEnabled()) {
             if (ClusterManager.isClusteringStarted()) {
                 if (ClusterManager.isSeniorClusterMember()) {
@@ -83,11 +74,13 @@ public class ClusteringController {
     }
 
     public Optional<ClusterNodeEntity> getNodeEntity(String nodeId) {
+        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_NODE, nodeId);
         final Optional<ClusterNodeInfo> nodeInfo = ClusterManager.getNodeInfo(NodeID.getInstance(nodeId.getBytes(StandardCharsets.UTF_8)));
         return nodeInfo.map(ClusterNodeEntity::from);
     }
 
     public ClusterNodeEntities getNodeEntities() {
+        LoggingUtils.auditEvent(AuditEvent.CLUSTERING_GET_NODES);
         final Collection<ClusterNodeInfo> nodesInfo = ClusterManager.getNodesInfo();
         return new ClusterNodeEntities(nodesInfo.stream().map(ClusterNodeEntity::from).collect(Collectors.toList()));
     }

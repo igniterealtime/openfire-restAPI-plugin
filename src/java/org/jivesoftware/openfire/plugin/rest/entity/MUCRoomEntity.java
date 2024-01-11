@@ -363,4 +363,32 @@ public class MUCRoomEntity {
         this.adminGroups = adminGroups;
     }
 
+    @Override
+    public String toString() {
+        return "MUCRoomEntity ["
+            + "roomName=" + roomName
+            + ", naturalName=" + naturalName
+            + ", description=" + description
+            + ", persistent=" + persistent
+            + ", publicRoom=" + publicRoom
+            + ", canAnyoneDiscoverJID=" + canAnyoneDiscoverJID
+            + ", canOccupantsChangeSubject=" + canOccupantsChangeSubject
+            + ", canOccupantsInvite=" + canOccupantsInvite
+            + ", canChangeNickname=" + canChangeNickname
+            + ", logEnabled=" + logEnabled
+            + ", loginRestrictedToNickname=" + loginRestrictedToNickname
+            + ", membersOnly=" + membersOnly
+            + ", moderated=" + moderated
+            + ", registrationEnabled=" + registrationEnabled
+            + ", broadcastPresenceRoles=" + broadcastPresenceRoles
+            + ", owners=" + owners
+            + ", ownerGroups=" + ownerGroups
+            + ", members=" + members
+            + ", memberGroups=" + memberGroups
+            + ", outcasts=" + outcasts
+            + ", outcastGroups=" + outcastGroups
+            + ", admins=" + admins
+            + ", adminGroups=" + adminGroups
+            + "]";
+    }
 }

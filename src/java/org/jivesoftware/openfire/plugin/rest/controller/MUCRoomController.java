@@ -26,6 +26,7 @@ import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.MUCRoomUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
 import org.jivesoftware.util.AlreadyExistsException;
@@ -154,6 +155,11 @@ public class MUCRoomController {
     public MUCRoomEntities getChatRooms(String serviceName, String channelType, String roomSearch, boolean expand) throws ServiceException
     {
         log("Get the chat rooms");
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_LIST_ROOMS,
+            "serviceName", serviceName,
+            "channelType", channelType,
+            "roomSearch", roomSearch,
+            "expand", expand);
         final MultiUserChatService service = MUCServiceController.getService(serviceName);
         Collection<MUCRoomSearchInfo> roomsInfo = service.getAllRoomSearchInfo();
 
@@ -196,7 +202,10 @@ public class MUCRoomController {
      *             the service exception
      */
     public MUCRoomEntity getChatRoom(String roomName, String serviceName, boolean expand) throws ServiceException {
-        log("Get the chat room: " + roomName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_GET_ROOM,
+            "roomName", roomName,
+            "serviceName", serviceName,
+            "expand", expand);
         final MUCRoom chatRoom = getRoom(serviceName, roomName);
         return convertToMUCRoomEntity(chatRoom, expand);
     }
@@ -212,7 +221,9 @@ public class MUCRoomController {
      *             the service exception
      */
     public void deleteChatRoom(String roomName, String serviceName) throws ServiceException {
-        log("Delete the chat room: " + roomName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_DELETE_ROOM,
+            "roomName", roomName,
+            "serviceName", serviceName);
         final MUCRoom chatRoom = getRoom(serviceName, roomName);
         chatRoom.destroyRoom(null, null);
     }
@@ -227,6 +238,9 @@ public class MUCRoomController {
      */
     public void createChatRoom(String serviceName, MUCRoomEntity mucRoomEntity, boolean sendInvitations) throws ServiceException {
         log("Create a chat room: " + mucRoomEntity.getRoomName());
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_CREATE_ROOM,
+            "serviceName", serviceName,
+            "mucRoomEntity", mucRoomEntity);
         try {
             createRoom(mucRoomEntity, serviceName, sendInvitations);
         } catch (NotAllowedException | ForbiddenException e) {
@@ -296,7 +310,10 @@ public class MUCRoomController {
      */
     public void updateChatRoom(String roomName, String serviceName, MUCRoomEntity mucRoomEntity, boolean sendInvitations)
             throws ServiceException {
-        log("Update a chat room: " + mucRoomEntity.getRoomName());
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_UPDATE_ROOM,
+            "roomName", roomName,
+            "serviceName", serviceName,
+            "mucRoomEntity", mucRoomEntity);
         try {
             // If the room name is different throw exception
             if (!JID.nodeprep(roomName).equals(mucRoomEntity.getRoomName())) {
@@ -493,7 +510,9 @@ public class MUCRoomController {
      */
     public ParticipantEntities getRoomParticipants(String roomName, String serviceName) throws ServiceException
     {
-        log("Get room participants for room: " + roomName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_GET_PARTICIPANT_LIST,
+            "roomName", roomName,
+            "serviceName", serviceName);
         ParticipantEntities participantEntities = new ParticipantEntities();
         List<ParticipantEntity> participants = new ArrayList<>();
 
@@ -523,7 +542,9 @@ public class MUCRoomController {
      */
     public OccupantEntities getRoomOccupants(String roomName, String serviceName) throws ServiceException
     {
-        log("Get room occupants for room: " + roomName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_GET_OCCUPANT_LIST,
+            "roomName", roomName,
+            "serviceName", serviceName);
         OccupantEntities occupantEntities = new OccupantEntities();
         List<OccupantEntity> occupants = new ArrayList<>();
 
@@ -553,7 +574,9 @@ public class MUCRoomController {
      * @return the room chat history
      */
     public MUCRoomMessageEntities getRoomHistory(String roomName, String serviceName) throws ServiceException {
-        log("Get room history for room: " + roomName);
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_GET_ROOM_HISTORY,
+            "roomName", roomName,
+            "serviceName", serviceName);
         MUCRoomMessageEntities mucRoomMessageEntities = new MUCRoomMessageEntities();
         List<MUCRoomMessageEntity> listMessages = new ArrayList<>();
 
@@ -602,6 +625,10 @@ public class MUCRoomController {
      */
     public void inviteUsersAndOrGroups(String serviceName, String roomName, MUCInvitationsEntity mucInvitationsEntity)
             throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_INVITE_USER,
+            "roomName", roomName,
+            "serviceName", serviceName,
+            "invitation" , mucInvitationsEntity);
         MUCRoom room = getRoom(serviceName, roomName);
 
         // First determine where to send all the invitations
@@ -987,6 +1014,7 @@ public class MUCRoomController {
      */
     public Collection<JID> getByAffiliation(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation) throws ServiceException
     {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_LIST_AFFILIATED_USERS_FOR_AFFILIATION, serviceName, roomName, affiliation);
         final MUCRoom room = getRoom(serviceName, roomName);
         switch (affiliation) {
             case admin:
@@ -1025,6 +1053,7 @@ public class MUCRoomController {
      */
     public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
     {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_REPLACE_AFFILIATED_USERS_FOR_AFFILIATION, serviceName, roomName, affiliation, jids);
         final Collection<JID> replacements = new HashSet<>();
 
         // Input validation.
@@ -1110,6 +1139,7 @@ public class MUCRoomController {
      */
     public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
     {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_ADD_AFFILIATED_USERS_FOR_AFFILIATION, serviceName, roomName, affiliation, jids);
         final Collection<JID> additions = new HashSet<>();
 
         // Input validation.
@@ -1183,6 +1213,7 @@ public class MUCRoomController {
      *             the service exception
      */
     public void deleteAffiliation(String serviceName, String roomName, MUCRole.Affiliation affiliation, String jid) throws ServiceException {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MUC_REMOVE_AFFILIATED_USER_OR_GROUP_FOR_AFFILIATION, serviceName, roomName, jid);
         MUCRoom room = getRoom(serviceName, roomName);
         try {
               JID userJid = UserUtils.checkAndGetJID(jid);

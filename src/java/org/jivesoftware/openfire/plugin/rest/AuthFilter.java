@@ -25,6 +25,7 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.admin.AdminManager;
@@ -32,10 +33,12 @@ import org.jivesoftware.openfire.auth.AuthFactory;
 import org.jivesoftware.openfire.auth.ConnectionException;
 import org.jivesoftware.openfire.auth.InternalUnauthenticatedException;
 import org.jivesoftware.openfire.auth.UnauthorizedException;
+import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.security.Principal;
 
 /**
  * The Class AuthFilter.
@@ -55,47 +58,23 @@ public class AuthFilter implements ContainerRequestFilter {
     private RESTServicePlugin plugin = (RESTServicePlugin) XMPPServer.getInstance().getPluginManager()
             .getPlugin("restapi");
 
-    @Override
-    public void filter(ContainerRequestContext containerRequest) throws IOException {
-        if (containerRequest.getUriInfo().getRequestUri().getPath().equals("/plugins/restapi/v1/openapi.yaml")) {
-            LOG.debug("Authentication was bypassed for openapi.yaml file (documentation)");
-            return;
-        }
+    public static final String SHARED_SECRET_AUTHENTICATION_SCHEME = "SharedSecret";
 
-        if (isStatusEndpoint(containerRequest.getUriInfo().getRequestUri().getPath())) {
-            LOG.debug("Authentication was bypassed for a status endpoint");
-            return;
-        }
+    @Override
+    public void filter(ContainerRequestContext requestContext) throws IOException {
 
         if (!plugin.isEnabled()) {
             LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);
         }
-        
-        // Let the preflight request through the authentication
-        if ("OPTIONS".equals(containerRequest.getMethod())) {
-            LOG.debug("Authentication was bypassed because of OPTIONS request");
-            return;
-        }
-        
-        // To be backwards compatible to userservice 1.*
-        if (containerRequest.getUriInfo().getRequestUri().getPath().contains("restapi/v1/userservice")) {
-            LOG.info("Deprecated 'userservice' endpoint was used. Please switch to the new endpoints");
+
+        if (!authRequired(requestContext)){
             return;
         }
 
         if (!plugin.getAllowedIPs().isEmpty()) {
             // Get client's IP address
-            String ipAddress = httpRequest.getHeader("x-forwarded-for");
-            if (ipAddress == null) {
-                ipAddress = httpRequest.getHeader("X_FORWARDED_FOR");
-                if (ipAddress == null) {
-                    ipAddress = httpRequest.getHeader("X-Forward-For");
-                    if (ipAddress == null) {
-                        ipAddress = httpRequest.getRemoteAddr();
-                    }
-                }
-            }
+            String ipAddress = getClientIPAddressForRequest(httpRequest);
             if (!plugin.getAllowedIPs().contains(ipAddress)) {
                 LOG.warn("REST API rejected service for IP address: " + ipAddress);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
@@ -103,9 +82,11 @@ public class AuthFilter implements ContainerRequestFilter {
         }
         
         // Get the authentication passed in HTTP headers parameters
-        String auth = containerRequest.getHeaderString("authorization");
+        String auth = requestContext.getHeaderString("authorization");
 
         if (auth == null) {
+            LOG.warn("REST API request with no Authorization header rejected. [Request IP: {}, Request URI: {}]",
+                    getClientIPAddressForRequest(httpRequest), requestContext.getUriInfo().getRequestUri().getPath());
             throw new WebApplicationException(Status.UNAUTHORIZED);
         }
 
@@ -115,35 +96,100 @@ public class AuthFilter implements ContainerRequestFilter {
 
             // If username or password fail
             if (usernameAndPassword == null || usernameAndPassword.length != 2) {
-                LOG.warn("Username or password is not set");
-                throw new WebApplicationException(Status.UNAUTHORIZED);
+                LOG.warn("Basic authentication failed. Username or password is not set. [Request IP: {}, Request URI: {}]",
+                    getClientIPAddressForRequest(httpRequest), requestContext.getUriInfo().getRequestUri().getPath());
+                throw new WebApplicationException("Username or password is not set", Status.UNAUTHORIZED);
             }
 
             boolean userAdmin = AdminManager.getInstance().isUserAdmin(usernameAndPassword[0], true);
 
             if (!userAdmin) {
                 LOG.warn("Provided User is not an admin");
-                throw new WebApplicationException(Status.UNAUTHORIZED);
+                throw new WebApplicationException("User is not authorised", Status.UNAUTHORIZED);
             }
 
             try {
                 AuthFactory.authenticate(usernameAndPassword[0], usernameAndPassword[1]);
+                setSecurityForContext(requestContext, usernameAndPassword[0], SecurityContext.BASIC_AUTH);
+                if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
+                    LOG.info("Authentication - successfully authenticated user. [Request IP: {}, Request URI: {}, Username: {}]",
+                        getClientIPAddressForRequest(httpRequest), requestContext.getUriInfo().getRequestUri().getPath(), usernameAndPassword[0]);
+                }
             } catch (UnauthorizedException e) {
-                LOG.warn("Wrong HTTP Basic Auth authorization", e);
-                throw new WebApplicationException(Status.UNAUTHORIZED);
-            } catch (ConnectionException e) {
-                LOG.error("Authentication went wrong", e);
-                throw new WebApplicationException(Status.UNAUTHORIZED);
-            } catch (InternalUnauthenticatedException e) {
+                LOG.warn("Basic authentication failed. Username or password is incorrect. [Request IP: {}, Request URI: {}]",
+                    getClientIPAddressForRequest(httpRequest), requestContext.getUriInfo().getRequestUri().getPath());
+                LOG.warn("Authentication error", e);
+                throw new WebApplicationException("Username or password is incorrect", Status.UNAUTHORIZED);
+            } catch (ConnectionException | InternalUnauthenticatedException e) {
                 LOG.error("Authentication went wrong", e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         } else {
             if (!auth.equals(plugin.getSecret())) {
-                LOG.warn("Wrong secret key authorization. Provided key: " + auth);
+                LOG.warn("Wrong secret key authorization. [Request IP: {}, Request URI: {}, Request auth: {}]",
+                    getClientIPAddressForRequest(httpRequest), requestContext.getUriInfo().getRequestUri().getPath(), auth);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
+            } else {
+                //For shared secret, use the authentication scheme to indicate that a username is unknown
+                setSecurityForContext(requestContext, SHARED_SECRET_AUTHENTICATION_SCHEME, SHARED_SECRET_AUTHENTICATION_SCHEME);
+                if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
+                    LOG.info("Authentication - successfully authenticated by secret key. [Request IP: {}, Request URI: {}]",
+                        getClientIPAddressForRequest(httpRequest), requestContext.getUriInfo().getRequestUri().getPath());
+                }
             }
         }
+    }
+
+    private boolean authRequired(ContainerRequestContext requestContext){
+        if (requestContext.getUriInfo().getRequestUri().getPath().equals("/plugins/restapi/v1/openapi.yaml")) {
+            LOG.debug("Authentication was bypassed for openapi.yaml file (documentation)");
+            return false;
+        }
+
+        if (isStatusEndpoint(requestContext.getUriInfo().getRequestUri().getPath())) {
+            LOG.debug("Authentication was bypassed for a status endpoint");
+            return false;
+        }
+
+        // Let the preflight request through the authentication
+        if ("OPTIONS".equals(requestContext.getMethod())) {
+            LOG.debug("Authentication was bypassed because of OPTIONS request");
+            return false;
+        }
+
+        // To be backwards compatible to userservice 1.*
+        if (requestContext.getUriInfo().getRequestUri().getPath().contains("restapi/v1/userservice")) {
+            LOG.info("Deprecated 'userservice' endpoint was used. Please switch to the new endpoints");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void setSecurityForContext(ContainerRequestContext requestContext, String username, String authScheme){
+        final SecurityContext currentSecurityContext = requestContext.getSecurityContext();
+        requestContext.setSecurityContext(new SecurityContext() {
+
+            @Override
+            public Principal getUserPrincipal() {
+                return () -> username;
+            }
+
+            @Override
+            public boolean isUserInRole(String role) {
+                return true;
+            }
+
+            @Override
+            public boolean isSecure() {
+                return currentSecurityContext.isSecure();
+            }
+
+            @Override
+            public String getAuthenticationScheme() {
+                return authScheme;
+            }
+        });
     }
 
     private boolean isStatusEndpoint(String path){
@@ -151,5 +197,19 @@ public class AuthFilter implements ContainerRequestFilter {
             path.startsWith("/plugins/restapi/v1/system/liveness/") ||
             path.equals("/plugins/restapi/v1/system/readiness") ||
             path.startsWith("/plugins/restapi/v1/system/readiness/");
+    }
+
+    private String getClientIPAddressForRequest(HttpServletRequest request) {
+        String ipAddress = request.getHeader("x-forwarded-for");
+        if (ipAddress == null) {
+            ipAddress = request.getHeader("X_FORWARDED_FOR");
+            if (ipAddress == null) {
+                ipAddress = request.getHeader("X-Forward-For");
+                if (ipAddress == null) {
+                    ipAddress = request.getRemoteAddr();
+                }
+            }
+        }
+        return ipAddress;
     }
 }

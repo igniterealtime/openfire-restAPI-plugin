@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.jivesoftware.database.DbConnectionManager;
+import org.jivesoftware.openfire.plugin.rest.utils.LoggingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
@@ -64,6 +65,7 @@ public class MsgArchiveController {
      * @return the total number of user unread messages.
      */
     public int getUnReadMessagesCount(JID jid) {
+        LoggingUtils.auditEvent(LoggingUtils.AuditEvent.MESSAGE_ARCHIVE_UNREAD_COUNT, jid);
         int messageCount = 0;
         Connection con = null;
         PreparedStatement pstmt = null;
