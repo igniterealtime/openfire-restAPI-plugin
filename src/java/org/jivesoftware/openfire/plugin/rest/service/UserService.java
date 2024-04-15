@@ -98,6 +98,7 @@ public class UserService {
         responses = {
             @ApiResponse(responseCode = "200", description = "The user was updated."),
         })
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response updateUser(
             @Parameter(description = "The username of the user to update.", required = true) @PathParam("username") String username,
             @RequestBody(description = "The definition update of the user.", required = true) UserEntity userEntity)
