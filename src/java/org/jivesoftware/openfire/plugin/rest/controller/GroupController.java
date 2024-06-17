@@ -24,6 +24,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupAlreadyExistsException;
 import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.group.GroupNameInvalidException;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.plugin.rest.entity.GroupEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
@@ -143,7 +144,7 @@ public class GroupController {
                     // Unsure if #addAll works for the specific Collection subclass that is used in the Group implementation. Let's add them one-by-one to be safe.
                     admins.add(newAdmin);
                 }
-            } catch (GroupAlreadyExistsException e) {
+            } catch (GroupAlreadyExistsException | GroupNameInvalidException e) {
                 throw new ServiceException("Could not create a group", groupEntity.getName(),
                         ExceptionType.GROUP_ALREADY_EXISTS, Response.Status.CONFLICT, e);
             }
