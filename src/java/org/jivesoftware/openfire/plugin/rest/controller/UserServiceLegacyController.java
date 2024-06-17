@@ -26,6 +26,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupAlreadyExistsException;
 import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.group.GroupNameInvalidException;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.lockout.LockOutManager;
 import org.jivesoftware.openfire.roster.Roster;
@@ -105,10 +106,16 @@ public class UserServiceLegacyController {
                     group = GroupManager.getInstance().getGroup(groupName);
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
+                    try {
                     group = GroupManager.getInstance().createGroup(groupName);
                     group.getProperties().put("sharedRoster.showInRoster", "nobody");
                     group.getProperties().put("sharedRoster.displayName", groupName);
                     group.getProperties().put("sharedRoster.groupList", "");
+                    } catch (GroupAlreadyExistsException e1) {
+						e1.printStackTrace();
+					} catch (GroupNameInvalidException e1) {
+						e1.printStackTrace();
+					}
                 }
                 groups.add(group);
             }
@@ -187,10 +194,16 @@ public class UserServiceLegacyController {
                     group = GroupManager.getInstance().getGroup(groupName);
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
+                    try {
                     group = GroupManager.getInstance().createGroup(groupName);
                     group.getProperties().put("sharedRoster.showInRoster", "nobody");
                     group.getProperties().put("sharedRoster.displayName", groupName);
                     group.getProperties().put("sharedRoster.groupList", "");
+                    } catch (GroupAlreadyExistsException e1) {
+						e1.printStackTrace();
+					} catch (GroupNameInvalidException e1) {
+						e1.printStackTrace();
+					}
                 }
 
                 newGroups.add(group);
