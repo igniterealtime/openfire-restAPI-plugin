@@ -36,6 +36,8 @@ import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
 /**
@@ -44,6 +46,7 @@ import org.xmpp.packet.JID;
  * @author Justin Hunt
  */
 public class UserServiceLegacyController {
+    private static final Logger LOG = LoggerFactory.getLogger(UserServiceLegacyController.class);
     
     /** The Constant INSTANCE. */
     public static final UserServiceLegacyController INSTANCE = new UserServiceLegacyController();
@@ -107,15 +110,15 @@ public class UserServiceLegacyController {
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
                     try {
-                    group = GroupManager.getInstance().createGroup(groupName);
-                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
-                    group.getProperties().put("sharedRoster.displayName", groupName);
-                    group.getProperties().put("sharedRoster.groupList", "");
+                        group = GroupManager.getInstance().createGroup(groupName);                
+                        group.getProperties().put("sharedRoster.showInRoster", "nobody");
+                        group.getProperties().put("sharedRoster.displayName", groupName);
+                        group.getProperties().put("sharedRoster.groupList", "");
                     } catch (GroupAlreadyExistsException e1) {
-						e1.printStackTrace();
-					} catch (GroupNameInvalidException e1) {
-						e1.printStackTrace();
-					}
+                        LOG.error(e1.getMessage(), e1);
+                    } catch (GroupNameInvalidException e1) {
+                        LOG.error(e1.getMessage(), e1);
+                    }
                 }
                 groups.add(group);
             }
@@ -195,15 +198,15 @@ public class UserServiceLegacyController {
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
                     try {
-                    group = GroupManager.getInstance().createGroup(groupName);
-                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
-                    group.getProperties().put("sharedRoster.displayName", groupName);
-                    group.getProperties().put("sharedRoster.groupList", "");
+                        group = GroupManager.getInstance().createGroup(groupName);
+                        group.getProperties().put("sharedRoster.showInRoster", "nobody");
+                        group.getProperties().put("sharedRoster.displayName", groupName);
+                        group.getProperties().put("sharedRoster.groupList", "");
                     } catch (GroupAlreadyExistsException e1) {
-						e1.printStackTrace();
-					} catch (GroupNameInvalidException e1) {
-						e1.printStackTrace();
-					}
+                        LOG.error(e1.getMessage(), e1);
+                    } catch (GroupNameInvalidException e1) {
+                        LOG.error(e1.getMessage(), e1);
+                    }
                 }
 
                 newGroups.add(group);
