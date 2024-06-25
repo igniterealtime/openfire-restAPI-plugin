@@ -36,8 +36,6 @@ import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 
 /**
@@ -46,8 +44,7 @@ import org.xmpp.packet.JID;
  * @author Justin Hunt
  */
 public class UserServiceLegacyController {
-    private static final Logger LOG = LoggerFactory.getLogger(UserServiceLegacyController.class);
-    
+
     /** The Constant INSTANCE. */
     public static final UserServiceLegacyController INSTANCE = new UserServiceLegacyController();
     
@@ -92,8 +89,9 @@ public class UserServiceLegacyController {
      * @throws GroupNotFoundException the group not found exception
      */
     public void createUser(String username, String password, String name, String email, String groupNames)
-            throws UserAlreadyExistsException, GroupAlreadyExistsException, UserNotFoundException,
-            GroupNotFoundException {
+        throws UserAlreadyExistsException, GroupAlreadyExistsException, UserNotFoundException,
+        GroupNotFoundException, GroupNameInvalidException
+    {
         userManager.createUser(username, password, name, email);
         userManager.getUser(username);
 
@@ -109,16 +107,10 @@ public class UserServiceLegacyController {
                     group = GroupManager.getInstance().getGroup(groupName);
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
-                    try {
-                        group = GroupManager.getInstance().createGroup(groupName);                
-                        group.getProperties().put("sharedRoster.showInRoster", "nobody");
-                        group.getProperties().put("sharedRoster.displayName", groupName);
-                        group.getProperties().put("sharedRoster.groupList", "");
-                    } catch (GroupAlreadyExistsException e1) {
-                        LOG.error(e1.getMessage(), e1);
-                    } catch (GroupNameInvalidException e1) {
-                        LOG.error(e1.getMessage(), e1);
-                    }
+                    group = GroupManager.getInstance().createGroup(groupName);
+                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
+                    group.getProperties().put("sharedRoster.displayName", groupName);
+                    group.getProperties().put("sharedRoster.groupList", "");
                 }
                 groups.add(group);
             }
@@ -176,7 +168,8 @@ public class UserServiceLegacyController {
      * @throws GroupAlreadyExistsException the group already exists exception
      */
     public void updateUser(String username, String password, String name, String email, String groupNames)
-            throws UserNotFoundException, GroupAlreadyExistsException {
+        throws UserNotFoundException, GroupAlreadyExistsException, GroupNameInvalidException
+    {
         User user = getUser(username);
         if (password != null)
             user.setPassword(password);
@@ -197,16 +190,10 @@ public class UserServiceLegacyController {
                     group = GroupManager.getInstance().getGroup(groupName);
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
-                    try {
-                        group = GroupManager.getInstance().createGroup(groupName);
-                        group.getProperties().put("sharedRoster.showInRoster", "nobody");
-                        group.getProperties().put("sharedRoster.displayName", groupName);
-                        group.getProperties().put("sharedRoster.groupList", "");
-                    } catch (GroupAlreadyExistsException e1) {
-                        LOG.error(e1.getMessage(), e1);
-                    } catch (GroupNameInvalidException e1) {
-                        LOG.error(e1.getMessage(), e1);
-                    }
+                    group = GroupManager.getInstance().createGroup(groupName);
+                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
+                    group.getProperties().put("sharedRoster.displayName", groupName);
+                    group.getProperties().put("sharedRoster.groupList", "");
                 }
 
                 newGroups.add(group);
