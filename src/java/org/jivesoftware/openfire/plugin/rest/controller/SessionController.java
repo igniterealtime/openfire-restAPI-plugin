@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2022-2024 Ignite Realtime Foundation.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,14 +130,14 @@ public class SessionController {
             }
 
             String status = "";
-            if (clientSession.getStatus() == Session.STATUS_CLOSED) {
+            if (clientSession.getStatus() == Session.Status.CLOSED) {
                 status = "Closed";
-            } else if (clientSession.getStatus() == Session.STATUS_CONNECTED) {
+            } else if (clientSession.getStatus() == Session.Status.CONNECTED) {
                 status = "Connected";
-            } else if (clientSession.getStatus() == Session.STATUS_AUTHENTICATED) {
+            } else if (clientSession.getStatus() == Session.Status.AUTHENTICATED) {
                 status = "Authenticated";
             } else {
-                status = "Unkown";
+                status = "Unknown";
             }
             session.setSessionStatus(status);
 
@@ -170,7 +170,7 @@ public class SessionController {
 
             session.setCreationDate(clientSession.getCreationDate());
             session.setLastActionDate(clientSession.getLastActiveDate());
-            session.setSecure(clientSession.isSecure());
+            session.setSecure(clientSession.isEncrypted());
 
             sessions.add(session);
         }
