@@ -8,3 +8,76 @@ jobs:
     secrets:
       IGNITE_REALTIME_MAVEN_USERNAME: ${{ secrets.IGNITE_REALTIME_MAVEN_USERNAME }}
       IGNITE_REALTIME_MAVEN_PASSWORD: ${{ secrets.IGNITE_REALTIME_MAVEN_PASSWORD }}
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout tests
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            test
+
+      - name: Checkout Openfire actions e.g. 'startCIServer'
+        uses: actions/checkout@v4
+        with:
+          repository: igniterealtime/Openfire
+          path: openfire-ci
+          sparse-checkout: |
+            .github
+
+      - name: Download a recent Openfire daily build.
+        run: |
+          # This tries to find the most recent daily build, going back 30 days if none are available.
+          #Note that the cache above will cause whatever build that's download to be considered 'todays' build.
+          for i in $(seq 0 30); do
+            STAMP=`date --date="$i day ago" +%F`;
+            echo "Attempting to download Openfire build for $STAMP"
+            curl --fail -L "https://download.igniterealtime.org/openfire/dailybuilds/openfire_$STAMP.tar.gz" -o openfire.tar.gz && break
+          done
+      
+      - name: Extract Openfire
+        run: |
+          tar -xzf openfire.tar.gz
+
+      - name: Set up yq
+        uses: frenck/action-setup-yq@v1
+      
+      - name: Copy in the extended demoboot config
+        run: |
+          rm openfire/conf/openfire.xml
+          cp ./test/demoboot-with-additions.xml openfire/conf/openfire-demoboot.xml
+
+      - name: Start CI server from distribution
+        id: startCIServer
+        uses: ./openfire-ci/.github/actions/startserver-action
+        with:
+          distBaseDir: './openfire'
+          domain: 'example.org'
+          ip: '127.0.0.1'
+
+      - name: Download the built artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: restAPI
+          path: .
+
+      - name: Install plugin
+        run: |
+          cp restAPI-openfire-plugin-assembly.jar openfire/plugins/restAPI.jar
+      
+      - uses: gacts/install-hurl@v1
+
+      - name: Test the plugin
+        run: |
+          # Wait for the server to start
+          sleep 30
+          # Test the plugin
+          hurl --test --variables-file test/test.env test/restAPI.hurl
+
+      - name: Expose Openfire logs
+        uses: actions/upload-artifact@v4
+        if: always() # always run even if the previous step fails
+        with:
+          name: Openfire server logs
+          path: openfire/logs/*
