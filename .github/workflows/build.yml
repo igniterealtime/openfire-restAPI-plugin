@@ -39,9 +39,6 @@ jobs:
 
       - name: Test the plugin
         run: |
-          # Wait for the server to start
-          sleep 30
-          # Test the plugin
           hurl --test --variables-file test/test.env test/restAPI.hurl
 
       - name: Expose Openfire logs
