@@ -18,53 +18,22 @@ jobs:
           sparse-checkout: |
             test
 
-      - name: Checkout Openfire actions e.g. 'startCIServer'
-        uses: actions/checkout@v4
-        with:
-          repository: igniterealtime/Openfire
-          path: openfire-ci
-          sparse-checkout: |
-            .github
-
-      - name: Download a recent Openfire daily build.
-        run: |
-          # This tries to find the most recent daily build, going back 30 days if none are available.
-          #Note that the cache above will cause whatever build that's download to be considered 'todays' build.
-          for i in $(seq 0 30); do
-            STAMP=`date --date="$i day ago" +%F`;
-            echo "Attempting to download Openfire build for $STAMP"
-            curl --fail -L "https://download.igniterealtime.org/openfire/dailybuilds/openfire_$STAMP.tar.gz" -o openfire.tar.gz && break
-          done
-      
-      - name: Extract Openfire
-        run: |
-          tar -xzf openfire.tar.gz
-
-      - name: Set up yq
-        uses: frenck/action-setup-yq@v1
-      
-      - name: Copy in the extended demoboot config
-        run: |
-          rm openfire/conf/openfire.xml
-          cp ./test/demoboot-with-additions.xml openfire/conf/openfire-demoboot.xml
-
-      - name: Start CI server from distribution
-        id: startCIServer
-        uses: ./openfire-ci/.github/actions/startserver-action
-        with:
-          distBaseDir: './openfire'
-          domain: 'example.org'
-          ip: '127.0.0.1'
-
-      - name: Download the built artifacts
+      - name: Download the built plugin
         uses: actions/download-artifact@v4
         with:
           name: restAPI
           path: .
 
-      - name: Install plugin
+      - name: Rename plugin
         run: |
-          cp restAPI-openfire-plugin-assembly.jar openfire/plugins/restAPI.jar
+          mv restAPI-openfire-plugin-assembly.jar restAPI.jar
+  
+      - name: Run Openfire
+        uses: igniterealtime/launch-openfire-action@v1.1.2
+        with:
+          version: 4.9.0
+          config: ./test/demoboot-with-additions.xml
+          plugin: ./restAPI.jar
       
       - uses: gacts/install-hurl@v1
 
