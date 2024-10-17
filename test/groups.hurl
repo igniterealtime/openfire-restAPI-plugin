@@ -1,19 +1,3 @@
-### CLUSTERING ###
-
-GET {{host}}/plugins/restapi/v1/clustering/status
-Authorization: {{authkey}}
-HTTP 200
-[Asserts]
-xpath "string(/clustering/status)" == "Disabled" 
-
-GET {{host}}/plugins/restapi/v1/clustering/nodes
-Authorization: {{authkey}}
-HTTP 200
-[Asserts]
-xpath "/clusterNodes[not(child::node())]" exists
-
-
-### USER GROUPS ###
 
 GET http://localhost:9090/plugins/restapi/v1/groups
 Authorization: {{authkey}}
@@ -83,19 +67,3 @@ DELETE http://localhost:9090/plugins/restapi/v1/groups/group1
 Authorization: {{authkey}}
 HTTP 200
 
-
-### CHAT ROOMS ###
-GET http://localhost:9090/plugins/restapi/v1/chatrooms
-Authorization: {{authkey}}
-HTTP 200
-
-GET http://localhost:9090/plugins/restapi/v1/sessions
-Authorization: {{authkey}}
-HTTP 200
-[Asserts]
-xpath "/sessions[not(child::node())]" count == 1 # sessions at the root, with no child nodes
-
-
-GET http://localhost:9090/plugins/restapi/v1/system/readiness/server
-Authorization: {{authkey}}
-HTTP 200

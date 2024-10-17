@@ -39,7 +39,7 @@ jobs:
 
       - name: Test the plugin
         run: |
-          hurl --test --variables-file test/test.env test/restAPI.hurl
+          hurl --test --variables-file test/test.env --jobs 1 test/*.hurl
 
       - name: Expose Openfire logs
         uses: actions/upload-artifact@v4
