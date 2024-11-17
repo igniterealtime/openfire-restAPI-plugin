@@ -129,13 +129,13 @@ public class AuthFilter implements ContainerRequestFilter {
             try {
                 AuthFactory.authenticate(usernameAndPassword[0], usernameAndPassword[1]);
             } catch (UnauthorizedException e) {
-                LOG.warn("Wrong HTTP Basic Auth authorization", e);
+                LOG.info("Authentication for '{}' failed: incorrect credentials provided.", usernameAndPassword[0], e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             } catch (ConnectionException e) {
-                LOG.error("Authentication went wrong", e);
+                LOG.error("Authentication for '{}' failed: Openfire is not able to connect to the back-end users/group system.", usernameAndPassword[0], e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             } catch (InternalUnauthenticatedException e) {
-                LOG.error("Authentication went wrong", e);
+                LOG.error("Authentication for '{}' failed: Openfire is not able to authenticate itself to the back-end users/group system.", usernameAndPassword[0], e);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         } else {

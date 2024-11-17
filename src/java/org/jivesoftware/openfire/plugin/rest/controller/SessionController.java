@@ -165,7 +165,7 @@ public class SessionController {
                 session.setHostAddress(clientSession.getHostAddress());
                 session.setHostName(clientSession.getHostName());
             } catch (UnknownHostException e) {
-                LOG.error("UnknownHostException", e);
+                LOG.debug("UnknownHostException", e);
             }
 
             session.setCreationDate(clientSession.getCreationDate());

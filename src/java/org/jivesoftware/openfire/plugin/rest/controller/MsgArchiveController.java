@@ -78,7 +78,7 @@ public class MsgArchiveController {
                 messageCount = rs.getInt(1);
             }
         } catch (SQLException sqle) {
-            LOG.error(sqle.getMessage(), sqle);
+            LOG.warn("A database error prevented successful retrieval of the unread message count for user '{}' (the value '0' will be returned instead).", jid, sqle);
         } finally {
             DbConnectionManager.closeConnection(rs, pstmt, con);
         }

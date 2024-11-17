@@ -187,7 +187,7 @@ public class UserServiceLegacy {
         } catch (SharedGroupException e) {
             replyError("SharedGroupException", response, out);
         } catch (Exception e) {
-            LOG.error("Error: ", e);
+            LOG.error("Unexpected error while processing 'userservice' request of type '{}' for username '{}'", type, username, e);
             replyError(e.toString(), response, out);
         }
         return Response.status(200).build();
