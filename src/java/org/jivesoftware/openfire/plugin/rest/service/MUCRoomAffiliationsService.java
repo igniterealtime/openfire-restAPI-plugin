@@ -23,7 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.jivesoftware.openfire.muc.MUCRole;
+import org.jivesoftware.openfire.muc.Affiliation;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
@@ -62,7 +62,7 @@ public class MUCRoomAffiliationsService
         throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {
@@ -114,7 +114,7 @@ public class MUCRoomAffiliationsService
         throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {
@@ -146,7 +146,7 @@ public class MUCRoomAffiliationsService
         throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {
@@ -177,7 +177,7 @@ public class MUCRoomAffiliationsService
     throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {
@@ -208,7 +208,7 @@ public class MUCRoomAffiliationsService
     throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {
@@ -239,7 +239,7 @@ public class MUCRoomAffiliationsService
         throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {
@@ -270,7 +270,7 @@ public class MUCRoomAffiliationsService
         throws ServiceException
     {
         roomName = JID.nodeprep(roomName);
-        final MUCRole.Affiliation affiliation;
+        final Affiliation affiliation;
         try {
             affiliation = MUCRoomUtils.convertPluralStringToAffiliation(affiliations);
         } catch (RuntimeException e) {

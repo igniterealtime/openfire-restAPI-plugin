@@ -57,7 +57,7 @@ public class UserServiceLegacy {
     @PostConstruct
     public void init() {
         plugin = (RESTServicePlugin) XMPPServer.getInstance().getPluginManager()
-                .getPlugin("restapi");
+                .getPluginByName("REST API").orElse(null);
         userServiceController = UserServiceLegacyController.getInstance();
     }
 
