@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jivesoftware.openfire.group.Group;
-import org.jivesoftware.openfire.muc.MUCRole;
+import org.jivesoftware.openfire.muc.Affiliation;
+import org.jivesoftware.openfire.muc.MUCOccupant;
+import org.jivesoftware.openfire.muc.Role;
 import org.jivesoftware.openfire.muc.MUCRoom;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
@@ -89,39 +91,39 @@ public class MUCRoomUtils {
     }
 
     /**
-     * Convert MUCRole.role instances to string list.
+     * Convert Role instances to string list.
      *
      * @param roles
      *            the roles
      * @return the array list<string>
      */
-    public static List<String> convertRolesToStringList(Collection<MUCRole.Role> roles) {
+    public static List<String> convertRolesToStringList(Collection<Role> roles) {
         return roles.stream()
-            .map(MUCRole.Role::toString)
+            .map(Role::toString)
             .collect(Collectors.toList());
     }
 
     /**
-     * Convert string instances to a MUCRole.role list.
+     * Convert string instances to a Role list.
      *
      * @param roles
      *            the roles
-     * @return the array list<MUCRole.role>
+     * @return the array list<Role>
      */
-    public static List<MUCRole.Role> convertStringsToRoles(Collection<String> roles) {
+    public static List<Role> convertStringsToRoles(Collection<String> roles) {
         return roles.stream()
-            .map(MUCRole.Role::valueOf)
+            .map(Role::valueOf)
             .collect(Collectors.toList());
     }
 
     /**
-     * Returns a MUCRole.Affiliation type for a String value that potentially is a plural (eg: MUCRole.Affiliation.member for 'members').
+     * Returns a Affiliation type for a String value that potentially is a plural (eg: Affiliation.member for 'members').
      *
      * @param affiliation The value for which to return an Affiliation type.
      * @return A string representation of an affiliation (can be in plural form).
      */
-    public static MUCRole.Affiliation convertPluralStringToAffiliation(String affiliation) {
-        return MUCRole.Affiliation.valueOf( affiliation.endsWith("s") ? affiliation.substring(0, affiliation.length()-1) : affiliation);
+    public static Affiliation convertPluralStringToAffiliation(String affiliation) {
+        return Affiliation.valueOf( affiliation.endsWith("s") ? affiliation.substring(0, affiliation.length()-1) : affiliation);
     }
 
     /**
@@ -129,7 +131,7 @@ public class MUCRoomUtils {
      *
      * Attempts to call the legacy implementation of MUCRoom::send, if an Openfire version < 4.6 is used.
      */
-    public static void send(MUCRoom room, Packet packet, MUCRole role)
+    public static void send(MUCRoom room, Packet packet, MUCOccupant role)
         throws InvocationTargetException, IllegalAccessException {
         Method legacySend = legacySendMethod();
 

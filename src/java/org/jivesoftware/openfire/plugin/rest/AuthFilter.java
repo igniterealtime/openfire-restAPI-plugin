@@ -52,8 +52,7 @@ public class AuthFilter implements ContainerRequestFilter {
     private HttpServletRequest httpRequest;
 
     /** The plugin. */
-    private RESTServicePlugin plugin = (RESTServicePlugin) XMPPServer.getInstance().getPluginManager()
-            .getPlugin("restapi");
+    private RESTServicePlugin plugin = (RESTServicePlugin) XMPPServer.getInstance().getPluginManager().getPluginByName("REST API").orElse(null);
 
     @Override
     public void filter(ContainerRequestContext containerRequest) throws IOException {

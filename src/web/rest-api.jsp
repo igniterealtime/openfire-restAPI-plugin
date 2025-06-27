@@ -52,7 +52,7 @@
     final PluginManager pluginManager = admin.getXMPPServer().getPluginManager();
     
     RESTServicePlugin plugin = (RESTServicePlugin) XMPPServer.getInstance().getPluginManager()
-            .getPlugin("restapi");
+            .getPluginByName("REST API").orElse(null);
 
     // Handle a save
     Map errors = new HashMap();

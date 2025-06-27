@@ -452,7 +452,7 @@ public class MUCRoomController {
             room.setLogEnabled(mucRoomEntity.isLogEnabled());
             room.setLoginRestrictedToNickname(mucRoomEntity.isLoginRestrictedToNickname());
             room.setMaxUsers(mucRoomEntity.getMaxUsers());
-            room.setMembersOnly(mucRoomEntity.isMembersOnly());
+            room.setMembersOnly(mucRoomEntity.isMembersOnly(), room.getSelfRepresentation().getAffiliation(), room.getSelfRepresentation().getOccupantJID());
             room.setModerated(mucRoomEntity.isModerated());
             room.setCanSendPrivateMessage(mucRoomEntity.getAllowPM());
 
@@ -486,7 +486,7 @@ public class MUCRoomController {
 
             // Unlock the room, because the default configuration lock the room.
             log("Unlocking room that is being " + (room.isLocked() ? "created" : "updated") + ": " + mucRoomEntity.getRoomName());
-            room.unlock(room.getRole());
+            room.unlock(room.getSelfRepresentation().getAffiliation());
 
             // Save the room to the DB if the room should be persistent
             if (room.isPersistent()) {
@@ -561,7 +561,7 @@ public class MUCRoomController {
         log("Get room participants for room: " + roomName);
         ParticipantEntities participantEntities = new ParticipantEntities();
         List<ParticipantEntity> participants = new ArrayList<>();
-        Collection<MUCRole> serverParticipants;
+        Collection<MUCOccupant> serverParticipants;
 
         final MultiUserChatService service = MUCServiceController.getService(serviceName);
         final Lock lock = getLock(service, roomName);
@@ -573,9 +573,9 @@ public class MUCRoomController {
             lock.unlock();
         }
 
-        for (MUCRole role : serverParticipants) {
+        for (MUCOccupant role : serverParticipants) {
             ParticipantEntity participantEntity = new ParticipantEntity();
-            participantEntity.setJid(role.getRoleAddress().toFullJID());
+            participantEntity.setJid(role.getOccupantJID().toFullJID());
             participantEntity.setRole(role.getRole().name());
             participantEntity.setAffiliation(role.getAffiliation().name());
 
@@ -602,7 +602,7 @@ public class MUCRoomController {
         OccupantEntities occupantEntities = new OccupantEntities();
         List<OccupantEntity> occupants = new ArrayList<>();
 
-        Collection<MUCRole> serverOccupants;
+        Collection<MUCOccupant> serverOccupants;
 
         final MultiUserChatService service = MUCServiceController.getService(serviceName);
         final Lock lock = getLock(service, roomName);
@@ -614,9 +614,9 @@ public class MUCRoomController {
             lock.unlock();
         }
 
-        for (MUCRole role : serverOccupants) {
+        for (MUCOccupant role : serverOccupants) {
             OccupantEntity occupantEntity = new OccupantEntity();
-            occupantEntity.setJid(role.getRoleAddress().toFullJID());
+            occupantEntity.setJid(role.getOccupantJID().toFullJID());
             occupantEntity.setUserAddress(role.getUserAddress().toFullJID());
             occupantEntity.setRole(role.getRole().name());
             occupantEntity.setAffiliation(role.getAffiliation().name());
@@ -718,7 +718,7 @@ public class MUCRoomController {
             MUCRoom room = getRoom(service, roomName);
             for (JID jid : targetJIDs) {
                 try {
-                    room.sendInvitation(jid, mucInvitationsEntity.getReason(), room.getRole(), null);
+                    room.sendInvitation(jid, mucInvitationsEntity.getReason(), room.getSelfRepresentation().getAffiliation(), room.getSelfRepresentation().getUserAddress(), null);
                 } catch (ForbiddenException | CannotBeInvitedException e) {
                     throw new ServiceException("Could not invite user", jid.toString(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
                 }
@@ -755,7 +755,7 @@ public class MUCRoomController {
      */
     private void sendInvitationsToSingleJID(
         MUCRoom room,
-        EnumSet<MUCRole.Affiliation> affiliations,
+        EnumSet<Affiliation> affiliations,
         JID limitToThisUserOrGroup,
         String reason,
         boolean performAffiliationCheck
@@ -793,51 +793,51 @@ public class MUCRoomController {
      */
     private void sendInvitationsFromRoom(
         MUCRoom room,
-        EnumSet<MUCRole.Affiliation> affiliations,
+        EnumSet<Affiliation> affiliations,
         Collection<JID> limitToTheseUsers,
         String reason,
         boolean performAffiliationCheck
     ) throws ForbiddenException {
 
         if (affiliations == null) {
-            affiliations = EnumSet.of(MUCRole.Affiliation.admin, MUCRole.Affiliation.member, MUCRole.Affiliation.owner);
+            affiliations = EnumSet.of(Affiliation.admin, Affiliation.member, Affiliation.owner);
         }
-        MUCRole roomRole = MUCRole.createRoomRole(room);
+        MUCOccupant roomRole = room.getSelfRepresentation();
 
-        if (affiliations.contains(MUCRole.Affiliation.admin)) {
+        if (affiliations.contains(Affiliation.admin)) {
             Collection<JID> sendHere = limitToTheseUsers == null ? room.getAdmins() : limitToTheseUsers;
             for (JID roomAdmin : sendHere) {
                 sendSingleInvitationFromRoom(
                     roomAdmin,
                     room,
                     roomRole,
-                    MUCRole.Affiliation.admin,
+                    Affiliation.admin,
                     reason == null ? "You are admin of room " + room.getName() : reason,
                     performAffiliationCheck ? (r, j) -> r.getAdmins().contains(j) : null
                 );
             }
         }
-        if (affiliations.contains(MUCRole.Affiliation.owner)) {
+        if (affiliations.contains(Affiliation.owner)) {
             Collection<JID> sendHere = limitToTheseUsers == null ? room.getOwners() : limitToTheseUsers;
             for (JID roomOwner : sendHere) {
                 sendSingleInvitationFromRoom(
                     roomOwner,
                     room,
                     roomRole,
-                    MUCRole.Affiliation.owner,
+                    Affiliation.owner,
                     reason == null ? "You are owner of room " + room.getName() : reason,
                     performAffiliationCheck ? (r, j) -> r.getOwners().contains(j) : null
                 );
             }
         }
-        if (affiliations.contains(MUCRole.Affiliation.member)) {
+        if (affiliations.contains(Affiliation.member)) {
             Collection<JID> sendHere = limitToTheseUsers == null ? room.getMembers() : limitToTheseUsers;
             for (JID roomMember : sendHere) {
                 sendSingleInvitationFromRoom(
                     roomMember,
                     room,
                     roomRole,
-                    MUCRole.Affiliation.member,
+                    Affiliation.member,
                     reason == null ? "You are member of room " + room.getName() : reason,
                     performAffiliationCheck ? (r, j) -> r.getMembers().contains(j) : null
                 );
@@ -856,7 +856,7 @@ public class MUCRoomController {
      * @param room
      *          The room
      * @param roomRole
-     *          Role of the room (added for optimisation, to prevent the MUCRole.createRoomRole(room) from being called
+     *          Role of the room (added for optimisation, to prevent the Role.createRoomRole(room) from being called
      *          many times)
      * @param affiliation
      *          The affiliation for which the jid is invited
@@ -872,8 +872,8 @@ public class MUCRoomController {
     private void sendSingleInvitationFromRoom(
         JID sendHere,
         MUCRoom room,
-        MUCRole roomRole,
-        MUCRole.Affiliation affiliation,
+        MUCOccupant roomRole,
+        Affiliation affiliation,
         String invitationReason,
         BiFunction<MUCRoom, JID, Boolean> validation
     ) throws ForbiddenException {
@@ -896,7 +896,7 @@ public class MUCRoomController {
 
             if (!jidIsGroup) {
                 try {
-                    room.sendInvitation(sendHere, invitationReason, roomRole, null);
+                    room.sendInvitation(sendHere, invitationReason, roomRole.getAffiliation(), roomRole.getUserAddress(), null);
                 } catch (CannotBeInvitedException e) {
                     log("User " + sendHere + " can not be invited to be " + affiliation + " of room " + room.getName());
                 }
@@ -1016,7 +1016,7 @@ public class MUCRoomController {
         // Update the room by adding new owners.
         for (final JID newOwner : newOwners) {
             log("Adding new 'owner' affiliation for '" + newOwner + "' to room: " + room.getName());
-            room.addOwner(newOwner, room.getRole());
+            room.addOwner(newOwner, room.getSelfRepresentation().getAffiliation());
             allNewAffiliations.add(newOwner);
         }
 
@@ -1036,7 +1036,7 @@ public class MUCRoomController {
         // Update the room by adding new admins.
         for (final JID newAdmin : newAdmins) {
             log("Adding new 'admin' affiliation for '" + newAdmin + "' to room: " + room.getName());
-            room.addAdmin(newAdmin, room.getRole());
+            room.addAdmin(newAdmin, room.getSelfRepresentation().getAffiliation());
             allNewAffiliations.add(newAdmin);
         }
 
@@ -1056,7 +1056,7 @@ public class MUCRoomController {
         // Update the room by adding new members.
         for (final JID newMember : newMembers) {
             log("Adding new 'member' affiliation for '" + newMember + "' to room: " + room.getName());
-            room.addMember(newMember, null, room.getRole());
+            room.addMember(newMember, null, room.getSelfRepresentation().getAffiliation());
             allNewAffiliations.add(newMember);
         }
 
@@ -1076,14 +1076,14 @@ public class MUCRoomController {
         // Update the room by adding new outcasts.
         for (final JID newOutcast : newOutcasts) {
             log("Adding new 'outcast' affiliation for '" + newOutcast + "' to room: " + room.getName());
-            room.addOutcast(newOutcast, null, room.getRole());
+            room.addOutcast(newOutcast, null, room.getSelfRepresentation().getUserAddress(), room.getSelfRepresentation().getAffiliation(), room.getSelfRepresentation().getRole());
             allNewAffiliations.add(newOutcast);
         }
 
         // Finally, clean up every old affiliation that is not carrying over.
         for (JID affiliationToReset : affiliationsToReset) {
             log("Removing old affiliation for '" + affiliationToReset + "' from room: " + room.getName());
-            room.addNone(affiliationToReset, room.getRole());
+            room.addNone(affiliationToReset, room.getSelfRepresentation().getAffiliation());
         }
 
         return allNewAffiliations;
@@ -1101,7 +1101,7 @@ public class MUCRoomController {
      * @return All users that have the specified affiliation to the specified room.
      * @throws ServiceException On any issue looking up the room or its affiliated users.
      */
-    public Collection<JID> getByAffiliation(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation) throws ServiceException
+    public Collection<JID> getByAffiliation(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final Affiliation affiliation) throws ServiceException
     {
         final MultiUserChatService service = MUCServiceController.getService(serviceName);
         final Lock lock = getLock(service, roomName);
@@ -1121,7 +1121,7 @@ public class MUCRoomController {
                 default:
                     return room.getOccupants().stream()
                         .filter(o -> affiliation.equals(o.getAffiliation()))
-                        .map(MUCRole::getUserAddress)
+                        .map(MUCOccupant::getUserAddress)
                         .collect(Collectors.toSet());
             }
         } finally {
@@ -1147,7 +1147,7 @@ public class MUCRoomController {
      *            whether to send invitations to newly affiliated users
      * @throws ServiceException On any issue looking up the room or changing its affiliated users.
      */
-    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
+    public void replaceAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
     {
         final Collection<JID> replacements = new HashSet<>();
 
@@ -1180,22 +1180,22 @@ public class MUCRoomController {
                 // First, add all new affiliations (some affiliations aren't allowed to be empty, so removing things first could cause issues).
                 switch (affiliation) {
                     case admin:
-                        room.addAdmins(toAdd, room.getRole());
+                        room.addAdmins(toAdd, room.getSelfRepresentation().getAffiliation());
                         break;
 
                     case member:
                         for (final JID add : toAdd) {
-                            room.addMember(add, null, room.getRole());
+                            room.addMember(add, null, room.getSelfRepresentation().getAffiliation());
                         }
                         break;
 
                     case owner:
-                        room.addOwners(toAdd, room.getRole());
+                        room.addOwners(toAdd, room.getSelfRepresentation().getAffiliation());
                         break;
 
                     case outcast:
                         for (final JID add : toAdd) {
-                            room.addOutcast(add, null, room.getRole());
+                            room.addOutcast(add, null, room.getSelfRepresentation().getUserAddress(), room.getSelfRepresentation().getAffiliation(), room.getSelfRepresentation().getRole());
                         }
                         break;
                     default:
@@ -1204,7 +1204,7 @@ public class MUCRoomController {
 
                 // Next, remove the affiliations that are no longer wanted.
                 for (final JID remove : toRemove) {
-                    room.addNone(remove, room.getRole());
+                    room.addNone(remove, room.getSelfRepresentation().getAffiliation());
                 }
             } catch (ForbiddenException | NotAllowedException e) {
                 throw new ServiceException("Forbidden to apply modification to list of " + affiliation, roomName, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN, e);
@@ -1243,7 +1243,7 @@ public class MUCRoomController {
      *            whether to send invitations to newly affiliated users
      * @throws ServiceException On any issue looking up the room or changing its affiliated users.
      */
-    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final MUCRole.Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
+    public void addAffiliatedUsers(@Nonnull final String serviceName, @Nonnull final String roomName, @Nonnull final Affiliation affiliation, boolean sendInvitations, @Nonnull final String... jids) throws ServiceException
     {
         final Collection<JID> additions = new HashSet<>();
 
@@ -1272,22 +1272,22 @@ public class MUCRoomController {
                 // Add all new affiliations.
                 switch (affiliation) {
                     case admin:
-                        room.addAdmins(toAdd, room.getRole());
+                        room.addAdmins(toAdd, room.getSelfRepresentation().getAffiliation());
                         break;
 
                     case member:
                         for (final JID add : toAdd) {
-                            room.addMember(add, null, room.getRole());
+                            room.addMember(add, null, room.getSelfRepresentation().getAffiliation());
                         }
                         break;
 
                     case owner:
-                        room.addOwners(toAdd, room.getRole());
+                        room.addOwners(toAdd, room.getSelfRepresentation().getAffiliation());
                         break;
 
                     case outcast:
                         for (final JID add : toAdd) {
-                            room.addOutcast(add, null, room.getRole());
+                            room.addOutcast(add, null, room.getSelfRepresentation().getUserAddress(), room.getSelfRepresentation().getAffiliation(), room.getSelfRepresentation().getRole());
                         }
                         break;
                     default:
@@ -1328,7 +1328,7 @@ public class MUCRoomController {
      * @throws ServiceException
      *             the service exception
      */
-    public void deleteAffiliation(String serviceName, String roomName, MUCRole.Affiliation affiliation, String jid) throws ServiceException {
+    public void deleteAffiliation(String serviceName, String roomName, Affiliation affiliation, String jid) throws ServiceException {
         try {
             JID userJid = UserUtils.checkAndGetJID(jid);
 
@@ -1343,9 +1343,9 @@ public class MUCRoomController {
                     throw new ConflictException("Entity does not have this affiliation with the room.");
                 }
                 // Send a presence to other room members
-                List<Presence> addNonePresence = room.addNone(userJid, room.getRole());
+                List<Presence> addNonePresence = room.addNone(userJid, room.getSelfRepresentation().getAffiliation());
                 for (Presence presence : addNonePresence) {
-                    MUCRoomUtils.send(room, presence, room.getRole());
+                    MUCRoomUtils.send(room, presence, room.getSelfRepresentation());
                 }
 
                 // Make sure that other cluster nodes see the changes made here.
