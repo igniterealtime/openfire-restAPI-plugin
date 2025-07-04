@@ -6,7 +6,7 @@
     <description>Allows administration over a RESTful API.</description>
     <author>Roman Soldatow</author>
     <version>${project.version}</version>
-    <date>2024-11-17</date>
+    <date>2025-07-04</date>
     <minServerVersion>5.0.0</minServerVersion>
     <adminconsole>
         <tab id="tab-server">
