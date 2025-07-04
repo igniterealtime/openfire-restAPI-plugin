@@ -16,6 +16,10 @@
 
 package org.jivesoftware.openfire.plugin.rest.controller;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.XMPPServer;
@@ -37,6 +41,7 @@ import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
+import org.jivesoftware.openfire.vcard.VCardManager;
 import org.jivesoftware.util.JiveGlobals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,6 +74,8 @@ public class UserServiceController {
     /** The lock out manager. */
     private final LockOutManager lockOutManager;
 
+    private final VCardManager vcardManager;
+
     /**
      * Gets the single instance of UserServiceController.
      *
@@ -98,6 +105,7 @@ public class UserServiceController {
         userManager = server.getUserManager();
         rosterManager = server.getRosterManager();
         lockOutManager = server.getLockOutManager();
+        vcardManager = server.getVCardManager();
     }
 
     public static void log(String logMessage) {
@@ -609,6 +617,84 @@ public class UserServiceController {
         } catch (UserNotFoundException e) {
             throw new ServiceException("Could not get user roster", username, ExceptionType.USER_NOT_FOUND_EXCEPTION,
                     Response.Status.NOT_FOUND, e);
+        }
+    }
+
+    /**
+     * Retrieves a vCard for a user.
+     *
+     * @param username The username for which to return a vcard
+     * @return A vCard (or null)
+     */
+    public Element getUserVCard(String username) throws ServiceException
+    {
+        log("Get user vCard for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.USER_NOT_FOUND_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        return vcardManager.getVCard(username);
+    }
+
+    /**
+     * Adds or updates a vCard for a user.
+     *
+     * @param username The username for which to return a vcard
+     * @param data The raw XML vCard data
+     */
+    public void setUserVCard(String username, String data) throws ServiceException
+    {
+        log("Set user vCard for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.USER_NOT_FOUND_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        try {
+            final Document document = DocumentHelper.parseText(data);
+            vcardManager.setVCard(username, document.getRootElement());
+        } catch (DocumentException e) {
+            throw new ServiceException("Could not parse the provided data as a vCard", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        } catch (UnsupportedOperationException e) {
+            throw new ServiceException("Cannot update vCards in the system, as the vCard system is configured to be read-only.", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
+        } catch (Exception e) {
+            throw new ServiceException("Unexpected problem while trying to update vCard.", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Removes a vCard for a user.
+     *
+     * @param username The username for which to return a vcard
+     */
+    public void deleteUserVCard(String username) throws ServiceException
+    {
+        log("Get user vCard for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.USER_NOT_FOUND_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        try {
+            vcardManager.deleteVCard(username);
+        } catch (UnsupportedOperationException e) {
+            throw new ServiceException("Cannot update vCards in the system, as the vCard system is configured to be read-only.", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
         }
     }
 }

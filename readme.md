@@ -626,6 +626,148 @@ Endpoint to update a roster entry
 </rosterItem>
 ```
 
+## Retrieve user's vcard
+Endpoint to get the vCard of a particular user
+> **GET** /users/{username}/vcard
+
+**Payload:** none
+
+**Return value:** vCard XML data
+
+### Possible parameters
+
+| Parameter | 	Parameter Type | Description    | Default value |
+|-----------|-----------------|----------------|---------------|
+| username  | 	@Path	         | Exact username |               |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**GET** http://example.org:9090/plugins/restapi/v1/users/testuser/vcard
+
+## Add or update user's vCard
+Endpoint to add or replace a vCard of a particular user.
+> **PUT** /users/{username}/vcard
+
+**Payload:** vCard XML data
+
+**Return value:** HTTP status 200 (Created)
+
+### Possible parameters
+
+
+| Parameter | 	Parameter Type | Description    | Default value |
+|-----------|-----------------|----------------|---------------|
+| username  | 	@Path	         | Exact username |               |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**Header:** Content-Type application/xml
+>
+>**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/vcard
+
+**Payload:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<vCard xmlns="vcard-temp">
+    <N>
+        <FAMILY>Doe</FAMILY>
+        <GIVEN>Janice</GIVEN>
+        <MIDDLE>Francis</MIDDLE>
+    </N>
+    <ORG>
+        <ORGNAME/>
+        <ORGUNIT/>
+    </ORG>
+    <NICKNAME>Jane</NICKNAME>
+    <FN>Janice Francis Doe</FN>
+    <TITLE/>
+    <URL/>
+    <EMAIL>
+        <HOME/>
+        <INTERNET/>
+        <PREF/>
+        <USERID>j.doe@example.org</USERID>
+    </EMAIL>
+    <TEL>
+        <WORK/>
+        <VOICE/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <WORK/>
+        <PAGER/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <WORK/>
+        <FAX/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <WORK/>
+        <CELL/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <HOME/>
+        <VOICE/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <HOME/>
+        <PAGER/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <HOME/>
+        <FAX/>
+        <NUMBER/>
+    </TEL>
+    <TEL>
+        <HOME/>
+        <CELL/>
+        <NUMBER/>
+    </TEL>
+    <ADR>
+        <WORK/>
+        <LOCALITY/>
+        <CTRY/>
+        <STREET/>
+        <PCODE/>
+        <REGION/>
+    </ADR>
+    <ADR>
+        <HOME/>
+        <LOCALITY/>
+        <CTRY/>
+        <STREET/>
+        <PCODE/>
+        <REGION/>
+    </ADR>
+</vCard>
+```
+
+## Delete user's vcard
+Endpoint to remove the vCard of a particular user
+> **DELETE** /users/{username}/vcard
+
+**Payload:** none
+
+**Return value:** none
+
+### Possible parameters
+
+| Parameter | 	Parameter Type | Description    | Default value |
+|-----------|-----------------|----------------|---------------|
+| username  | 	@Path	         | Exact username |               |
+
+### Examples
+>**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+>
+>**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/vcard
+
 # Chat room related REST Endpoints
 
 ## Retrieve all chat services
