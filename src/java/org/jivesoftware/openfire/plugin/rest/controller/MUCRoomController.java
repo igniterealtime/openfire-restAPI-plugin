@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Ignite Realtime Foundation
+ * Copyright (c) 2022-2025 Ignite Realtime Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -438,7 +438,6 @@ public class MUCRoomController {
 
             // Set values
             room.setNaturalLanguageName(mucRoomEntity.getNaturalName());
-            room.setSubject(mucRoomEntity.getSubject());
             room.setDescription(mucRoomEntity.getDescription());
             room.setPassword(mucRoomEntity.getPassword());
             room.setPersistent(mucRoomEntity.isPersistent());
@@ -493,6 +492,15 @@ public class MUCRoomController {
                 log("Persisting room that is being created/updated: " + mucRoomEntity.getRoomName());
                 room.saveToDB();
             }
+
+            // Set the subject (see issue #213 and OF-3131).
+            final Message message = new Message();
+            message.setType(Message.Type.groupchat);
+            message.setSubject(mucRoomEntity.getSubject());
+            message.setFrom(room.getSelfRepresentation().getOccupantJID());
+            message.setTo(room.getSelfRepresentation().getOccupantJID());
+            log("Setting subject of room that is being created/updated: " + mucRoomEntity.getRoomName());
+            room.changeSubject(message, room.getSelfRepresentation());
 
             log("Syncing room that is being created/updated: " + mucRoomEntity.getRoomName());
             service.syncChatRoom(room);
