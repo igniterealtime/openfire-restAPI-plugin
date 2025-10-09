@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.jivesoftware.database.DbConnectionManager;
+import org.jivesoftware.database.DbConnectionManager.DatabaseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
@@ -36,12 +37,29 @@ public class MsgArchiveController {
 
     /** The Constant INSTANCE. */
     public static final MsgArchiveController INSTANCE = new MsgArchiveController();
+    /**
+     * Builds the SQL query for counting unread messages based on the underlying database type.
+     *
+     * @param databaseType the database connection used to detect the database product name
+     * @return the database-specific SQL query string for counting unread messages
+     */
+    private String buildUserMessageCountQuery(DatabaseType databaseType) {
+        String castExpr;
+        switch (databaseType) {
+            case mysql:
+                castExpr = "CAST(p.offlineDate AS SIGNED)"; break;
+            case oracle:
+                castExpr = "CAST(p.offlineDate AS NUMBER)"; break;
+            default:
+                // PostgreSQL, SQL Server, Sybase — all understand BIGINT in CAST
+                castExpr = "CAST(p.offlineDate AS BIGINT)";
+                break;
+        }
 
-    /** The Constant USER_MESSAGE_COUNT. */
-    private static final String USER_MESSAGE_COUNT = "select COUNT(1) from ofMessageArchive a " +
-            "join ofPresence p on (a.sentDate > p.offlineDate) " +
+        return "SELECT COUNT(1) FROM ofMessageArchive a " +
+            "JOIN ofPresence p ON (a.sentDate > " + castExpr + ") " +
             "WHERE a.toJID = ? AND p.username = ?";
-
+    }
     /**
      * Gets the single instance of MsgArchiveController.
      *
@@ -70,7 +88,9 @@ public class MsgArchiveController {
         ResultSet rs = null;
         try {
             con = DbConnectionManager.getConnection();
-            pstmt = con.prepareStatement(USER_MESSAGE_COUNT);
+            DatabaseType databaseType = DbConnectionManager.getDatabaseType();
+            String userMessageCountQuery = buildUserMessageCountQuery(databaseType);
+            pstmt = con.prepareStatement(userMessageCountQuery);
             pstmt.setString(1, jid.toBareJID());
             pstmt.setString(2, jid.getNode());
             rs = pstmt.executeQuery();
