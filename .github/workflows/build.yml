@@ -8,7 +8,8 @@ jobs:
     secrets:
       IGNITE_REALTIME_MAVEN_USERNAME: ${{ secrets.IGNITE_REALTIME_MAVEN_USERNAME }}
       IGNITE_REALTIME_MAVEN_PASSWORD: ${{ secrets.IGNITE_REALTIME_MAVEN_PASSWORD }}
-  test:
+  hurl-e2e-test:
+    name: Hurl E2E Tests
     runs-on: ubuntu-latest
     needs: build
     steps:
