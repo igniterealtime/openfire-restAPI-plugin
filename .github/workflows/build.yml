@@ -30,7 +30,7 @@ jobs:
           mv restAPI-openfire-plugin-assembly.jar restAPI.jar
   
       - name: Run Openfire
-        uses: igniterealtime/launch-openfire-action@v1.2.0
+        uses: igniterealtime/launch-openfire-action@main # Should this be tied to the Openfire version?
         with:
           version: 5.0.2
           config: ./test/demoboot-with-additions.xml
