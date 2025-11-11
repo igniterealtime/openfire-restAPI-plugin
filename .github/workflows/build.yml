@@ -12,6 +12,8 @@ jobs:
     name: Hurl E2E Tests
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+        checks: write
     steps:
       - name: Checkout tests
         uses: actions/checkout@v5
@@ -54,6 +56,5 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: 'test-results.xml'
-          suite_regex: '*'
           include_passed: true
           detailed_summary: true
