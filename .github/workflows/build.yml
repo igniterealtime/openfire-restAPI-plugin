@@ -8,3 +8,53 @@ jobs:
     secrets:
       IGNITE_REALTIME_MAVEN_USERNAME: ${{ secrets.IGNITE_REALTIME_MAVEN_USERNAME }}
       IGNITE_REALTIME_MAVEN_PASSWORD: ${{ secrets.IGNITE_REALTIME_MAVEN_PASSWORD }}
+  hurl-e2e-test:
+    name: Hurl E2E Tests
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+        checks: write
+    steps:
+      - name: Checkout tests
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: |
+            test
+
+      - name: Download the built plugin
+        uses: actions/download-artifact@v6
+        with:
+          name: restAPI
+          path: .
+
+      - name: Rename plugin
+        run: |
+          mv restAPI-openfire-plugin-assembly.jar restAPI.jar
+  
+      - name: Run Openfire
+        uses: igniterealtime/launch-openfire-action@main # Should this be tied to the Openfire version?
+        with:
+          version: 5.0.2
+          config: ./test/demoboot-with-additions.xml
+          plugin: ./restAPI.jar
+      
+      - uses: gacts/install-hurl@v1
+
+      - name: Test the plugin
+        run: |
+          hurl --test --report-junit test-results.xml --variables-file test/test.env --jobs 1 test/*.hurl
+
+      - name: Expose Openfire logs
+        uses: actions/upload-artifact@v5
+        if: always() # always run even if the previous step fails
+        with:
+          name: Openfire server logs
+          path: openfire/logs/*
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v6
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: 'test-results.xml'
+          include_passed: true
+          detailed_summary: true
