@@ -21,7 +21,7 @@
     </licenses>
 
     <properties>
-        <jersey.version>2.45</jersey.version>
+        <jersey.version>4.0.0</jersey.version>
         <swagger.version>2.2.41</swagger.version>
     </properties>
 
