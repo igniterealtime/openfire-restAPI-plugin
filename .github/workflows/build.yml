@@ -22,7 +22,7 @@ jobs:
             test
 
       - name: Download the built plugin
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: restAPI
           path: .
@@ -45,7 +45,7 @@ jobs:
           hurl --test --report-junit test-results.xml --variables-file test/test.env --jobs 1 test/*.hurl
 
       - name: Expose Openfire logs
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always() # always run even if the previous step fails
         with:
           name: Openfire server logs
