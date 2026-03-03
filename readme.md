@@ -3,8 +3,19 @@
 
 The REST API Plugin provides the ability to manage Openfire by sending an REST/HTTP request to the server. This plugin's functionality is useful for applications that need to administer Openfire outside of the Openfire admin console.
 
+## Notice
+This plugin is not an official Openfire plugin.
+It's a fork of the official Openfire REST API Plugin and can't be installed together with the official Openfire REST API Plugin.
+All credits for the original plugin go to the original author.
+The original plugin can be found here:
+https://github.com/igniterealtime/openfire-restAPI-plugin
+The Client Libraries only have the capability to send requests based on the Offical Openfire REST API Plugin
+and not the extended functionality of this plugin.
+
 ## Feature list
 * Get overview over all or specific user and to create, update or delete a user
+* Get overview over all or specific PubSub/PEP nodes for a user and their published items
+* Support for OMEMO device list payload parsing in PubSub items
 * Get overview over all or specific group and to create, update or delete a group
 * Get overview over all user roster entries and to add, update or delete a roster entry
 * Add user to a group and remove a user from a group
@@ -1329,6 +1340,61 @@ Endpoint to send a broadcast/server message to all online users
 	<body>Your message</body>
 </message>
 ```
+
+## Send a message to a user
+Endpoint to send a message to a specific user
+>**POST** /messages/user/{address}
+
+**Payload:** Message
+**Return value:** HTTP status 201 (Created)
+
+### Possible parameters
+
+Parameter |	Parameter Type  | Description   | Default value
+--------- | --------------  | -----------   | -------------
+address | @Path 	| The address/JID of the user | 	 
+
+### Examples
+
+>**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+
+>**POST** http://example.org:9090/plugins/restapi/v1/messages/user/testuser@example.org
+
+**Payload:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<message>
+	<body>Your message</body>
+</message>
+```
+
+## Send a message to a user resource
+Endpoint to send a message to a specific user resource
+>**POST** /messages/user/{address}/{resource}
+
+**Payload:** Message
+**Return value:** HTTP status 201 (Created)
+
+### Possible parameters
+
+Parameter |	Parameter Type  | Description   | Default value
+--------- | --------------  | -----------   | -------------
+address | @Path 	| The address/JID of the user | 	 
+resource | @Path 	| The resource of the user | 	 
+
+### Examples
+
+>**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+
+>**POST** http://example.org:9090/plugins/restapi/v1/messages/user/testuser@example.org/mobile
+
+**Payload:**
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<message>
+	<body>Your message</body>
+</message>
+```
 # Security Audit related REST Endpoints
 
 ## Retrieve the Security audit logs
@@ -1353,6 +1419,27 @@ limit| @QueryParam   | Number of logs to retrieve |
 >**Header**: Authorization: Basic YWRtaW46MTIzNDU=
 
 >**GET** http://example.org:9090/plugins/restapi/v1/logs/security
+
+# PubSub related REST Endpoints
+
+## Retrieve PubSub nodes of a user
+Endpoint to get all PubSub/PEP leaf nodes for a specific user, including their published items.
+> **GET** /pubsub/{username}
+
+**Payload:** none
+**Return value:** PubSubNodes
+
+### Possible parameters
+
+Parameter   | Parameter Type | Description | Default value
+---------   | -------------- | ----------- | ------------
+username	|	@Path |	Exact username or JID	 |
+
+### Examples
+
+**Header:** Authorization: Basic YWRtaW46MTIzNDU=
+
+**GET** http://example.org:9090/plugins/restapi/v1/pubsub/testuser
 
 # Data format
 Openfire REST API provides XML and JSON as data format. The default data format is XML.
@@ -1438,6 +1525,34 @@ sessionStatus | No | The current status of this session. Can be "Closed", "Conne
 presenceStatus| No | The status of this presence packet, a natural-language description of availability status.
 priority| No | The priority of the session. The valid priority range is -128 through 128.
 hostAddress| No | The IP address string in textual presentation.
+
+### PubSubNodes
+Parameter   | Optional   | Description 
+---------   | --------------- | ------
+psnodeitem | No | List of PubSub nodes
+psnodecount | No | Total count of nodes
+
+### PubSubNode
+Parameter   | Optional   | Description 
+---------   | --------------- | ------
+nodeID | No | The ID of the node
+nodeName | Yes | The name of the node
+nodeDescription | Yes | The description of the node
+nodeSubscriptions | No | Count of subscriptions
+nodeAffiliations | No | Count of affiliations
+nodeCreationDate | No | Creation date
+nodeModificationDate | No | Modification date
+psnodepupitem | Yes | List of published items
+nodePublishedItemCount | No | Count of published items
+
+### PubSubItem
+Parameter   | Optional   | Description 
+---------   | --------------- | ------
+id | No | The ID of the item
+publisher | No | The JID of the publisher
+creationDate | No | Creation date
+isRawXMLPayload | No | Boolean indicating if payload is unparsed XML
+payload | Yes | The payload object (parsed OmemoDevicesList or generic XML)
 hostName| No | The host name for this IP address.
 creationDate| No | The date the session was created.
 lastActionDate| No | The time the session last had activity.

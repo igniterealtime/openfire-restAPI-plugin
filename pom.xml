@@ -9,17 +9,18 @@
     <groupId>org.igniterealtime.openfire.plugins</groupId>
     <artifactId>restAPI</artifactId>
     <version>1.4.0</version>
-    <name>REST API Plugin</name>
-    <description>Allows administration over a RESTful API.</description>
+    <name>REST API extended Plugin</name>
+    <description>Allows extended administration over a RESTful API.</description>
 
     <properties>
+        <java.version>1.8</java.version>
         <jackson.version>1.9.11</jackson.version>
         <jersey.version>1.19.4</jersey.version>
     </properties>
 
     <developers>
 	    <developer>
-	    	<name>Roman Soldatow</name>
+	    	<name>Soehnke Mannott</name>
 	    </developer>
     </developers>
 

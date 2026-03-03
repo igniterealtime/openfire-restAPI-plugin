@@ -2,9 +2,9 @@
 
 <plugin>
     <class>org.jivesoftware.openfire.plugin.rest.RESTServicePlugin</class>
-    <name>REST API</name>
-    <description>Allows administration over a RESTful API.</description>
-    <author>Roman Soldatow</author>
+    <name>REST APIext</name>
+    <description>Allows extended administration over a RESTful API.</description>
+    <author>Soehnke Mannott</author>
     <version>${project.version}</version>
     <date>02/24/2020</date>
     <minServerVersion>4.1.1</minServerVersion>

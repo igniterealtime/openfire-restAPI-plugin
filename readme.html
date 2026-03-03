@@ -95,6 +95,11 @@
                     <li><a href="#retrieve-the-security-audit-logs">Retrieve the Security audit logs</a></li>
                 </ul>
             </li>
+            <li><a href="#pubsub-related-rest-endpoints">PubSub related REST Endpoints</a>
+                <ul>
+                    <li><a href="#retrieve-pubsub-nodes-of-a-user">Retrieve PubSub nodes of a user</a></li>
+                </ul>
+            </li>
             <li><a href="#data-format">Data format</a>
                 <ul>
                     <li><a href="#data-types">Data types</a></li>
@@ -2016,6 +2021,92 @@
 	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>Your message<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">&gt;</span></span>
 </code></pre>
+
+        <h2 id="send-a-message-to-a-user">Send a message to a user</h2>
+        <p>Endpoint to send a message to a specific user</p>
+        <blockquote>
+            <p><strong>POST</strong> /messages/user/{address}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> Message<br>
+            <strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-37">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>address</td>
+                <td>@Path</td>
+                <td>The address/JID of the user</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-42">Examples</h3>
+        <blockquote>
+            <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
+        </blockquote>
+        <blockquote>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/messages/user/testuser@example.org">http://example.org:9090/plugins/restapi/v1/messages/user/testuser@example.org</a></p>
+        </blockquote>
+        <p><strong>Payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>Your message<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+
+        <h2 id="send-a-message-to-a-user-resource">Send a message to a user resource</h2>
+        <p>Endpoint to send a message to a specific user resource</p>
+        <blockquote>
+            <p><strong>POST</strong> /messages/user/{address}/{resource}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> Message<br>
+            <strong>Return value:</strong> HTTP status 201 (Created)</p>
+        <h3 id="possible-parameters-38">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>address</td>
+                <td>@Path</td>
+                <td>The address/JID of the user</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>resource</td>
+                <td>@Path</td>
+                <td>The resource of the user</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-43">Examples</h3>
+        <blockquote>
+            <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
+        </blockquote>
+        <blockquote>
+            <p><strong>POST</strong> <a href="http://example.org:9090/plugins/restapi/v1/messages/user/testuser@example.org/mobile">http://example.org:9090/plugins/restapi/v1/messages/user/testuser@example.org/mobile</a></p>
+        </blockquote>
+        <p><strong>Payload:</strong></p>
+        <pre class=" language-xml"><code class="prism  language-xml"><span class="token prolog">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>message</span><span class="token punctuation">&gt;</span></span>
+	<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>Your message<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>message</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
         <h1 id="security-audit-related-rest-endpoints">Security Audit related REST Endpoints</h1>
         <h2 id="retrieve-the-security-audit-logs">Retrieve the Security audit logs</h2>
         <p>Endpoint to get security audit logs</p>
@@ -2073,6 +2164,40 @@
         </blockquote>
         <blockquote>
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/logs/security">http://example.org:9090/plugins/restapi/v1/logs/security</a></p>
+        </blockquote>
+        <h1 id="pubsub-related-rest-endpoints">PubSub related REST Endpoints</h1>
+        <h2 id="retrieve-pubsub-nodes-of-a-user">Retrieve PubSub nodes of a user</h2>
+        <p>Endpoint to get all PubSub/PEP leaf nodes for a specific user, including their published items.</p>
+        <blockquote>
+            <p><strong>GET</strong> /pubsub/{username}</p>
+        </blockquote>
+        <p><strong>Payload:</strong> none<br>
+            <strong>Return value:</strong> PubSubNodes</p>
+        <h3 id="possible-parameters-36">Possible parameters</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Parameter Type</th>
+                <th>Description</th>
+                <th>Default value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>username</td>
+                <td>@Path</td>
+                <td>Exact username or JID</td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table><h3 id="examples-41">Examples</h3>
+        <blockquote>
+            <p><strong>Header</strong>: Authorization: Basic YWRtaW46MTIzNDU=</p>
+        </blockquote>
+        <blockquote>
+            <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/pubsub/testuser">http://example.org:9090/plugins/restapi/v1/pubsub/testuser</a></p>
         </blockquote>
         <h1 id="data-format">Data format</h1>
         <p>Openfire REST API provides XML and JSON as data format. The default data format is XML.<br>
@@ -2424,6 +2549,122 @@
                 <td>secure</td>
                 <td>No</td>
                 <td>Is “true” if this connection is secure.</td>
+            </tr>
+            </tbody>
+        </table><h3 id="pubsubnodes">PubSubNodes</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Optional</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>psnodeitem</td>
+                <td>No</td>
+                <td>List of PubSub nodes</td>
+            </tr>
+            <tr>
+                <td>psnodecount</td>
+                <td>No</td>
+                <td>Total count of nodes</td>
+            </tr>
+            </tbody>
+        </table><h3 id="pubsubnode">PubSubNode</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Optional</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>nodeID</td>
+                <td>No</td>
+                <td>The ID of the node</td>
+            </tr>
+            <tr>
+                <td>nodeName</td>
+                <td>Yes</td>
+                <td>The name of the node</td>
+            </tr>
+            <tr>
+                <td>nodeDescription</td>
+                <td>Yes</td>
+                <td>The description of the node</td>
+            </tr>
+            <tr>
+                <td>nodeSubscriptions</td>
+                <td>No</td>
+                <td>Count of subscriptions</td>
+            </tr>
+            <tr>
+                <td>nodeAffiliations</td>
+                <td>No</td>
+                <td>Count of affiliations</td>
+            </tr>
+            <tr>
+                <td>nodeCreationDate</td>
+                <td>No</td>
+                <td>Creation date</td>
+            </tr>
+            <tr>
+                <td>nodeModificationDate</td>
+                <td>No</td>
+                <td>Modification date</td>
+            </tr>
+            <tr>
+                <td>psnodepupitem</td>
+                <td>Yes</td>
+                <td>List of published items</td>
+            </tr>
+            <tr>
+                <td>nodePublishedItemCount</td>
+                <td>No</td>
+                <td>Count of published items</td>
+            </tr>
+            </tbody>
+        </table><h3 id="pubsubitem">PubSubItem</h3>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Parameter</th>
+                <th>Optional</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>id</td>
+                <td>No</td>
+                <td>The ID of the item</td>
+            </tr>
+            <tr>
+                <td>publisher</td>
+                <td>No</td>
+                <td>The JID of the publisher</td>
+            </tr>
+            <tr>
+                <td>creationDate</td>
+                <td>No</td>
+                <td>Creation date</td>
+            </tr>
+            <tr>
+                <td>isRawXMLPayload</td>
+                <td>No</td>
+                <td>Boolean indicating if payload is unparsed XML</td>
+            </tr>
+            <tr>
+                <td>payload</td>
+                <td>Yes</td>
+                <td>The payload object (parsed OmemoDevicesList or generic XML)</td>
             </tr>
             </tbody>
         </table><h3 id="sessions-count">Sessions count</h3>
