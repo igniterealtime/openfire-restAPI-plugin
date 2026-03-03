@@ -1,0 +1,7 @@
+git:
+  filters:
+  - filter_type: file
+    source_file: src/i18n/restapi_i18n.properties
+    file_format: UNICODEPROPERTIES
+    translation_files_expression: 'src/i18n/restapi_i18n_<lang>.properties'
+    source_language: en

@@ -1,28 +1,35 @@
+/*
+ * Copyright (c) 2022.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jivesoftware.openfire.plugin.rest.controller;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.ws.rs.core.Response;
-
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.jivesoftware.openfire.SessionManager;
 import org.jivesoftware.openfire.SharedGroupException;
 import org.jivesoftware.openfire.XMPPServer;
-import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupManager;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.lockout.LockOutManager;
 import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.dao.PropertyDAO;
-import org.jivesoftware.openfire.plugin.rest.entity.GroupEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.RosterEntities;
-import org.jivesoftware.openfire.plugin.rest.entity.RosterItemEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.UserEntities;
-import org.jivesoftware.openfire.plugin.rest.entity.UserEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.UserGroupsEntity;
-import org.jivesoftware.openfire.plugin.rest.entity.UserProperty;
+import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
@@ -34,32 +41,40 @@ import org.jivesoftware.openfire.user.User;
 import org.jivesoftware.openfire.user.UserAlreadyExistsException;
 import org.jivesoftware.openfire.user.UserManager;
 import org.jivesoftware.openfire.user.UserNotFoundException;
+import org.jivesoftware.openfire.vcard.VCardManager;
+import org.jivesoftware.util.JiveGlobals;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.StreamError;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * The Class UserServiceController.
  */
 public class UserServiceController {
-    private static Logger LOG = LoggerFactory.getLogger(UserServiceController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserServiceController.class);
 
     /** The Constant INSTANCE. */
-    public static final UserServiceController INSTANCE = new UserServiceController();
+    private static UserServiceController INSTANCE = null;
 
     /** The user manager. */
-    private UserManager userManager;
+    private final UserManager userManager;
 
     /** The roster manager. */
-    private RosterManager rosterManager;
+    private final RosterManager rosterManager;
 
     /** The server. */
-    private XMPPServer server;
+    private final XMPPServer server;
     
     /** The lock out manager. */
-    private LockOutManager lockOutManager;
+    private final LockOutManager lockOutManager;
+
+    private final VCardManager vcardManager;
 
     /**
      * Gets the single instance of UserServiceController.
@@ -67,11 +82,20 @@ public class UserServiceController {
      * @return single instance of UserServiceController
      */
     public static UserServiceController getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new UserServiceController();
+        }
         return INSTANCE;
     }
 
-    private static final PluginManager pluginManager = XMPPServer.getInstance().getPluginManager();
-    private static final RESTServicePlugin plugin = (RESTServicePlugin) pluginManager.getPlugin("restapi");
+    /**
+     * @param instance the mock/stub/spy controller to use.
+     * @deprecated - for test use only
+     */
+    @Deprecated
+    public static void setInstance(final UserServiceController instance) {
+        UserServiceController.INSTANCE = instance;
+    }
 
     /**
      * Instantiates a new user service controller.
@@ -81,11 +105,13 @@ public class UserServiceController {
         userManager = server.getUserManager();
         rosterManager = server.getRosterManager();
         lockOutManager = server.getLockOutManager();
+        vcardManager = server.getVCardManager();
     }
 
     public static void log(String logMessage) {
-        if (plugin.isServiceLoggingEnabled())
+        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
             LOG.info(logMessage);
+        }
     }
 
     /**
@@ -174,10 +200,15 @@ public class UserServiceController {
     /**
      * Gets the user entities.
      *
+     * When a property key (and possibly value) is provided, then the user that is returned is one for which the
+     * specified property has been defined.
+     *
      * @param userSearch
      *            the user search
-     * @param propertyValue
      * @param propertyKey
+     *            the property key (can be null)
+     * @param propertyValue
+     *            the property value (can be null)
      * @return the user entities
      * @throws ServiceException
      *              the service exception
@@ -257,7 +288,7 @@ public class UserServiceController {
         log("Get roster entities for user: " + username);
         Roster roster = getUserRoster(username);
 
-        List<RosterItemEntity> rosterEntities = new ArrayList<RosterItemEntity>();
+        List<RosterItemEntity> rosterEntities = new ArrayList<>();
         for (RosterItem rosterItem : roster.getRosterItems()) {
             RosterItemEntity rosterItemEntity = new RosterItemEntity(rosterItem.getJid().toBareJID(),
                     rosterItem.getNickname(), rosterItem.getSubStatus().getValue());
@@ -300,13 +331,11 @@ public class UserServiceController {
             // Roster item does not exist. Try to add it.
         }
 
-        if (roster != null) {
-            RosterItem rosterItem = roster.createRosterItem(jid, rosterItemEntity.getNickname(),
-                    rosterItemEntity.getGroups(), false, true);
-            UserUtils.checkSubType(rosterItemEntity.getSubscriptionType());
-            rosterItem.setSubStatus(RosterItem.SubType.getTypeFromInt(rosterItemEntity.getSubscriptionType()));
-            roster.updateRosterItem(rosterItem);
-        }
+        RosterItem rosterItem = roster.createRosterItem(jid, rosterItemEntity.getNickname(),
+                rosterItemEntity.getGroups(), false, true);
+        UserUtils.checkSubType(rosterItemEntity.getSubscriptionType());
+        rosterItem.setSubStatus(RosterItem.SubType.getTypeFromInt(rosterItemEntity.getSubscriptionType()));
+        roster.updateRosterItem(rosterItem);
     }
 
     /**
@@ -383,9 +412,18 @@ public class UserServiceController {
      */
     public List<String> getUserGroups(String username) throws ServiceException {
         log("Get user groups for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.GROUP_NOT_FOUND, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
         User user = getAndCheckUser(username);
         Collection<Group> groups = GroupManager.getInstance().getGroups(user);
-        List<String> groupNames = new ArrayList<String>();
+        List<String> groupNames = new ArrayList<>();
         for (Group group : groups) {
             groupNames.add(group.getName());
         }
@@ -406,7 +444,7 @@ public class UserServiceController {
     public void addUserToGroups(String username, UserGroupsEntity userGroupsEntity) throws ServiceException {
         if (userGroupsEntity != null) {
             log("Adding user: " + username + " to groups");
-            Collection<Group> groups = new ArrayList<Group>();
+            Collection<Group> groups = new ArrayList<>();
 
             for (String groupName : userGroupsEntity.getGroupNames()) {
                 Group group;
@@ -420,7 +458,7 @@ public class UserServiceController {
                 groups.add(group);
             }
             for (Group group : groups) {
-                group.getMembers().add(server.createJID(username, null));
+                group.getMembers().add(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
             }
         }
     }
@@ -443,7 +481,7 @@ public class UserServiceController {
             group = GroupController.getInstance().createGroup(new GroupEntity(groupName, ""));
         }
         
-        group.getMembers().add(server.createJID(username, null));
+        group.getMembers().add(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
     }
 
     /**
@@ -469,7 +507,7 @@ public class UserServiceController {
                             Response.Status.NOT_FOUND, e);
                 }
                 log("Removing user: " + username + " from the group: " + groupName);
-                group.getMembers().remove(server.createJID(username, null));
+                group.getMembers().remove(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
             }
         }
     }
@@ -490,7 +528,7 @@ public class UserServiceController {
             throw new ServiceException("Could not find group", groupName, ExceptionType.GROUP_NOT_FOUND,
                     Response.Status.NOT_FOUND, e);
         }
-        group.getMembers().remove(server.createJID(username, null));
+        group.getMembers().remove(username.contains("@") ? new JID(username) : XMPPServer.getInstance().createJID(username, null));
     }
 
     /**
@@ -507,7 +545,7 @@ public class UserServiceController {
     public UserEntities getUserEntitiesByProperty(String propertyKey, String propertyValue) throws ServiceException {
         log("Get user entities by property key : " + propertyKey + "and property value: " + propertyValue);
         List<String> usernames = PropertyDAO.getUsernameByProperty(propertyKey, propertyValue);
-        List<UserEntity> users = new ArrayList<UserEntity>();
+        List<UserEntity> users = new ArrayList<>();
         UserEntities userEntities = new UserEntities();
 
         for (String username : usernames) {
@@ -579,6 +617,84 @@ public class UserServiceController {
         } catch (UserNotFoundException e) {
             throw new ServiceException("Could not get user roster", username, ExceptionType.USER_NOT_FOUND_EXCEPTION,
                     Response.Status.NOT_FOUND, e);
+        }
+    }
+
+    /**
+     * Retrieves a vCard for a user.
+     *
+     * @param username The username for which to return a vcard
+     * @return A vCard (or null)
+     */
+    public Element getUserVCard(String username) throws ServiceException
+    {
+        log("Get user vCard for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.USER_NOT_FOUND_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        return vcardManager.getVCard(username);
+    }
+
+    /**
+     * Adds or updates a vCard for a user.
+     *
+     * @param username The username for which to return a vcard
+     * @param data The raw XML vCard data
+     */
+    public void setUserVCard(String username, String data) throws ServiceException
+    {
+        log("Set user vCard for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.USER_NOT_FOUND_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        try {
+            final Document document = DocumentHelper.parseText(data);
+            vcardManager.setVCard(username, document.getRootElement());
+        } catch (DocumentException e) {
+            throw new ServiceException("Could not parse the provided data as a vCard", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        } catch (UnsupportedOperationException e) {
+            throw new ServiceException("Cannot update vCards in the system, as the vCard system is configured to be read-only.", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
+        } catch (Exception e) {
+            throw new ServiceException("Unexpected problem while trying to update vCard.", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Removes a vCard for a user.
+     *
+     * @param username The username for which to return a vcard
+     */
+    public void deleteUserVCard(String username) throws ServiceException
+    {
+        log("Get user vCard for user: " + username);
+        if (username.contains("@")) {
+            final JID jid = new JID(username);
+            if (jid.getDomain().equals(XMPPServer.getInstance().getServerInfo().getXMPPDomain())) {
+                username = jid.getNode();
+            } else {
+                // Implementing this would require us to iterate over all groups, which is a performance nightmare.
+                throw new ServiceException("This service cannot be used for non-local users.", username, ExceptionType.USER_NOT_FOUND_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+        try {
+            vcardManager.deleteVCard(username);
+        } catch (UnsupportedOperationException e) {
+            throw new ServiceException("Cannot update vCards in the system, as the vCard system is configured to be read-only.", username, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
         }
     }
 }

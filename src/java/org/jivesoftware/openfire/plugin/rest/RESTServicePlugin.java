@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Jive Software. All rights reserved.
+ * Copyright (C) 2005-2008 Jive Software, 2022 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,23 @@
 
 package org.jivesoftware.openfire.plugin.rest;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
+import org.jivesoftware.admin.AuthCheckFilter;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
-import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
-import org.jivesoftware.openfire.plugin.rest.entity.SystemProperty;
-import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
-import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
+import org.jivesoftware.openfire.stats.StatisticsManager;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
 import org.jivesoftware.util.StringUtils;
 
-import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
+import java.io.File;
+import java.util.*;
 
 /**
  * The Class RESTServicePlugin.
  */
 public class RESTServicePlugin implements Plugin, PropertyEventListener {
-    
-    /** The Constant INSTANCE. */
-    public static final RESTServicePlugin INSTANCE = new RESTServicePlugin();
 
     private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
     public static final String SERVICE_LOGGING_ENABLED = "plugin.restapi.serviceLoggingEnabled";
@@ -75,15 +63,7 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     /** The custom authentication filter */
     private String customAuthFilterClassName;
 
-
-    /**
-     * Gets the single instance of RESTServicePlugin.
-     *
-     * @return single instance of RESTServicePlugin
-     */
-    public static RESTServicePlugin getInstance() {
-        return INSTANCE;
-    }
+    private final Set<String> registeredStatisticKeys = new HashSet<>();
 
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
@@ -98,7 +78,13 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         
         // See if Custom authentication filter has been defined
         customAuthFilterClassName = JiveGlobals.getProperty("plugin.restapi.customAuthFilter", "");
-        
+
+        // Start collecting statistics.
+        for (StatisticsFilter.RestResponseFamilyStatistic statistic : StatisticsFilter.generateAllFamilyStatisticInstances()) {
+            StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
+            registeredStatisticKeys.add(statistic.getKeyName());
+        }
+
         // See if the service is enabled or not.
         enabled = JiveGlobals.getBooleanProperty("plugin.restapi.enabled", false);
 
@@ -112,97 +98,28 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         setServiceLoggingEnabled(JiveGlobals.getBooleanProperty(SERVICE_LOGGING_ENABLED, false));
         // Listen to system property events
         PropertyEventDispatcher.addListener(this);
+
+        // Exclude this servlet from requering the user to login
+        AuthCheckFilter.addExclude(JerseyWrapper.SERVLET_URL);
     }
 
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#destroyPlugin()
      */
     public void destroyPlugin() {
+        // Stop registering statistics.
+        final Iterator<String> iter = registeredStatisticKeys.iterator();
+        while (iter.hasNext()) {
+            StatisticsManager.getInstance().removeStatistic(iter.next());
+            iter.remove();
+        }
+
+        // Release the excluded URL
+        AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
         // Stop listening to system property events
         PropertyEventDispatcher.removeListener(this);
     }
 
-    /**
-     * Gets the system properties.
-     *
-     * @return the system properties
-     */
-    public SystemProperties getSystemProperties() {
-        SystemProperties systemProperties = new SystemProperties();
-        List<SystemProperty> propertiesList = new ArrayList<SystemProperty>();
-        
-        for(String propertyKey : JiveGlobals.getPropertyNames()) {
-            String propertyValue = JiveGlobals.getProperty(propertyKey);
-            propertiesList.add(new SystemProperty(propertyKey, propertyValue));
-        }
-        systemProperties.setProperties(propertiesList);
-        return systemProperties;
-
-    }
-
-    /**
-     * Gets the system property.
-     *
-     * @param propertyKey the property key
-     * @return the system property
-     * @throws ServiceException the service exception
-     */
-    public SystemProperty getSystemProperty(String propertyKey) throws ServiceException {
-        String propertyValue = JiveGlobals.getProperty(propertyKey);
-        if(propertyValue != null) {
-        return new SystemProperty(propertyKey, propertyValue);
-        } else {
-            throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
-                    Response.Status.NOT_FOUND);
-        }
-    }
-    
-    /**
-     * Creates the system property.
-     *
-     * @param systemProperty the system property
-     */
-    public void createSystemProperty(SystemProperty systemProperty) {
-        JiveGlobals.setProperty(systemProperty.getKey(), systemProperty.getValue());
-    }
-    
-    /**
-     * Delete system property.
-     *
-     * @param propertyKey the property key
-     * @throws ServiceException the service exception
-     */
-    public void deleteSystemProperty(String propertyKey) throws ServiceException {
-        if(JiveGlobals.getProperty(propertyKey) != null) {
-            JiveGlobals.deleteProperty(propertyKey);
-        } else {
-            throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
-                    Response.Status.NOT_FOUND);
-        }
-    }
-    
-    /**
-     * Update system property.
-     *
-     * @param propertyKey the property key
-     * @param systemProperty the system property
-     * @throws ServiceException the service exception
-     */
-    public void updateSystemProperty(String propertyKey, SystemProperty systemProperty) throws ServiceException {
-        if(JiveGlobals.getProperty(propertyKey) != null) {
-            if(systemProperty.getKey().equals(propertyKey)) {
-                JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
-            } else {
-                throw new ServiceException("Path property name and entity property name doesn't match", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
-                        Response.Status.BAD_REQUEST);
-            }
-        } else {
-            throw new ServiceException("Could not find property for update", systemProperty.getKey(), ExceptionType.PROPERTY_NOT_FOUND,
-                    Response.Status.NOT_FOUND);
-        }
-    }
-
-    
     /**
      * Returns the loading status message.
      *

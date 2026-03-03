@@ -1,4 +1,24 @@
+/*
+ * Copyright (c) 2022.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jivesoftware.openfire.plugin.rest.entity;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.xmpp.packet.JID;
 
 import java.util.Date;
 import java.util.List;
@@ -13,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
         "modificationDate", "maxUsers", "persistent", "publicRoom", "registrationEnabled", "canAnyoneDiscoverJID",
         "canOccupantsChangeSubject", "canOccupantsInvite", "canChangeNickname", "logEnabled",
         "loginRestrictedToNickname", "membersOnly", "moderated", "broadcastPresenceRoles", "owners", "admins",
-        "members", "outcasts", "ownerGroups", "adminGroups", "memberGroups", "outcastGroups" })
+        "members", "outcasts", "ownerGroups", "adminGroups", "memberGroups", "outcastGroups", "allowPM" })
 public class MUCRoomEntity {
 
     private String roomName;
@@ -38,6 +58,7 @@ public class MUCRoomEntity {
     private boolean loginRestrictedToNickname;
     private boolean membersOnly;
     private boolean moderated;
+    private String allowPM;
 
     private List<String> broadcastPresenceRoles;
 
@@ -58,7 +79,7 @@ public class MUCRoomEntity {
 
     public MUCRoomEntity(String naturalName, String roomName, String description) {
         this.naturalName = naturalName;
-        this.roomName = roomName;
+        this.roomName = roomName == null ? null : JID.nodeprep(roomName);
         this.description = description;
     }
 
@@ -77,7 +98,7 @@ public class MUCRoomEntity {
     }
 
     public void setRoomName(String roomName) {
-        this.roomName = roomName;
+        this.roomName = roomName == null ? null : JID.nodeprep(roomName);;
     }
 
     @XmlElement
@@ -237,20 +258,33 @@ public class MUCRoomEntity {
         this.moderated = moderated;
     }
 
+    @XmlElement
+    @Schema(description = "Defines who is allowed to send private messages to other occupants. Must be one of \"anyone\", \"participants\", \"moderators\" or \"none\".", example = "anyone")
+    public String getAllowPM() {
+        return allowPM == null ? "anyone" : allowPM;
+    }
+
+    public void setAllowPM(String allowPM) {
+        this.allowPM = allowPM == null ? "anyone" : allowPM;
+    }
+
     @XmlElement(name = "broadcastPresenceRole")
     @XmlElementWrapper(name = "broadcastPresenceRoles")
+    @JsonProperty(value = "broadcastPresenceRoles")
     public List<String> getBroadcastPresenceRoles() {
         return broadcastPresenceRoles;
     }
 
     @XmlElementWrapper(name = "owners")
     @XmlElement(name = "owner")
+    @JsonProperty(value = "owners")
     public List<String> getOwners() {
         return owners;
     }
 
     @XmlElementWrapper(name = "ownerGroups")
     @XmlElement(name = "ownerGroup")
+    @JsonProperty(value = "ownerGroups")
     public List<String> getOwnerGroups() {
         return ownerGroups;
     }
@@ -265,13 +299,15 @@ public class MUCRoomEntity {
 
     @XmlElementWrapper(name = "members")
     @XmlElement(name = "member")
+    @JsonProperty(value = "members")
     public List<String> getMembers() {
         return members;
     }
 
     @XmlElementWrapper(name = "memberGroups")
     @XmlElement(name = "memberGroup")
-    public List<String> getmemberGroups() {
+    @JsonProperty(value = "memberGroups")
+    public List<String> getMemberGroups() {
         return memberGroups;
     }
 
@@ -285,13 +321,15 @@ public class MUCRoomEntity {
 
     @XmlElementWrapper(name = "outcasts")
     @XmlElement(name = "outcast")
+    @JsonProperty(value = "outcasts")
     public List<String> getOutcasts() {
         return outcasts;
     }
 
     @XmlElementWrapper(name = "outcastGroups")
     @XmlElement(name = "outcastGroup")
-    public List<String> getoutcastGroups() {
+    @JsonProperty(value = "outcastGroups")
+    public List<String> getOutcastGroups() {
         return outcastGroups;
     }
 
@@ -305,13 +343,15 @@ public class MUCRoomEntity {
 
     @XmlElementWrapper(name = "admins")
     @XmlElement(name = "admin")
+    @JsonProperty(value = "admins")
     public List<String> getAdmins() {
         return admins;
     }
 
     @XmlElementWrapper(name = "adminGroups")
     @XmlElement(name = "adminGroup")
-    public List<String> getadminGroups() {
+    @JsonProperty(value = "adminGroups")
+    public List<String> getAdminGroups() {
         return adminGroups;
     }
 

@@ -6,8 +6,8 @@
     <description>Allows extended administration over a RESTful API.</description>
     <author>Soehnke Mannott</author>
     <version>${project.version}</version>
-    <date>02/24/2020</date>
-    <minServerVersion>4.1.1</minServerVersion>
+    <date>2025-10-02</date>
+    <minServerVersion>5.0.0</minServerVersion>
     <adminconsole>
         <tab id="tab-server">
             <sidebar id="sidebar-server-settings">

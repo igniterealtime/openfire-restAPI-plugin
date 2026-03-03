@@ -26,6 +26,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.group.Group;
 import org.jivesoftware.openfire.group.GroupAlreadyExistsException;
 import org.jivesoftware.openfire.group.GroupManager;
+import org.jivesoftware.openfire.group.GroupNameInvalidException;
 import org.jivesoftware.openfire.group.GroupNotFoundException;
 import org.jivesoftware.openfire.lockout.LockOutManager;
 import org.jivesoftware.openfire.roster.Roster;
@@ -43,7 +44,7 @@ import org.xmpp.packet.JID;
  * @author Justin Hunt
  */
 public class UserServiceLegacyController {
-    
+
     /** The Constant INSTANCE. */
     public static final UserServiceLegacyController INSTANCE = new UserServiceLegacyController();
     
@@ -88,8 +89,9 @@ public class UserServiceLegacyController {
      * @throws GroupNotFoundException the group not found exception
      */
     public void createUser(String username, String password, String name, String email, String groupNames)
-            throws UserAlreadyExistsException, GroupAlreadyExistsException, UserNotFoundException,
-            GroupNotFoundException {
+        throws UserAlreadyExistsException, GroupAlreadyExistsException, UserNotFoundException,
+        GroupNotFoundException, GroupNameInvalidException
+    {
         userManager.createUser(username, password, name, email);
         userManager.getUser(username);
 
@@ -106,7 +108,7 @@ public class UserServiceLegacyController {
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
                     group = GroupManager.getInstance().createGroup(groupName);
-                    group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
                     group.getProperties().put("sharedRoster.displayName", groupName);
                     group.getProperties().put("sharedRoster.groupList", "");
                 }
@@ -166,7 +168,8 @@ public class UserServiceLegacyController {
      * @throws GroupAlreadyExistsException the group already exists exception
      */
     public void updateUser(String username, String password, String name, String email, String groupNames)
-            throws UserNotFoundException, GroupAlreadyExistsException {
+        throws UserNotFoundException, GroupAlreadyExistsException, GroupNameInvalidException
+    {
         User user = getUser(username);
         if (password != null)
             user.setPassword(password);
@@ -188,7 +191,7 @@ public class UserServiceLegacyController {
                 } catch (GroupNotFoundException e) {
                     // Create this group ;
                     group = GroupManager.getInstance().createGroup(groupName);
-                    group.getProperties().put("sharedRoster.showInRoster", "onlyGroup");
+                    group.getProperties().put("sharedRoster.showInRoster", "nobody");
                     group.getProperties().put("sharedRoster.displayName", groupName);
                     group.getProperties().put("sharedRoster.groupList", "");
                 }

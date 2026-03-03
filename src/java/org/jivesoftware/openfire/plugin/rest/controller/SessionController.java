@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2022-2024 Ignite Realtime Foundation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jivesoftware.openfire.plugin.rest.controller;
 
 import java.net.UnknownHostException;
@@ -114,14 +130,14 @@ public class SessionController {
             }
 
             String status = "";
-            if (clientSession.getStatus() == Session.STATUS_CLOSED) {
+            if (clientSession.getStatus() == Session.Status.CLOSED) {
                 status = "Closed";
-            } else if (clientSession.getStatus() == Session.STATUS_CONNECTED) {
+            } else if (clientSession.getStatus() == Session.Status.CONNECTED) {
                 status = "Connected";
-            } else if (clientSession.getStatus() == Session.STATUS_AUTHENTICATED) {
+            } else if (clientSession.getStatus() == Session.Status.AUTHENTICATED) {
                 status = "Authenticated";
             } else {
-                status = "Unkown";
+                status = "Unknown";
             }
             session.setSessionStatus(status);
 
@@ -149,12 +165,12 @@ public class SessionController {
                 session.setHostAddress(clientSession.getHostAddress());
                 session.setHostName(clientSession.getHostName());
             } catch (UnknownHostException e) {
-                LOG.error("UnknownHostException", e);
+                LOG.debug("UnknownHostException", e);
             }
 
             session.setCreationDate(clientSession.getCreationDate());
             session.setLastActionDate(clientSession.getLastActiveDate());
-            session.setSecure(clientSession.isSecure());
+            session.setSecure(clientSession.isEncrypted());
 
             sessions.add(session);
         }

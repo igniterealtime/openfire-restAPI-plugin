@@ -44,6 +44,135 @@
 REST API Plugin Changelog
 </h1>
 
+<p><b>1.12.1</b> (to be determined)</p>
+<ul>
+    <li>[<a href="https://github.com/igniterealtime/openfire-restAPI-plugin/issues/213">#213</a>] - Improve setting a subject in a chat room</li>
+    <li>[<a href="https://github.com/igniterealtime/openfire-restAPI-plugin/issues/217">#217</a>] - Add Hurl e2e tests, and CI to run them</li>
+</ul>
+
+<p><b>1.12.0</b> July 4, 2025</p>
+<ul>
+    <li>Now requires Openfire 5.0.0 or later</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/7'>#7</a>] - Add endpoints that can get, set and delete user vCards.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/200'>#200</a>] - Fix compatibility issue with Openfire 4.9.0.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/203'>#203</a>] - Reduce log level verbosity for some errors.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/208'>#208</a>] - Fix compatibility issue with Openfire 5.0.0, update jersey to 2.45 and swagger to 2.2.31.</li>
+</ul>
+
+<p><b>1.11.0</b> June 25, 2024</p>
+<ul>
+    <li>Now requires Openfire 4.8.0 or later</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/188'>#188</a>] - Fix issues with MUC room data consistency in an Openfire cluster</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/190'>#190</a>] - Readiness and liveness probes (broken since openfire 4.8.0)</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/192'>#192</a>] - Fix issue to support swagger updating user entity</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/195'>#195</a>] - Fix API incompatibilities with Openfire 4.8.0</li>
+</ul>
+
+<p><b>1.10.2</b> November 20, 2023</p>
+<ul>
+    <li>Added Ukrainian (uk_UA) translation, created and provided by Yurii Savchuk (svais) and his son Vladislav Savchuk (Bruhmozavr)!</li>
+    <li>Updated setup instructions in the readme</li>
+</ul>
+
+<p><b>1.10.1</b> November 9, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/159'>#159</a>] - Fix issues with duplicated MUC room affiliations</li>
+</ul>
+
+<p><b>1.10.0</b> September 29, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/155'>#155</a>] - Add statistics for endpoint responses</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/153'>#153</a>] - Remove unused static instance of RESTServicePlugin</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/150'>#150</a>] - Ensure MUC room names are normalized</li>
+</ul>
+
+<p><b>1.9.1</b> August 4, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/148'>#148</a>] - Example of MUC invite contains escaped characters</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/146'>#146</a>] - Chatroom 'affiliation' URL template clash</li>
+</ul>
+
+<p><b>1.9.0</b> August 4, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/141'>#141</a>] - Remove boilerplate code for managing MUC room affiliations</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/136'>#136</a>] - Implement group role handling when creating/updating a room</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/130'>#130</a>] - Add endpoint to create a new MUC service</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/129'>#129</a>] - Add endpoint(s) to invite users to a chatroom</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/128'>#128</a>] - Modify endpoints to add 'send invitations to affiliated users' as optional functionality</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/127'>#127</a>] - Add endpoint that allows for more than one MUC room to be created with one request</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/33'>#33</a>] - Add 'allowPM' to representation of MUC room.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/15'>#15</a>] - Fix group-based affiliations with MUC rooms.</li>
+</ul>
+
+<p><b>1.8.3</b> July 19, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/124'>#124</a>] - Update dependency-check-maven to 7.1.1</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/123'>#123</a>] - Suppress false positive in Dependency Check</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/122'>#122</a>] - Update mockito to 4.6.1</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/121'>#121</a>] - Update Swagger to 2.2.1</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/120'>#120</a>] - Update Jersey to 2.36</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/118'>#118</a>] - Cannot retrieve full list of rooms following #113</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/113'>#113</a>] - MUC search including naturalName</li>
+</ul>
+
+<p><b>1.8.2</b> June 27, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/30'>#30</a>] - Update cache when creating or updating MUCs</li>
+</ul>
+
+<p><b>1.8.1</b> June 23, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/108'>#108</a>] - On existence (HEAD) check, do not log absence of entity verbosely.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/105'>#105</a>] - New endpoints for bulk operations on MUC room affiliations.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/102'>#102</a>] - Reduce log level of error responses.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/99'>#99</a>] - Fix hard-coded link to localhost for OpenAPI yaml link in docs.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/96'>#96</a>] - Don't require auth for readiness/liveness endpoints</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/74'>#74</a>] - Return HTTP status code 404 instead of 500 when passing incorrect MUC service/room name</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/40'>#40</a>] - When creating or updating a group, use the members and admins that are provided in the input data.</li>
+</ul>
+
+<p><b>1.8.0</b> April 6, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/76'>#76</a>] - Add a clustering status endpoint</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/92'>#92</a>] - Add endpoints for readiness and liveness.</li>
+</ul>
+
+<p><b>1.7.1</b> February 14, 2022</p>
+<ul>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/88'>#88</a>] - Fix backwards compatibility issues introduced in release 1.7.0.</li>
+</ul>
+
+<p><b>1.7.0</b> January 19, 2022</p>
+<ul>
+    <li>Requires Openfire 4.7.0</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/1'>#1</a>] - Migrate to Swagger.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/25'>#25</a>] - Java 11 Jaxb issue</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/39'>#39</a>] - Requests fail when using XML as accept type on Openfire servers running java 11</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/52'>#52</a>] - Create groups as private by default, and add config to allow roster sharing if desired</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/67'>#67</a>] - Updated Jersey dependency to 2.35.</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/68'>#68</a>] - Fix for incompatibility with Openfire v4.7.0-beta and later</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/72'>#72</a>] - Add license information</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/77'>#77</a>] - Add dependency checking</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/79'>#79</a>] - Ensure consistent JSON representation</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/80'>#80</a>] - Expose all Openfire system properties, not only user-defined ones</li>
+</ul>
+
+<p><b>1.6.0</b> June 18, 2021</p>
+<ul>
+    <li>This plugin now requires Openfire 4.6.1 or later</li>
+    <li>[<a href='https://github.com/igniterealtime/openfire-restAPI-plugin/issues/56'>#56</a>] - Fix for incompatibility with Openfire v4.6.1 and later</li>
+</ul>
+
+<p><b>1.5.0</b> March 5th, 2021</p>
+<ul>
+    <li>Openfire 4.6 Compatibility (MUCRoom.send signature)</li>
+</ul>    
+    
+<p><b>1.4.1</b></p>
+<ul>
+    <li>Upgrading to jackson version: 2.12.1</li>
+</ul>
+
 <p><b>1.4.0</b> -- February 24th, 2020</p>
 <ul>
     <li>Upgrading to jackson version: 1.9.11</li>

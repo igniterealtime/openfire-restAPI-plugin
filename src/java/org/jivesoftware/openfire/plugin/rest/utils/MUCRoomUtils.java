@@ -1,11 +1,35 @@
+/*
+ * Copyright (c) 2022.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jivesoftware.openfire.plugin.rest.utils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jivesoftware.openfire.group.Group;
+import org.jivesoftware.openfire.muc.Affiliation;
+import org.jivesoftware.openfire.muc.MUCOccupant;
+import org.jivesoftware.openfire.muc.Role;
+import org.jivesoftware.openfire.muc.MUCRoom;
 import org.xmpp.packet.JID;
+import org.xmpp.packet.Packet;
 
 /**
  * The Class MUCRoomUtils.
@@ -64,5 +88,74 @@ public class MUCRoomUtils {
             result.add(new JID(jidString));
         }
         return result;
+    }
+
+    /**
+     * Convert Role instances to string list.
+     *
+     * @param roles
+     *            the roles
+     * @return the array list<string>
+     */
+    public static List<String> convertRolesToStringList(Collection<Role> roles) {
+        return roles.stream()
+            .map(Role::toString)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Convert string instances to a Role list.
+     *
+     * @param roles
+     *            the roles
+     * @return the array list<Role>
+     */
+    public static List<Role> convertStringsToRoles(Collection<String> roles) {
+        return roles.stream()
+            .map(Role::valueOf)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a Affiliation type for a String value that potentially is a plural (eg: Affiliation.member for 'members').
+     *
+     * @param affiliation The value for which to return an Affiliation type.
+     * @return A string representation of an affiliation (can be in plural form).
+     */
+    public static Affiliation convertPluralStringToAffiliation(String affiliation) {
+        return Affiliation.valueOf( affiliation.endsWith("s") ? affiliation.substring(0, affiliation.length()-1) : affiliation);
+    }
+
+    /**
+     * Wrapper around MUCRoom::send
+     *
+     * Attempts to call the legacy implementation of MUCRoom::send, if an Openfire version < 4.6 is used.
+     */
+    public static void send(MUCRoom room, Packet packet, MUCOccupant role)
+        throws InvocationTargetException, IllegalAccessException {
+        Method legacySend = legacySendMethod();
+
+        if (legacySend != null) {
+            legacySend.invoke(room, packet); // Openfire < 4.6
+        } else {
+            room.send(packet, role); // Openfire >= 4.6
+        }
+    }
+
+    /**
+     * Attempts to find the legacy MUCRoom::send method signature
+     * depending on the used Openfire version via reflection.
+     *
+     * Openfire versions < 4.6 offer the MUCRoom::send function with one parameters,
+     * while later versions expect two.
+     *
+     * @return the legacy MUCRoom::send method, if present, else null
+     */
+    private static Method legacySendMethod() {
+        try {
+            return MUCRoom.class.getMethod("send", Packet.class);
+        } catch (NoSuchMethodException e) {
+            return null;
+        }
     }
 }
