@@ -100,6 +100,10 @@ public class JerseyWrapper extends ServletContainer {
         prc.getClasses().add(MessageService.class);
         prc.getClasses().add(SecurityAuditLogService.class);
 
+        //Custom Start
+        prc.getClasses().add(PubSubService.class);
+        // Custom End
+
         prc.getClasses().add(RESTExceptionMapper.class);
     }
 
