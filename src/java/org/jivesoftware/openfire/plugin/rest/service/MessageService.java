@@ -26,7 +26,7 @@ public class MessageService {
         messageController.sendBroadcastMessage(messageEntity);
         return Response.status(Response.Status.CREATED).build();
     }
-
+    @POST
     @Path("/user/{address}")
     public Response sendMessage(
         MessageEntity messageEntity,
@@ -36,6 +36,7 @@ public class MessageService {
         return Response.status(Response.Status.CREATED).build();
     }
 
+    @POST
     @Path("/user/{address}/{resource}")
     public Response sendMessageWithResouce(
         MessageEntity messageEntity,
