@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Jive Software, 2022 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2005-2008 Jive Software, 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,11 @@ package org.jivesoftware.openfire.plugin.rest;
 import org.jivesoftware.admin.AuthCheckFilter;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.keystore.CertificateStore;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.openfire.stats.StatisticsManager;
+import org.jivesoftware.util.CertificateEventListener;
+import org.jivesoftware.util.CertificateManager;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.PropertyEventDispatcher;
 import org.jivesoftware.util.PropertyEventListener;
@@ -32,7 +35,7 @@ import java.util.*;
 /**
  * The Class RESTServicePlugin.
  */
-public class RESTServicePlugin implements Plugin, PropertyEventListener {
+public class RESTServicePlugin implements Plugin, PropertyEventListener, CertificateEventListener {
 
     private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
     public static final String SERVICE_LOGGING_ENABLED = "plugin.restapi.serviceLoggingEnabled";
@@ -99,6 +102,9 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         // Listen to system property events
         PropertyEventDispatcher.addListener(this);
 
+        // Re-register the URL exclusion if the admin console restarts (e.g. on certificate change)
+        CertificateManager.addListener(this);
+
         // Exclude this servlet from requering the user to login
         AuthCheckFilter.addExclude(JerseyWrapper.SERVLET_URL);
     }
@@ -118,6 +124,17 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
         // Stop listening to system property events
         PropertyEventDispatcher.removeListener(this);
+        CertificateManager.removeListener(this);
+    }
+
+    /**
+     * Re-registers the URL exclusion with the admin console's AuthCheckFilter after a certificate
+     * store change, which triggers an admin console restart that would otherwise clear plugin-
+     * registered excludes.
+     */
+    @Override
+    public void storeContentChanged(CertificateStore store) {
+        AuthCheckFilter.addExclude(JerseyWrapper.SERVLET_URL);
     }
 
     /**
