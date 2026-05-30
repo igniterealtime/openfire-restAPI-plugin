@@ -82,6 +82,18 @@ public class SessionController {
     }
     
     /**
+     * Gets the number of all sessions.
+     *
+     * @return the number of all sessions
+     * @throws ServiceException the service exception
+     */
+    public SessionEntities getAllSessionsLoad() throws ServiceException {
+        Collection<ClientSession> clientSessions = SessionManager.getInstance().getSessions();
+        SessionEntities sessionEntities = convertToSessionEntitiesLoad(clientSessions);
+        return sessionEntities;
+    }
+
+    /**
      * Removes the user sessions.
      *
      * @param username the username
@@ -93,6 +105,34 @@ public class SessionController {
             session.deliverRawText(error.toXML());
             session.close();
         }
+    }
+
+    /**
+     * Convert to session entities.
+     *
+     * @param clientSessions the client sessions
+     * @return the session entities
+     * @throws ServiceException the service exception
+     */
+    private SessionEntities convertToSessionEntitiesLoad(Collection<ClientSession> clientSessions) throws ServiceException {
+        int load = 0;
+
+        List<SessionEntity> sessions = new ArrayList<SessionEntity>();
+        SessionEntities sessionEntities = new SessionEntities(sessions);
+
+        for (ClientSession clientSession : clientSessions) {
+            if (clientSession instanceof LocalClientSession) {
+              ++load;
+            }
+        }
+
+        SessionEntity session = new SessionEntity();
+
+        session.setLoad(load);
+
+        sessions.add(session);
+
+        return sessionEntities;
     }
 
     /**
@@ -160,7 +200,11 @@ public class SessionController {
                 }
                 session.setPriority(clientSession.getPresence().getPriority());
             }
-            
+
+            // Load is set to the real local load of each server when specific
+            // REST query is received.
+            session.setLoad(0);
+
             try {
                 session.setHostAddress(clientSession.getHostAddress());
                 session.setHostName(clientSession.getHostName());

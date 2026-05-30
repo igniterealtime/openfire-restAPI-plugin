@@ -54,6 +54,13 @@ public class SessionService {
     }
     
     @GET
+    @Path("/load")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public SessionEntities getAllSessionsLoad() throws ServiceException {
+        return sessionController.getAllSessionsLoad();
+    }
+
+    @GET
     @Path("/{username}")
     @Operation( summary = "Get user sessions",
         description = "Retrieve all live client sessions for a particular user.",
