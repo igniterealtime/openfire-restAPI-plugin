@@ -49,9 +49,7 @@ import org.xmpp.packet.JID;
 import org.xmpp.packet.StreamError;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * The Class UserServiceController.
@@ -377,6 +375,39 @@ public class UserServiceController {
         roster.updateRosterItem(rosterItem);
     }
 
+    public Map<String, Integer> syncRosterEntities(String username, RosterEntities entities) throws UserNotFoundException,
+        ServiceException, UserAlreadyExistsException, SharedGroupException {
+        Map<String, Integer> ret = new HashMap<>();
+        ret.put("inserts", 0);
+        ret.put("updates", 0);
+
+        getAndCheckUser(username);
+        Roster roster = getUserRoster(username);
+        for(RosterItemEntity rosterItemEntity : entities.getRoster()) {
+            JID jid = new JID(rosterItemEntity.getJid());
+            RosterItem rosterItem = roster.getRosterItem(jid);
+            String key;
+            if(rosterItem != null) {
+                key = "updates";
+                if (rosterItemEntity.getNickname() != null) {
+                    rosterItem.setNickname(rosterItemEntity.getNickname());
+                }
+                if (rosterItemEntity.getGroups() != null) {
+                    rosterItem.setGroups(rosterItemEntity.getGroups());
+                }
+            }else{
+                key = "inserts";
+                rosterItem = roster.createRosterItem(jid, rosterItemEntity.getNickname(),
+                    rosterItemEntity.getGroups(), false, true);
+            }
+            UserUtils.checkSubType(rosterItemEntity.getSubscriptionType());
+            rosterItem.setSubStatus(RosterItem.SubType.getTypeFromInt(rosterItemEntity.getSubscriptionType()));
+            roster.updateRosterItem(rosterItem);
+            int count = ret.get(key);
+            ret.put(key, count + 1);
+        }
+        return ret;
+    }
     /**
      * Delete roster item.
      *
