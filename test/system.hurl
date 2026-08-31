@@ -38,6 +38,16 @@ xpath "/properties/property" count > 150
 # TODO test that property with attribute key=admin.authorizedJIDs exists
 # TODO test that property with attribute key=plugin.restapi.enabled has value=true
 
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/242
+# abstractGroupProvider.shared.recursive is registered through Openfire's SystemProperty API with a default value.
+# It used to 404 when queried individually, as that lookup checked JiveGlobals only.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/abstractGroupProvider.shared.recursive
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "/property" count == 1
+xpath "string(/property/@value)" == "false"
+
 POST http://localhost:9090/plugins/restapi/v1/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
