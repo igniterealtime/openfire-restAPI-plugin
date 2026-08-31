@@ -97,7 +97,8 @@ public class SystemController {
      * @throws ServiceException the service exception
      */
     public org.jivesoftware.openfire.plugin.rest.entity.SystemProperty getSystemProperty(String propertyKey) throws ServiceException {
-        String propertyValue = JiveGlobals.getProperty(propertyKey);
+        final Optional<SystemProperty> systemProperty = SystemProperty.getProperty(propertyKey);
+        final String propertyValue = systemProperty.isPresent() ? systemProperty.get().getValueAsSaved() : JiveGlobals.getProperty(propertyKey);
         if(propertyValue != null) {
             return new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(propertyKey, propertyValue);
         } else {
