@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public class UserServiceLegacy {
         // type = type == null ? "image" : type;
 
         // Check that our plugin is enabled.
-        if (!plugin.isEnabled()) {
+        if (!RESTServicePlugin.ENABLED.getValue()) {
             LOG.warn("User service plugin is disabled: " + request.getQueryString());
             replyError("UserServiceDisabled", response, out);
             return Response.status(200).build();
