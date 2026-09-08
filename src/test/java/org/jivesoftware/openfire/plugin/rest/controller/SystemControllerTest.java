@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -74,6 +75,28 @@ public class SystemControllerTest {
 
             assertEquals(key, result.getKey());
             assertEquals("false", result.getValue());
+        }
+    }
+
+    /**
+     * A property that was registered (by Openfire, or by a plugin) using the {@link SystemProperty} API, but that
+     * has never been given an explicit value, should be returned using its default value, instead of causing a 404.
+     * This test uses the edge case where the default value is not set (and thus is {@code null}).
+     */
+    @Test
+    public void testGetSystemPropertyThatIsRegisteredButUnsetWithDefaultNotSet() throws Exception
+    {
+        final String key = "foo.bar.xyz";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class)) {
+            final SystemProperty<?> registeredProperty = mock(SystemProperty.class);
+            when(registeredProperty.getValueAsSaved()).thenReturn(null);
+            systemPropertyMock.when(() -> SystemProperty.getProperty(eq(key))).thenReturn(Optional.of(registeredProperty));
+
+            final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty result = systemController.getSystemProperty(key);
+
+            assertEquals(key, result.getKey());
+            assertNull(result.getValue());
         }
     }
 
