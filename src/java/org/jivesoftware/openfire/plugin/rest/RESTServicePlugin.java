@@ -81,6 +81,16 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         .build();
 
     /**
+     * List of IP addresses that are allowed to access the REST API services.
+     */
+    public static final SystemProperty<Set<String>> ALLOWED_IPS = SystemProperty.Builder.ofType(Set.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.allowedIPs")
+        .setDefaultValue(Collections.emptySet())
+        .setDynamic(true)
+        .buildSet(String.class);
+
+    /**
      * The types of authentication mechanisms for REST service calls.
      */
     public enum AuthType
@@ -100,9 +110,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
          */
         custom
     }
-
-    /** The allowed i ps. */
-    private Collection<String> allowedIPs;
     
     private final Set<String> registeredStatisticKeys = new HashSet<>();
 
@@ -121,10 +128,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
             registeredStatisticKeys.add(statistic.getKeyName());
         }
-
-        // Get the list of IP addresses that can use this service. An empty list
-        // means that this filter is disabled.
-        allowedIPs = StringUtils.stringToCollection(JiveGlobals.getProperty("plugin.restapi.allowedIPs", ""));
 
         // Listen to system property events
         PropertyEventDispatcher.addListener(this);
@@ -165,42 +168,17 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     public String loadAuthenticationFilter(String customAuthFilterClassName) {
         return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
     }
-    
-    /**
-     * Gets the allowed i ps.
-     *
-     * @return the allowed i ps
-     */
-    public Collection<String> getAllowedIPs() {
-        return allowedIPs;
-    }
-
-    /**
-     * Sets the allowed i ps.
-     *
-     * @param allowedIPs the new allowed i ps
-     */
-    public void setAllowedIPs(Collection<String> allowedIPs) {
-        JiveGlobals.setProperty("plugin.restapi.allowedIPs", StringUtils.collectionToString(allowedIPs));
-        this.allowedIPs = allowedIPs;
-    }
 
     /* (non-Javadoc)
      * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
      */
     public void propertySet(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.allowedIPs")) {
-            this.allowedIPs = StringUtils.stringToCollection((String) params.get("value"));
-        }
     }
 
     /* (non-Javadoc)
      * @see org.jivesoftware.util.PropertyEventListener#propertyDeleted(java.lang.String, java.util.Map)
      */
     public void propertyDeleted(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.allowedIPs")) {
-            this.allowedIPs = Collections.emptyList();
-        }
     }
 
     /* (non-Javadoc)

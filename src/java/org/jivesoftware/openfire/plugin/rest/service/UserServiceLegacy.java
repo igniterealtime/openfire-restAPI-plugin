@@ -73,7 +73,7 @@ public class UserServiceLegacy {
         // Printwriter for writing out responses to browser
         PrintWriter out = response.getWriter();
 
-        if (!plugin.getAllowedIPs().isEmpty()) {
+        if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
             // Get client's IP address
             String ipAddress = request.getHeader("x-forwarded-for");
             if (ipAddress == null) {
@@ -85,7 +85,7 @@ public class UserServiceLegacy {
                     }
                 }
             }
-            if (!plugin.getAllowedIPs().contains(ipAddress)) {
+            if (!RESTServicePlugin.ALLOWED_IPS.getValue().contains(ipAddress)) {
                 LOG.warn("User service rejected service to IP address: " + ipAddress);
                 replyError("RequestNotAuthorised", response, out);
                 return Response.status(200).build();
