@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class AuthFilter implements ContainerRequestFilter {
             return;
         }
 
-        if (!plugin.isEnabled()) {
+        if (!RESTServicePlugin.ENABLED.getValue()) {
             LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);
         }

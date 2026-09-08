@@ -60,11 +60,18 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         .setDynamic(true)
         .build();
 
+    /**
+     * Enables or disables the processing of REST API service requests.
+     */
+    public static final SystemProperty<Boolean> ENABLED = SystemProperty.Builder.ofType(Boolean.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.enabled")
+        .setDynamic(true)
+        .setDefaultValue(false)
+        .build();
+
     /** The allowed i ps. */
     private Collection<String> allowedIPs;
-    
-    /** The enabled. */
-    private boolean enabled;
 
     /** The http auth. */
     private String httpAuth;
@@ -86,9 +93,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
             registeredStatisticKeys.add(statistic.getKeyName());
         }
-
-        // See if the service is enabled or not.
-        enabled = JiveGlobals.getBooleanProperty("plugin.restapi.enabled", false);
 
         // See if the HTTP Basic Auth is enabled or not.
         httpAuth = JiveGlobals.getProperty("plugin.restapi.httpAuth", "basic");
@@ -157,28 +161,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     }
 
     /**
-     * Returns true if the user service is enabled. If not enabled, it will not
-     * accept requests to create new accounts.
-     *
-     * @return true if the user service is enabled.
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Enables or disables the user service. If not enabled, it will not accept
-     * requests to create new accounts.
-     *
-     * @param enabled
-     *            true if the user service should be enabled.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        JiveGlobals.setProperty("plugin.restapi.enabled", enabled ? "true" : "false");
-    }
-
-    /**
      * Gets the http authentication mechanism.
      *
      * @return the http authentication mechanism
@@ -201,9 +183,7 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
      */
     public void propertySet(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.enabled")) {
-            this.enabled = Boolean.parseBoolean((String) params.get("value"));
-        } else if (property.equals("plugin.restapi.allowedIPs")) {
+        if (property.equals("plugin.restapi.allowedIPs")) {
             this.allowedIPs = StringUtils.stringToCollection((String) params.get("value"));
         } else if (property.equals("plugin.restapi.httpAuth")) {
             this.httpAuth = (String) params.get("value");
@@ -214,9 +194,7 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      * @see org.jivesoftware.util.PropertyEventListener#propertyDeleted(java.lang.String, java.util.Map)
      */
     public void propertyDeleted(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.enabled")) {
-            this.enabled = false;
-        } else if (property.equals("plugin.restapi.allowedIPs")) {
+        if (property.equals("plugin.restapi.allowedIPs")) {
             this.allowedIPs = Collections.emptyList();
         } else if (property.equals("plugin.restapi.httpAuth")) {
             this.httpAuth = "basic";
