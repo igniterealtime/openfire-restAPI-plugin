@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2022-2026 Ignite Realtime Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ public class SystemController {
     }
 
     public static void log(String logMessage) {
-        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
+        if (RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue()) {
             LOG.info(logMessage);
         }
     }

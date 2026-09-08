@@ -72,7 +72,7 @@
             plugin.setHttpAuth(httpAuth);
             plugin.setAllowedIPs(StringUtils.stringToCollection(allowedIPs));
             plugin.setCustomAuthFiIterClassName(customAuthFilterClassName);
-            plugin.setServiceLoggingEnabled(loggingEnabled);
+            RESTServicePlugin.SERVICE_LOGGING_ENABLED.setValue(loggingEnabled);
 
             if(is2Reload) {
                 String pluginName  = PluginMetadataHelper.getName(plugin);
@@ -93,7 +93,7 @@
     httpAuth = plugin.getHttpAuth();
     allowedIPs = StringUtils.collectionToString(plugin.getAllowedIPs());
     customAuthFilterClassName = plugin.getCustomAuthFilterClassName();
-    loggingEnabled = plugin.isServiceLoggingEnabled();
+    loggingEnabled = RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue();
 %>
 
 <html>

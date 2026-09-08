@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Jive Software, 2022 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2005-2008 Jive Software, 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,25 +41,23 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         .setEncrypted(true)
         .build();
 
+    /**
+     * Enables or disables additional logging of REST API service calls.
+     */
+    public static final SystemProperty<Boolean> SERVICE_LOGGING_ENABLED = SystemProperty.Builder.ofType(Boolean.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.serviceLoggingEnabled")
+        .setDynamic(true)
+        .setDefaultValue(false)
+        .build();
+
     private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
-    public static final String SERVICE_LOGGING_ENABLED = "plugin.restapi.serviceLoggingEnabled";
 
     /** The allowed i ps. */
     private Collection<String> allowedIPs;
     
     /** The enabled. */
     private boolean enabled;
-
-    public boolean isServiceLoggingEnabled() {
-        return serviceLoggingEnabled;
-    }
-
-    public void setServiceLoggingEnabled(boolean serviceLoggingEnabled) {
-        JiveGlobals.setProperty(SERVICE_LOGGING_ENABLED, Boolean.toString(serviceLoggingEnabled));
-        this.serviceLoggingEnabled = serviceLoggingEnabled;
-    }
-
-    private boolean serviceLoggingEnabled;
 
     /** The http auth. */
     private String httpAuth;
@@ -98,7 +96,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         // means that this filter is disabled.
         allowedIPs = StringUtils.stringToCollection(JiveGlobals.getProperty("plugin.restapi.allowedIPs", ""));
 
-        setServiceLoggingEnabled(JiveGlobals.getBooleanProperty(SERVICE_LOGGING_ENABLED, false));
         // Listen to system property events
         PropertyEventDispatcher.addListener(this);
 
