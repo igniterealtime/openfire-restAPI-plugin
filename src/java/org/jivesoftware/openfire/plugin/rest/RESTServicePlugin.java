@@ -51,7 +51,14 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         .setDefaultValue(false)
         .build();
 
-    private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
+    /**
+     * The class name of a custom authentication filter implementation.
+     */
+    public static final SystemProperty<String> CUSTOM_AUTH_FILTER = SystemProperty.Builder.ofType(String.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.customAuthFilter")
+        .setDynamic(true)
+        .build();
 
     /** The allowed i ps. */
     private Collection<String> allowedIPs;
@@ -62,9 +69,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     /** The http auth. */
     private String httpAuth;
     
-    /** The custom authentication filter */
-    private String customAuthFilterClassName;
-
     private final Set<String> registeredStatisticKeys = new HashSet<>();
 
     /* (non-Javadoc)
@@ -77,9 +81,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             SECRET.setValue(StringUtils.randomString(16));
         }
         
-        // See if Custom authentication filter has been defined
-        customAuthFilterClassName = JiveGlobals.getProperty("plugin.restapi.customAuthFilter", "");
-
         // Start collecting statistics.
         for (StatisticsFilter.RestResponseFamilyStatistic statistic : StatisticsFilter.generateAllFamilyStatisticInstances()) {
             StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
@@ -134,26 +135,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      */
     public String loadAuthenticationFilter(String customAuthFilterClassName) {
         return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
-    }
-
-    /**
-     * Returns the custom authentication filter class name used in place of the basic ones to grant permission to use the Rest services.
-     *
-     * @return custom authentication filter class name .
-     */
-    public String getCustomAuthFilterClassName() {
-        return customAuthFilterClassName;
-    }
-
-    /**
-     * Sets the customAuthFIlterClassName used to grant permission to use the Rest services.
-     *
-     * @param customAuthFilterClassName
-     *            custom authentication filter class name.
-     */
-    public void setCustomAuthFiIterClassName(String customAuthFilterClassName) {
-        JiveGlobals.setProperty(CUSTOM_AUTH_FILTER_PROPERTY_NAME, customAuthFilterClassName);
-        this.customAuthFilterClassName = customAuthFilterClassName;
     }
     
     /**
@@ -226,8 +207,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             this.allowedIPs = StringUtils.stringToCollection((String) params.get("value"));
         } else if (property.equals("plugin.restapi.httpAuth")) {
             this.httpAuth = (String) params.get("value");
-        } else if(property.equals(CUSTOM_AUTH_FILTER_PROPERTY_NAME)) {
-            this.customAuthFilterClassName = (String) params.get("value");
         }
     }
 
@@ -241,8 +220,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             this.allowedIPs = Collections.emptyList();
         } else if (property.equals("plugin.restapi.httpAuth")) {
             this.httpAuth = "basic";
-        } else if(property.equals(CUSTOM_AUTH_FILTER_PROPERTY_NAME)) {
-            this.customAuthFilterClassName = null;
         }
     }
 
