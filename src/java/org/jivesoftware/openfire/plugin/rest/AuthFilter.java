@@ -83,7 +83,7 @@ public class AuthFilter implements ContainerRequestFilter {
             return;
         }
 
-        if (!plugin.getAllowedIPs().isEmpty()) {
+        if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
             // Get client's IP address
             String ipAddress = httpRequest.getHeader("x-forwarded-for");
             if (ipAddress == null) {
@@ -95,7 +95,7 @@ public class AuthFilter implements ContainerRequestFilter {
                     }
                 }
             }
-            if (!plugin.getAllowedIPs().contains(ipAddress)) {
+            if (!RESTServicePlugin.ALLOWED_IPS.getValue().contains(ipAddress)) {
                 LOG.warn("REST API rejected service for IP address: " + ipAddress);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }

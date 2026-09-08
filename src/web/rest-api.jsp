@@ -77,7 +77,7 @@
             RESTServicePlugin.ENABLED.setValue(enabled);
             RESTServicePlugin.SECRET.setValue(secret == null || secret.isEmpty() ? StringUtils.randomString(16) : secret);
             RESTServicePlugin.AUTH_TYPE.setValue(authType);
-            plugin.setAllowedIPs(StringUtils.stringToCollection(allowedIPs));
+            RESTServicePlugin.ALLOWED_IPS.setValue(new HashSet<>(StringUtils.stringToCollection(allowedIPs)));
             RESTServicePlugin.CUSTOM_AUTH_FILTER.setValue(customAuthFilterClassName);
             RESTServicePlugin.SERVICE_LOGGING_ENABLED.setValue(loggingEnabled);
 
@@ -98,7 +98,7 @@
     secret = RESTServicePlugin.SECRET.getValue();
     enabled = RESTServicePlugin.ENABLED.getValue();
     authType = RESTServicePlugin.AUTH_TYPE.getValue();
-    allowedIPs = StringUtils.collectionToString(plugin.getAllowedIPs());
+    allowedIPs = StringUtils.collectionToString(RESTServicePlugin.ALLOWED_IPS.getValue());
     customAuthFilterClassName = RESTServicePlugin.CUSTOM_AUTH_FILTER.getValue();
     loggingEnabled = RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue();
 %>
