@@ -81,6 +81,11 @@ public class SystemController {
         final List<org.jivesoftware.openfire.plugin.rest.entity.SystemProperty> compoundProperties = systemProperties.stream().map(p -> new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(p.getKey(), p.getValueAsSaved())).collect(Collectors.toList());
         // Now add any missing JiveGlobals properties
         JiveGlobals.getPropertyNames().stream().filter(key -> !systemPropertyKeys.contains(key)).forEach(key -> compoundProperties.add(new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, JiveGlobals.getProperty(key))));
+
+        // Ensure that we're not exposing any 'forbidden' properties.
+        final Set<String> forbiddenPropertyKeys = getForbiddenPropertyKeys();
+        compoundProperties.removeIf(systemProperty -> forbiddenPropertyKeys.contains(systemProperty.getKey()));
+
         // And sort by key
         compoundProperties.sort(Comparator.comparing(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty::getKey));
 
@@ -97,19 +102,30 @@ public class SystemController {
      * @throws ServiceException the service exception
      */
     public org.jivesoftware.openfire.plugin.rest.entity.SystemProperty getSystemProperty(String propertyKey) throws ServiceException {
+        // Ensure that we're not exposing any 'forbidden' properties.
+        final Set<String> forbiddenPropertyKeys = getForbiddenPropertyKeys();
+
         final Optional<SystemProperty> systemProperty = SystemProperty.getProperty(propertyKey);
         if (systemProperty.isPresent()) {
+            if (forbiddenPropertyKeys.contains(systemProperty.get().getKey())) {
+                // Ensure that we're not exposing any 'forbidden' properties.
+                throw new ServiceException("Access to property is forbidden", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+            }
             // There's guaranteed to be a system property - return a value (even null), no matter what.
             return new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(propertyKey, systemProperty.get().getValueAsSaved());
         }
 
         // No system property found. Check JiveGlobals. This cannot distinguish between a property that is not set and a property that is set to null.
+        if (forbiddenPropertyKeys.contains(propertyKey)) {
+            // Ensure that we're not exposing any 'forbidden' properties.
+            throw new ServiceException("Access to property is forbidden", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
+
         final String propertyValue = JiveGlobals.getProperty(propertyKey);
         if (propertyValue != null) {
             return new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(propertyKey, propertyValue);
         } else {
-            throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
-                Response.Status.NOT_FOUND);
+            throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND, Response.Status.NOT_FOUND);
         }
     }
 
@@ -118,7 +134,12 @@ public class SystemController {
      *
      * @param systemProperty the system property
      */
-    public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) {
+    public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException
+    {
+        // Ensure that we're not exposing any 'forbidden' properties.
+        if (getForbiddenPropertyKeys().contains(systemProperty.getKey())) {
+            throw new ServiceException("Could not create property", systemProperty.getKey(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
         JiveGlobals.setProperty(systemProperty.getKey(), systemProperty.getValue());
     }
 
@@ -129,6 +150,11 @@ public class SystemController {
      * @throws ServiceException the service exception
      */
     public void deleteSystemProperty(String propertyKey) throws ServiceException {
+        // Ensure that we're not exposing any 'forbidden' properties.
+        if (getForbiddenPropertyKeys().contains(propertyKey)) {
+            throw new ServiceException("Could not delete property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
+
         if(JiveGlobals.getProperty(propertyKey) != null) {
             JiveGlobals.deleteProperty(propertyKey);
         } else {
@@ -145,6 +171,10 @@ public class SystemController {
      * @throws ServiceException the service exception
      */
     public void updateSystemProperty(String propertyKey, org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException {
+        // Ensure that we're not exposing any 'forbidden' properties.
+        if (getForbiddenPropertyKeys().contains(propertyKey)) {
+            throw new ServiceException("Could not update property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
         if(JiveGlobals.getProperty(propertyKey) != null) {
             if(systemProperty.getKey().equals(propertyKey)) {
                 JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
@@ -280,5 +310,22 @@ public class SystemController {
         }
 
         return true;
+    }
+
+    /**
+     * Returns a set of system property keys that are not allowed to be modified via the REST API.
+     *
+     * @return a set of system property keys (never null, possibly empty).
+     */
+    public static Set<String> getForbiddenPropertyKeys()
+    {
+        final String pluginName = RESTServicePlugin.ENABLED.getPlugin();
+        return org.jivesoftware.util.SystemProperty.getProperties().stream()
+
+            // Do not allow modifications of the configuration of this plugin itself. See https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+            .filter(p -> pluginName.equals(p.getPlugin())) // This works only because all properties used by the plugin are SystemProperty instances (as opposed to using JiveGlobals directly).
+
+            .map(org.jivesoftware.util.SystemProperty::getKey)
+            .collect(Collectors.toSet());
     }
 }
