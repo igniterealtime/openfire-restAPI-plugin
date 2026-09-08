@@ -70,11 +70,39 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         .setDefaultValue(false)
         .build();
 
+    /**
+     * The authentication mechanism used to authenticate REST API service requests.
+     */
+    public static final SystemProperty<AuthType> AUTH_TYPE = SystemProperty.Builder.ofType(AuthType.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.httpAuth")
+        .setDynamic(true)
+        .setDefaultValue(AuthType.basic)
+        .build();
+
+    /**
+     * The types of authentication mechanisms for REST service calls.
+     */
+    public enum AuthType
+    {
+        /**
+         * Use HTTP Basic Authentication.
+         */
+        basic,
+
+        /**
+         * Use a Shared Secret.
+         */
+        secret,
+
+        /**
+         * Use a custom authentication implementation.
+         */
+        custom
+    }
+
     /** The allowed i ps. */
     private Collection<String> allowedIPs;
-
-    /** The http auth. */
-    private String httpAuth;
     
     private final Set<String> registeredStatisticKeys = new HashSet<>();
 
@@ -93,9 +121,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
             registeredStatisticKeys.add(statistic.getKeyName());
         }
-
-        // See if the HTTP Basic Auth is enabled or not.
-        httpAuth = JiveGlobals.getProperty("plugin.restapi.httpAuth", "basic");
 
         // Get the list of IP addresses that can use this service. An empty list
         // means that this filter is disabled.
@@ -160,33 +185,12 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
         this.allowedIPs = allowedIPs;
     }
 
-    /**
-     * Gets the http authentication mechanism.
-     *
-     * @return the http authentication mechanism
-     */
-    public String getHttpAuth() {
-        return httpAuth;
-    }
-
-    /**
-     * Sets the http auth.
-     *
-     * @param httpAuth the new http auth
-     */
-    public void setHttpAuth(String httpAuth) {
-        this.httpAuth = httpAuth;
-        JiveGlobals.setProperty("plugin.restapi.httpAuth", httpAuth);
-    }
-
     /* (non-Javadoc)
      * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
      */
     public void propertySet(String property, Map<String, Object> params) {
         if (property.equals("plugin.restapi.allowedIPs")) {
             this.allowedIPs = StringUtils.stringToCollection((String) params.get("value"));
-        } else if (property.equals("plugin.restapi.httpAuth")) {
-            this.httpAuth = (String) params.get("value");
         }
     }
 
@@ -196,8 +200,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     public void propertyDeleted(String property, Map<String, Object> params) {
         if (property.equals("plugin.restapi.allowedIPs")) {
             this.allowedIPs = Collections.emptyList();
-        } else if (property.equals("plugin.restapi.httpAuth")) {
-            this.httpAuth = "basic";
         }
     }
 

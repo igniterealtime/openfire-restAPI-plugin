@@ -1,6 +1,6 @@
 <%--
 /*
- * Copyright (c) 2022.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@
     boolean success = request.getParameter("success") != null;
     String secret = ParamUtils.getParameter(request, "secret");
     boolean enabled = ParamUtils.getBooleanParameter(request, "enabled");
-    String httpAuth = ParamUtils.getParameter(request, "authtype");
+    String authTypeString = ParamUtils.getParameter(request, "authtype");
     String allowedIPs = ParamUtils.getParameter(request, "allowedIPs");
     String customAuthFilterClassName = ParamUtils.getParameter(request, "customAuthFilterClassName");
     boolean loggingEnabled = ParamUtils.getBooleanParameter(request, "loggingEnabled");
@@ -54,21 +54,29 @@
             .getPluginByName("REST API").orElse(null);
 
     // Handle a save
-    Map errors = new HashMap();
+    Map<String, String> errors = new HashMap<>();
+
+    RESTServicePlugin.AuthType authType = null;
     if (save) {
-        if("custom".equals(httpAuth)) {
+        try {
+            authType = RESTServicePlugin.AuthType.valueOf(authTypeString);
+        } catch (Exception e) {
+            errors.put("authtype", "invalid value");
+        }
+
+        if (RESTServicePlugin.AuthType.custom.equals(authType)) {
             loadingStatus = plugin.loadAuthenticationFilter(customAuthFilterClassName);
         }
         if (loadingStatus != null) {
             errors.put("loadingStatus", loadingStatus);
         }
-        
-        if (errors.size() == 0) {
-            
-            boolean is2Reload = "custom".equals(httpAuth) || "custom".equals(plugin.getHttpAuth());
+
+        if (errors.isEmpty())
+        {
+            boolean is2Reload = RESTServicePlugin.AuthType.custom.equals(authType) || RESTServicePlugin.AuthType.custom.equals(RESTServicePlugin.AUTH_TYPE.getValue());
             RESTServicePlugin.ENABLED.setValue(enabled);
             RESTServicePlugin.SECRET.setValue(secret == null || secret.isEmpty() ? StringUtils.randomString(16) : secret);
-            plugin.setHttpAuth(httpAuth);
+            RESTServicePlugin.AUTH_TYPE.setValue(authType);
             plugin.setAllowedIPs(StringUtils.stringToCollection(allowedIPs));
             RESTServicePlugin.CUSTOM_AUTH_FILTER.setValue(customAuthFilterClassName);
             RESTServicePlugin.SERVICE_LOGGING_ENABLED.setValue(loggingEnabled);
@@ -89,7 +97,7 @@
 
     secret = RESTServicePlugin.SECRET.getValue();
     enabled = RESTServicePlugin.ENABLED.getValue();
-    httpAuth = plugin.getHttpAuth();
+    authType = RESTServicePlugin.AUTH_TYPE.getValue();
     allowedIPs = StringUtils.collectionToString(plugin.getAllowedIPs());
     customAuthFilterClassName = RESTServicePlugin.CUSTOM_AUTH_FILTER.getValue();
     loggingEnabled = RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue();
@@ -144,6 +152,27 @@
     <%
         }
     %>
+    <%
+        if (errors.get("authtype") != null) {
+    %>
+    <div class="jive-error">
+        <table cellpadding="0" cellspacing="0" border="0">
+            <tbody>
+            <tr>
+                <td class="jive-icon"><img src="images/error-16x16.gif"
+                                           width="16" height="16" border="0"></td>
+                <td class="jive-icon-label">Unrecognized authentication type.
+
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <%
+        }
+    %>
+
     <form action="rest-api.jsp?save" method="post">
 
         <fieldset>
@@ -170,12 +199,12 @@
                     <br>
 
                     <input type="radio" name="authtype" value="basic"
-                        id="http_basic_auth" <%=("basic".equals(httpAuth) ? "checked" : "")%>>
+                        id="http_basic_auth" <%=(RESTServicePlugin.AuthType.basic.equals(authType) ? "checked" : "")%>>
                     <label for="http_basic_auth">HTTP basic auth - REST API
                         authentication with Openfire admin account.</label>
                     <br>
                     <input type="radio" name="authtype" value="secret"
-                        id="secretKeyAuth" <%=("secret".equals(httpAuth) ? "checked" : "")%>>
+                        id="secretKeyAuth" <%=(RESTServicePlugin.AuthType.secret.equals(authType) ? "checked" : "")%>>
                     <label for="secretKeyAuth">Secret key auth - REST API
                         authentication over specified secret key.</label>
                     <br>
@@ -185,7 +214,7 @@
                         id="text_secret">
                     <br>
                     <input type="radio" name="authtype" value="custom"
-                        id="customFilterAuth" <%=("custom".equals(httpAuth) ? "checked" : "")%>>
+                        id="customFilterAuth" <%=(RESTServicePlugin.AuthType.custom.equals(authType) ? "checked" : "")%>>
                     <label for="secretKeyAuth">Custom authentication filter classname - REST API
                         authentication delegates to a custom filter implemented in some other plugin.
                     </label>
