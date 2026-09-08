@@ -98,8 +98,14 @@ public class SystemController {
      */
     public org.jivesoftware.openfire.plugin.rest.entity.SystemProperty getSystemProperty(String propertyKey) throws ServiceException {
         final Optional<SystemProperty> systemProperty = SystemProperty.getProperty(propertyKey);
-        final String propertyValue = systemProperty.isPresent() ? systemProperty.get().getValueAsSaved() : JiveGlobals.getProperty(propertyKey);
-        if(propertyValue != null) {
+        if (systemProperty.isPresent()) {
+            // There's guaranteed to be a system property - return a value (even null), no matter what.
+            return new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(propertyKey, systemProperty.get().getValueAsSaved());
+        }
+
+        // No system property found. Check JiveGlobals. This cannot distinguish between a property that is not set and a property that is set to null.
+        final String propertyValue = JiveGlobals.getProperty(propertyKey);
+        if (propertyValue != null) {
             return new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(propertyKey, propertyValue);
         } else {
             throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
