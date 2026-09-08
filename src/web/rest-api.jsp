@@ -68,7 +68,7 @@
             
             boolean is2Reload = "custom".equals(httpAuth) || "custom".equals(plugin.getHttpAuth());
             plugin.setEnabled(enabled);
-            plugin.setSecret(secret);
+            RESTServicePlugin.SECRET.setValue(secret == null || secret.isEmpty() ? StringUtils.randomString(16) : secret);
             plugin.setHttpAuth(httpAuth);
             plugin.setAllowedIPs(StringUtils.stringToCollection(allowedIPs));
             plugin.setCustomAuthFiIterClassName(customAuthFilterClassName);
@@ -88,7 +88,7 @@
         }
     }
 
-    secret = plugin.getSecret();
+    secret = RESTServicePlugin.SECRET.getValue();
     enabled = plugin.isEnabled();
     httpAuth = plugin.getHttpAuth();
     allowedIPs = StringUtils.collectionToString(plugin.getAllowedIPs());

@@ -112,7 +112,7 @@ public class UserServiceLegacy {
         }
 
         // Check this request is authorised
-        if (secret == null || !secret.equals(plugin.getSecret())) {
+        if (secret == null || secret.isEmpty() || !secret.equals(RESTServicePlugin.SECRET.getValue())) {
             LOG.warn("An unauthorised user service request was received: " + request.getQueryString());
             replyError("RequestNotAuthorised", response, out);
             return Response.status(200).build();

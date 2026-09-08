@@ -138,7 +138,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         } else {
-            if (!auth.equals(plugin.getSecret())) {
+            if (!auth.equals(RESTServicePlugin.SECRET.getValue())) {
                 LOG.warn("Wrong secret key authorization. Provided key: " + auth);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }

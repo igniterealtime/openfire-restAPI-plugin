@@ -21,10 +21,7 @@ import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.openfire.stats.StatisticsManager;
-import org.jivesoftware.util.JiveGlobals;
-import org.jivesoftware.util.PropertyEventDispatcher;
-import org.jivesoftware.util.PropertyEventListener;
-import org.jivesoftware.util.StringUtils;
+import org.jivesoftware.util.*;
 
 import java.io.File;
 import java.util.*;
@@ -34,12 +31,19 @@ import java.util.*;
  */
 public class RESTServicePlugin implements Plugin, PropertyEventListener {
 
+    /**
+     * The value that is used to authenticate requests when using 'shared secret' authentication.
+     */
+    public static final SystemProperty<String> SECRET = SystemProperty.Builder.ofType(String.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.secret")
+        .setDynamic(true)
+        .setEncrypted(true)
+        .build();
+
     private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
     public static final String SERVICE_LOGGING_ENABLED = "plugin.restapi.serviceLoggingEnabled";
 
-    /** The secret. */
-    private String secret;
-    
     /** The allowed i ps. */
     private Collection<String> allowedIPs;
     
@@ -68,12 +72,11 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
      */
-    public void initializePlugin(PluginManager manager, File pluginDirectory) {
-        secret = JiveGlobals.getProperty("plugin.restapi.secret", "");
+    public void initializePlugin(PluginManager manager, File pluginDirectory)
+    {
         // If no secret key has been assigned, assign a random one.
-        if ("".equals(secret)) {
-            secret = StringUtils.randomString(16);
-            setSecret(secret);
+        if (SECRET.getValue() == null || SECRET.getValue().isEmpty()) {
+            SECRET.setValue(StringUtils.randomString(16));
         }
         
         // See if Custom authentication filter has been defined
@@ -134,26 +137,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      */
     public String loadAuthenticationFilter(String customAuthFilterClassName) {
         return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
-    }
-    
-    /**
-     * Returns the secret key that only valid requests should know.
-     *
-     * @return the secret key.
-     */
-    public String getSecret() {
-        return secret;
-    }
-
-    /**
-     * Sets the secret key that grants permission to use the userservice.
-     *
-     * @param secret
-     *            the secret key.
-     */
-    public void setSecret(String secret) {
-        JiveGlobals.setProperty("plugin.restapi.secret", secret);
-        this.secret = secret;
     }
 
     /**
@@ -240,9 +223,7 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
      */
     public void propertySet(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.secret")) {
-            this.secret = (String) params.get("value");
-        } else if (property.equals("plugin.restapi.enabled")) {
+        if (property.equals("plugin.restapi.enabled")) {
             this.enabled = Boolean.parseBoolean((String) params.get("value"));
         } else if (property.equals("plugin.restapi.allowedIPs")) {
             this.allowedIPs = StringUtils.stringToCollection((String) params.get("value"));
@@ -257,9 +238,7 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      * @see org.jivesoftware.util.PropertyEventListener#propertyDeleted(java.lang.String, java.util.Map)
      */
     public void propertyDeleted(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.secret")) {
-            this.secret = "";
-        } else if (property.equals("plugin.restapi.enabled")) {
+        if (property.equals("plugin.restapi.enabled")) {
             this.enabled = false;
         } else if (property.equals("plugin.restapi.allowedIPs")) {
             this.allowedIPs = Collections.emptyList();

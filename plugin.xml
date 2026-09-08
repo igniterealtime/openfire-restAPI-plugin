@@ -8,6 +8,7 @@
     <version>${project.version}</version>
     <date>2025-10-02</date>
     <minServerVersion>5.0.0</minServerVersion>
+    <priorToServerVersion>5.2.0</priorToServerVersion> <!-- because of OF-3313 compatibility -->
     <adminconsole>
         <tab id="tab-server">
             <sidebar id="sidebar-server-settings">
