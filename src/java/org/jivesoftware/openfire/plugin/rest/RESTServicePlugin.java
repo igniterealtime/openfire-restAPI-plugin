@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * The Class RESTServicePlugin.
  */
-public class RESTServicePlugin implements Plugin, PropertyEventListener {
+public class RESTServicePlugin implements Plugin {
 
     /**
      * The value that is used to authenticate requests when using 'shared secret' authentication.
@@ -129,9 +129,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
             registeredStatisticKeys.add(statistic.getKeyName());
         }
 
-        // Listen to system property events
-        PropertyEventDispatcher.addListener(this);
-
         // Exclude this servlet from requering the user to login
         AuthCheckFilter.addExclude(JerseyWrapper.SERVLET_URL);
     }
@@ -149,8 +146,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
 
         // Release the excluded URL
         AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
-        // Stop listening to system property events
-        PropertyEventDispatcher.removeListener(this);
     }
 
     /**
@@ -167,31 +162,5 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      */
     public String loadAuthenticationFilter(String customAuthFilterClassName) {
         return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
-     */
-    public void propertySet(String property, Map<String, Object> params) {
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#propertyDeleted(java.lang.String, java.util.Map)
-     */
-    public void propertyDeleted(String property, Map<String, Object> params) {
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#xmlPropertySet(java.lang.String, java.util.Map)
-     */
-    public void xmlPropertySet(String property, Map<String, Object> params) {
-        // Do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#xmlPropertyDeleted(java.lang.String, java.util.Map)
-     */
-    public void xmlPropertyDeleted(String property, Map<String, Object> params) {
-        // Do nothing
     }
 }
