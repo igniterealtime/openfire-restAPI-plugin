@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,7 +76,7 @@ public class CustomOpenApiResource extends BaseOpenApiResource {
         openAPI.components(new Components());
 
         final String key;
-        if (plugin == null || !"basic".equals(plugin.getHttpAuth())) {
+        if (plugin == null || !RESTServicePlugin.AuthType.basic.equals(RESTServicePlugin.AUTH_TYPE.getValue())) {
             key = "Secret key auth";
             final SecurityScheme apiKeyScheme = new SecurityScheme();
             apiKeyScheme.setDescription("Authenticate using the Secret Key as configured in the Openfire admin console.");
