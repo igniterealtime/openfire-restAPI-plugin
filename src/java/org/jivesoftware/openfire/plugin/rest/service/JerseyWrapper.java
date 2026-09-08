@@ -22,7 +22,6 @@ import org.jivesoftware.openfire.plugin.rest.CORSFilter;
 import org.jivesoftware.openfire.plugin.rest.CustomJacksonMapperProvider;
 import org.jivesoftware.openfire.plugin.rest.StatisticsFilter;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
-import org.jivesoftware.util.JiveGlobals;
 
 import javax.servlet.ServletConfig;
 import javax.ws.rs.core.Context;
@@ -34,9 +33,6 @@ import java.util.logging.Logger;
  */
 public class JerseyWrapper extends ResourceConfig {
 
-    /** The Constant CUSTOM_AUTH_PROPERTY_NAME */
-    private static final String CUSTOM_AUTH_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
-    
     /** The Constant REST_AUTH_TYPE */
     private static final String REST_AUTH_TYPE  = "plugin.restapi.httpAuth";
 
@@ -69,9 +65,9 @@ public class JerseyWrapper extends ResourceConfig {
     }
     
     public String loadAuthenticationFilter() {
-            
+
         // Check if custom AuthFilter is available
-        String customAuthFilterClassName = JiveGlobals.getProperty(CUSTOM_AUTH_PROPERTY_NAME);
+        String customAuthFilterClassName = RESTServicePlugin.CUSTOM_AUTH_FILTER.getValue();
         String restAuthType = JiveGlobals.getProperty(REST_AUTH_TYPE);
         Class<?> pickedAuthFilter = AuthFilter.class;
         

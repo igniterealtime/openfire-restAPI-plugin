@@ -21,7 +21,6 @@
     import="java.util.*,
                 org.jivesoftware.openfire.XMPPServer,
                 org.jivesoftware.util.*,org.jivesoftware.openfire.plugin.rest.RESTServicePlugin,
-                org.jivesoftware.openfire.container.Plugin,
                 org.jivesoftware.openfire.container.PluginManager"
     errorPage="error.jsp"%>
 <%@ page import="org.jivesoftware.openfire.container.PluginMetadataHelper" %>
@@ -71,7 +70,7 @@
             RESTServicePlugin.SECRET.setValue(secret == null || secret.isEmpty() ? StringUtils.randomString(16) : secret);
             plugin.setHttpAuth(httpAuth);
             plugin.setAllowedIPs(StringUtils.stringToCollection(allowedIPs));
-            plugin.setCustomAuthFiIterClassName(customAuthFilterClassName);
+            RESTServicePlugin.CUSTOM_AUTH_FILTER.setValue(customAuthFilterClassName);
             RESTServicePlugin.SERVICE_LOGGING_ENABLED.setValue(loggingEnabled);
 
             if(is2Reload) {
@@ -92,7 +91,7 @@
     enabled = plugin.isEnabled();
     httpAuth = plugin.getHttpAuth();
     allowedIPs = StringUtils.collectionToString(plugin.getAllowedIPs());
-    customAuthFilterClassName = plugin.getCustomAuthFilterClassName();
+    customAuthFilterClassName = RESTServicePlugin.CUSTOM_AUTH_FILTER.getValue();
     loggingEnabled = RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue();
 %>
 
