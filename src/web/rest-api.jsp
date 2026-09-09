@@ -65,7 +65,7 @@
         }
 
         if (RESTServicePlugin.AuthType.custom.equals(authType)) {
-            loadingStatus = plugin.loadAuthenticationFilter(customAuthFilterClassName);
+            loadingStatus = plugin.validateCustomAuthenticationFilter(customAuthFilterClassName);
         }
         if (loadingStatus != null) {
             errors.put("loadingStatus", loadingStatus);
