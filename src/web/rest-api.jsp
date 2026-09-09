@@ -215,7 +215,7 @@
                     <br>
                     <input type="radio" name="authtype" value="custom"
                         id="customFilterAuth" <%=(RESTServicePlugin.AuthType.custom.equals(authType) ? "checked" : "")%>>
-                    <label for="secretKeyAuth">Custom authentication filter classname - REST API
+                    <label for="customFilterAuth">Custom authentication filter classname - REST API
                         authentication delegates to a custom filter implemented in some other plugin.
                     </label>
                     <div style="margin-left: 20px; margin-top: 5px;"><strong>Note: changing back and forth from custom authentication filter forces the REST API plugin reloading</strong></div>
