@@ -45,6 +45,15 @@ public class JerseyWrapper extends ResourceConfig {
 
     private static final org.slf4j.Logger Log = org.slf4j.LoggerFactory.getLogger(JerseyWrapper.class);
 
+    /**
+     * A collection of classes that are acceptable for use as a custom REST API authentication implementation.
+     */
+    public static final Set<Class<?>> CUSTOM_AUTH_ACCEPTABLE_CONTRACT_SHAPES = Set.of(
+        ContainerRequestFilter.class, // Implementations are expected to be a ContainerRequestFilter
+        Feature.class,                // Theoretically, Jersey can use this too - allowing/keeping this for backwards compatibility.
+        DynamicFeature.class          // Theoretically, Jersey can use this too - allowing/keeping this for backwards compatibility.
+    );
+
     /** The Constant CUSTOM_AUTH_PROPERTY_NAME */
     private static final String CUSTOM_AUTH_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
     
@@ -127,12 +136,6 @@ public class JerseyWrapper extends ResourceConfig {
     @VisibleForTesting
     static Class<?> getCustomAuthFilterClassObject(@Nonnull final String className) throws IllegalArgumentException
     {
-        final Set<Class<?>> acceptableContractShapes = Set.of(
-            ContainerRequestFilter.class, // Implementations are expected to be a ContainerRequestFilter
-            Feature.class,                // Theoretically, Jersey can use this too - allowing/keeping this for backwards compatibility.
-            DynamicFeature.class          // Theoretically, Jersey can use this too - allowing/keeping this for backwards compatibility.
-        );
-
         final Class<?> candidate;
         try {
             candidate = Class.forName(className, false, JerseyWrapper.class.getClassLoader());
@@ -140,8 +143,8 @@ public class JerseyWrapper extends ResourceConfig {
             throw new IllegalArgumentException("Class not found: " + className, e);
         }
 
-        if (acceptableContractShapes.stream().noneMatch(c -> c.isAssignableFrom(candidate))) {
-            throw new IllegalArgumentException("Class " + className + " does not implement an acceptable contract shape (one of " + acceptableContractShapes.stream().map(Class::getName).collect(Collectors.joining(", ")) + ").");
+        if (CUSTOM_AUTH_ACCEPTABLE_CONTRACT_SHAPES.stream().noneMatch(c -> c.isAssignableFrom(candidate))) {
+            throw new IllegalArgumentException("Class " + className + " does not implement an acceptable contract shape (one of " + CUSTOM_AUTH_ACCEPTABLE_CONTRACT_SHAPES.stream().map(Class::getName).collect(Collectors.joining(", ")) + ").");
         }
 
         final Priority priority = candidate.getAnnotation(Priority.class);
