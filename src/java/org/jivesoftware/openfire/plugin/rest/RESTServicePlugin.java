@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Jive Software, 2022 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2005-2008 Jive Software, 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,19 +121,14 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     }
 
     /**
-     * Returns the loading status message.
+     * Validates the custom authentication filter class name.
      *
-     * @return the loading status message.
+     * @param customAuthFilterClassName the custom authentication filter class name.
+     * @return the validation message, or null when the class name is valid.
      */
-    public String getLoadingStatusMessage() {
-        return JerseyWrapper.getLoadingStatusMessage();
-    }
-    
-    /**
-     * Reloads the Jersey wrapper.
-     */
-    public String loadAuthenticationFilter(String customAuthFilterClassName) {
-        return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
+    public String validateCustomAuthenticationFilter(String customAuthFilterClassName)
+    {
+        return JerseyWrapper.validateCustomAuthFilterClassName(customAuthFilterClassName);
     }
     
     /**

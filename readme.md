@@ -80,6 +80,34 @@ The secret key can be defined in Openfire Admin console under Server > Server Se
 E.g.
 >**Header:** Authorization: s3cretKey
 
+### Custom authentication filter
+
+In addition to Basic HTTP Authentication and the shared secret key, the REST API plugin can delegate authentication
+to a custom implementation, for deployments that need to integrate with an external identity provider, a
+different credential store, or additional checks beyond what the built-in mechanisms provide.
+
+This is configured in the Openfire Admin console under Server > Server Settings > REST API, by setting the
+authentication type to "custom" and providing the fully qualified class name of your implementation. The class
+must already be present on Openfire's classpath (e.g. provided as a JAR file in Openfire's LIB folder) before it can be
+selected.
+
+#### Requirements for a custom implementation
+
+A class used as a custom authentication filter must:
+
+1. Implement `javax.ws.rs.container.ContainerRequestFilter`.
+2. Be annotated with `@javax.annotation.Priority(javax.ws.rs.Priorities.AUTHENTICATION)`.
+3. Reject any request that does not carry valid credentials (for example by throwing a `WebApplicationException` with an
+   appropriate `Response.Status`, or by calling `requestContext.abortWith(...)` with an appropriate `4xx` response)
+   before returning from `filter()`.
+
+The first two requirements are enforced by the plugin: a class that does not satisfy both will be rejected when
+you attempt to save the configuration. The REST API will continue using its default authentication filter.
+
+The third requirement cannot be verified automatically and is the implementer's responsibility. A filter that
+implements the interface and carries the annotation, but returns without calling `abortWith(...)` on an
+unauthenticated request, will be loaded successfully and will silently grant unauthenticated access.
+
 # User related REST Endpoints
 
 ## Retrieve users

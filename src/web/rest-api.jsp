@@ -58,7 +58,7 @@
     Map errors = new HashMap();
     if (save) {
         if("custom".equals(httpAuth)) {
-            loadingStatus = plugin.loadAuthenticationFilter(customAuthFilterClassName);
+            loadingStatus = plugin.validateCustomAuthenticationFilter(customAuthFilterClassName);
         }
         if (loadingStatus != null) {
             errors.put("loadingStatus", loadingStatus);
