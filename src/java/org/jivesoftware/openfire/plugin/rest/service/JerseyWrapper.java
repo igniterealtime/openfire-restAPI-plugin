@@ -66,14 +66,13 @@ public class JerseyWrapper extends ResourceConfig {
     /** The Constant JERSEY_LOGGER. */
     private final static Logger JERSEY_LOGGER = Logger.getLogger("org.glassfish.jersey");
     
-    private static String loadingStatusMessage = null;
-    
     static {
         JERSEY_LOGGER.setLevel(Level.SEVERE);
     }
 
     public static String validateCustomAuthFilterClassName(String customAuthFilterClassName)
     {
+        String loadingStatusMessage;
         if (customAuthFilterClassName == null || customAuthFilterClassName.isEmpty()) {
             loadingStatusMessage = "Classname field can't be empty!";
         } else {
@@ -94,7 +93,8 @@ public class JerseyWrapper extends ResourceConfig {
         String customAuthFilterClassName = JiveGlobals.getProperty(CUSTOM_AUTH_PROPERTY_NAME);
         String restAuthType = JiveGlobals.getProperty(REST_AUTH_TYPE);
         Class<?> pickedAuthFilter = AuthFilter.class;
-        
+
+        String loadingStatusMessage = null;
         try {
             if(customAuthFilterClassName != null && "custom".equals(restAuthType)) {
                 pickedAuthFilter = getCustomAuthFilterClassObject(customAuthFilterClassName);
@@ -195,14 +195,4 @@ public class JerseyWrapper extends ResourceConfig {
         // Documentation (Swagger)
         register( new CustomOpenApiResource() );
     }
-    
-    /*
-     * Returns the loading status message.
-     *
-     * @return the loading status message.
-     */
-    public static String getLoadingStatusMessage() {
-        return loadingStatusMessage;
-    }
-    
 }

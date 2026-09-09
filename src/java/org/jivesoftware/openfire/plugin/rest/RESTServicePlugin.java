@@ -121,15 +121,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
     }
 
     /**
-     * Returns the loading status message.
-     *
-     * @return the loading status message.
-     */
-    public String getLoadingStatusMessage() {
-        return JerseyWrapper.getLoadingStatusMessage();
-    }
-
-    /**
      * Validates the custom authentication filter class name.
      *
      * @param customAuthFilterClassName the custom authentication filter class name.
