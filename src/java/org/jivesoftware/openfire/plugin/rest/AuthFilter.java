@@ -41,7 +41,7 @@ import java.io.IOException;
  * The Class AuthFilter.
  */
 @PreMatching
-@Priority(Priorities.AUTHORIZATION)
+@Priority(Priorities.AUTHENTICATION)
 public class AuthFilter implements ContainerRequestFilter {
 
     /** The log. */

@@ -156,11 +156,15 @@ public class RESTServicePlugin implements Plugin {
     public String getLoadingStatusMessage() {
         return JerseyWrapper.getLoadingStatusMessage();
     }
-    
+
     /**
-     * Reloads the Jersey wrapper.
+     * Validates the custom authentication filter class name.
+     *
+     * @param customAuthFilterClassName the custom authentication filter class name.
+     * @return the validation message, or null when the class name is valid.
      */
-    public String loadAuthenticationFilter(String customAuthFilterClassName) {
-        return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
+    public String validateCustomAuthenticationFilter(String customAuthFilterClassName)
+    {
+        return JerseyWrapper.validateCustomAuthFilterClassName(customAuthFilterClassName);
     }
 }
