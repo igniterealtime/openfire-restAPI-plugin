@@ -55,6 +55,7 @@ public class SystemService {
         description = "Get a specific Openfire system property.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The requested system property.", content = @Content(schema = @Schema(implementation = SystemProperty.class))),
+            @ApiResponse(responseCode = "403", description = "Reading this system property is prohibited."),
             @ApiResponse(responseCode = "404", description = "The system property could not be found.")
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
