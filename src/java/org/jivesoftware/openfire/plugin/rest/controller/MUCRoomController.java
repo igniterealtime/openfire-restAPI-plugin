@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Ignite Realtime Foundation
+ * Copyright (c) 2022-2026 Ignite Realtime Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.plugin.rest.utils.MUCRoomUtils;
 import org.jivesoftware.openfire.plugin.rest.utils.UserUtils;
 import org.jivesoftware.util.AlreadyExistsException;
-import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.StringUtils;
 import org.jivesoftware.util.SystemProperty;
 import org.slf4j.Logger;
@@ -102,13 +101,13 @@ public class MUCRoomController {
     }
 
     public static void log(String logMessage) {
-        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
+        if (RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue()) {
             LOG.info(logMessage);
         }
     }
 
     public static void log(String logMessage, Throwable t) {
-        if (JiveGlobals.getBooleanProperty(RESTServicePlugin.SERVICE_LOGGING_ENABLED, false)) {
+        if (RESTServicePlugin.SERVICE_LOGGING_ENABLED.getValue()) {
             LOG.info(logMessage, t);
         }
     }

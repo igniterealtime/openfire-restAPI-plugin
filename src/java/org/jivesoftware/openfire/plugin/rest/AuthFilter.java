@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class AuthFilter implements ContainerRequestFilter {
             return;
         }
 
-        if (!plugin.isEnabled()) {
+        if (!RESTServicePlugin.ENABLED.getValue()) {
             LOG.debug("REST API Plugin is not enabled");
             throw new WebApplicationException(Status.FORBIDDEN);
         }
@@ -83,7 +83,7 @@ public class AuthFilter implements ContainerRequestFilter {
             return;
         }
 
-        if (!plugin.getAllowedIPs().isEmpty()) {
+        if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
             // Get client's IP address
             String ipAddress = httpRequest.getHeader("x-forwarded-for");
             if (ipAddress == null) {
@@ -95,7 +95,7 @@ public class AuthFilter implements ContainerRequestFilter {
                     }
                 }
             }
-            if (!plugin.getAllowedIPs().contains(ipAddress)) {
+            if (!RESTServicePlugin.ALLOWED_IPS.getValue().contains(ipAddress)) {
                 LOG.warn("REST API rejected service for IP address: " + ipAddress);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
@@ -109,7 +109,7 @@ public class AuthFilter implements ContainerRequestFilter {
         }
 
         // HTTP Basic Auth or Shared Secret key
-        if ("basic".equals(plugin.getHttpAuth())) {
+        if (RESTServicePlugin.AuthType.basic.equals(RESTServicePlugin.AUTH_TYPE.getValue())) {
             String[] usernameAndPassword = BasicAuth.decode(auth);
 
             // If username or password fail
@@ -138,7 +138,7 @@ public class AuthFilter implements ContainerRequestFilter {
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }
         } else {
-            if (!auth.equals(plugin.getSecret())) {
+            if (!auth.equals(RESTServicePlugin.SECRET.getValue())) {
                 LOG.warn("Wrong secret key authorization. Provided key: " + auth);
                 throw new WebApplicationException(Status.UNAUTHORIZED);
             }

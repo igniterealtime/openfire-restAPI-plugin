@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class UserServiceLegacy {
         // Printwriter for writing out responses to browser
         PrintWriter out = response.getWriter();
 
-        if (!plugin.getAllowedIPs().isEmpty()) {
+        if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
             // Get client's IP address
             String ipAddress = request.getHeader("x-forwarded-for");
             if (ipAddress == null) {
@@ -85,7 +85,7 @@ public class UserServiceLegacy {
                     }
                 }
             }
-            if (!plugin.getAllowedIPs().contains(ipAddress)) {
+            if (!RESTServicePlugin.ALLOWED_IPS.getValue().contains(ipAddress)) {
                 LOG.warn("User service rejected service to IP address: " + ipAddress);
                 replyError("RequestNotAuthorised", response, out);
                 return Response.status(200).build();
@@ -105,14 +105,14 @@ public class UserServiceLegacy {
         // type = type == null ? "image" : type;
 
         // Check that our plugin is enabled.
-        if (!plugin.isEnabled()) {
+        if (!RESTServicePlugin.ENABLED.getValue()) {
             LOG.warn("User service plugin is disabled: " + request.getQueryString());
             replyError("UserServiceDisabled", response, out);
             return Response.status(200).build();
         }
 
         // Check this request is authorised
-        if (secret == null || !secret.equals(plugin.getSecret())) {
+        if (secret == null || secret.isEmpty() || !secret.equals(RESTServicePlugin.SECRET.getValue())) {
             LOG.warn("An unauthorised user service request was received: " + request.getQueryString());
             replyError("RequestNotAuthorised", response, out);
             return Response.status(200).build();

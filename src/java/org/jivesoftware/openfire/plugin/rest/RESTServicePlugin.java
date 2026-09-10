@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2008 Jive Software, 2022 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2005-2008 Jive Software, 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@ import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
 import org.jivesoftware.openfire.stats.StatisticsManager;
-import org.jivesoftware.util.JiveGlobals;
-import org.jivesoftware.util.PropertyEventDispatcher;
-import org.jivesoftware.util.PropertyEventListener;
-import org.jivesoftware.util.StringUtils;
+import org.jivesoftware.util.*;
 
 import java.io.File;
 import java.util.*;
@@ -32,72 +29,105 @@ import java.util.*;
 /**
  * The Class RESTServicePlugin.
  */
-public class RESTServicePlugin implements Plugin, PropertyEventListener {
+public class RESTServicePlugin implements Plugin {
 
-    private static final String CUSTOM_AUTH_FILTER_PROPERTY_NAME = "plugin.restapi.customAuthFilter";
-    public static final String SERVICE_LOGGING_ENABLED = "plugin.restapi.serviceLoggingEnabled";
+    /**
+     * The value that is used to authenticate requests when using 'shared secret' authentication.
+     */
+    public static final SystemProperty<String> SECRET = SystemProperty.Builder.ofType(String.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.secret")
+        .setDynamic(true)
+        .setEncrypted(true)
+        .build();
 
-    /** The secret. */
-    private String secret;
-    
-    /** The allowed i ps. */
-    private Collection<String> allowedIPs;
-    
-    /** The enabled. */
-    private boolean enabled;
+    /**
+     * Enables or disables additional logging of REST API service calls.
+     */
+    public static final SystemProperty<Boolean> SERVICE_LOGGING_ENABLED = SystemProperty.Builder.ofType(Boolean.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.serviceLoggingEnabled")
+        .setDynamic(true)
+        .setDefaultValue(false)
+        .build();
 
-    public boolean isServiceLoggingEnabled() {
-        return serviceLoggingEnabled;
+    /**
+     * The class name of a custom authentication filter implementation.
+     */
+    public static final SystemProperty<String> CUSTOM_AUTH_FILTER = SystemProperty.Builder.ofType(String.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.customAuthFilter")
+        .setDynamic(true)
+        .build();
+
+    /**
+     * Enables or disables the processing of REST API service requests.
+     */
+    public static final SystemProperty<Boolean> ENABLED = SystemProperty.Builder.ofType(Boolean.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.enabled")
+        .setDynamic(true)
+        .setDefaultValue(false)
+        .build();
+
+    /**
+     * The authentication mechanism used to authenticate REST API service requests.
+     */
+    public static final SystemProperty<AuthType> AUTH_TYPE = SystemProperty.Builder.ofType(AuthType.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.httpAuth")
+        .setDynamic(true)
+        .setDefaultValue(AuthType.basic)
+        .build();
+
+    /**
+     * List of IP addresses that are allowed to access the REST API services.
+     */
+    public static final SystemProperty<Set<String>> ALLOWED_IPS = SystemProperty.Builder.ofType(Set.class)
+        .setPlugin("REST API")
+        .setKey("plugin.restapi.allowedIPs")
+        .setDefaultValue(Collections.emptySet())
+        .setDynamic(true)
+        .buildSet(String.class);
+
+    /**
+     * The types of authentication mechanisms for REST service calls.
+     */
+    public enum AuthType
+    {
+        /**
+         * Use HTTP Basic Authentication.
+         */
+        basic,
+
+        /**
+         * Use a Shared Secret.
+         */
+        secret,
+
+        /**
+         * Use a custom authentication implementation.
+         */
+        custom
     }
-
-    public void setServiceLoggingEnabled(boolean serviceLoggingEnabled) {
-        JiveGlobals.setProperty(SERVICE_LOGGING_ENABLED, Boolean.toString(serviceLoggingEnabled));
-        this.serviceLoggingEnabled = serviceLoggingEnabled;
-    }
-
-    private boolean serviceLoggingEnabled;
-
-    /** The http auth. */
-    private String httpAuth;
     
-    /** The custom authentication filter */
-    private String customAuthFilterClassName;
-
     private final Set<String> registeredStatisticKeys = new HashSet<>();
 
     /* (non-Javadoc)
      * @see org.jivesoftware.openfire.container.Plugin#initializePlugin(org.jivesoftware.openfire.container.PluginManager, java.io.File)
      */
-    public void initializePlugin(PluginManager manager, File pluginDirectory) {
-        secret = JiveGlobals.getProperty("plugin.restapi.secret", "");
+    public void initializePlugin(PluginManager manager, File pluginDirectory)
+    {
         // If no secret key has been assigned, assign a random one.
-        if ("".equals(secret)) {
-            secret = StringUtils.randomString(16);
-            setSecret(secret);
+        if (SECRET.getValue() == null || SECRET.getValue().isEmpty()) {
+            SECRET.setValue(StringUtils.randomString(16));
         }
         
-        // See if Custom authentication filter has been defined
-        customAuthFilterClassName = JiveGlobals.getProperty("plugin.restapi.customAuthFilter", "");
-
         // Start collecting statistics.
         for (StatisticsFilter.RestResponseFamilyStatistic statistic : StatisticsFilter.generateAllFamilyStatisticInstances()) {
             StatisticsManager.getInstance().addStatistic(statistic.getKeyName(), statistic);
             registeredStatisticKeys.add(statistic.getKeyName());
         }
-
-        // See if the service is enabled or not.
-        enabled = JiveGlobals.getBooleanProperty("plugin.restapi.enabled", false);
-
-        // See if the HTTP Basic Auth is enabled or not.
-        httpAuth = JiveGlobals.getProperty("plugin.restapi.httpAuth", "basic");
-
-        // Get the list of IP addresses that can use this service. An empty list
-        // means that this filter is disabled.
-        allowedIPs = StringUtils.stringToCollection(JiveGlobals.getProperty("plugin.restapi.allowedIPs", ""));
-
-        setServiceLoggingEnabled(JiveGlobals.getBooleanProperty(SERVICE_LOGGING_ENABLED, false));
-        // Listen to system property events
-        PropertyEventDispatcher.addListener(this);
 
         // Exclude this servlet from requering the user to login
         AuthCheckFilter.addExclude(JerseyWrapper.SERVLET_URL);
@@ -116,8 +146,6 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
 
         // Release the excluded URL
         AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
-        // Stop listening to system property events
-        PropertyEventDispatcher.removeListener(this);
     }
 
     /**
@@ -134,153 +162,5 @@ public class RESTServicePlugin implements Plugin, PropertyEventListener {
      */
     public String loadAuthenticationFilter(String customAuthFilterClassName) {
         return JerseyWrapper.tryLoadingAuthenticationFilter(customAuthFilterClassName);
-    }
-    
-    /**
-     * Returns the secret key that only valid requests should know.
-     *
-     * @return the secret key.
-     */
-    public String getSecret() {
-        return secret;
-    }
-
-    /**
-     * Sets the secret key that grants permission to use the userservice.
-     *
-     * @param secret
-     *            the secret key.
-     */
-    public void setSecret(String secret) {
-        JiveGlobals.setProperty("plugin.restapi.secret", secret);
-        this.secret = secret;
-    }
-
-    /**
-     * Returns the custom authentication filter class name used in place of the basic ones to grant permission to use the Rest services.
-     *
-     * @return custom authentication filter class name .
-     */
-    public String getCustomAuthFilterClassName() {
-        return customAuthFilterClassName;
-    }
-
-    /**
-     * Sets the customAuthFIlterClassName used to grant permission to use the Rest services.
-     *
-     * @param customAuthFilterClassName
-     *            custom authentication filter class name.
-     */
-    public void setCustomAuthFiIterClassName(String customAuthFilterClassName) {
-        JiveGlobals.setProperty(CUSTOM_AUTH_FILTER_PROPERTY_NAME, customAuthFilterClassName);
-        this.customAuthFilterClassName = customAuthFilterClassName;
-    }
-    
-    /**
-     * Gets the allowed i ps.
-     *
-     * @return the allowed i ps
-     */
-    public Collection<String> getAllowedIPs() {
-        return allowedIPs;
-    }
-
-    /**
-     * Sets the allowed i ps.
-     *
-     * @param allowedIPs the new allowed i ps
-     */
-    public void setAllowedIPs(Collection<String> allowedIPs) {
-        JiveGlobals.setProperty("plugin.restapi.allowedIPs", StringUtils.collectionToString(allowedIPs));
-        this.allowedIPs = allowedIPs;
-    }
-
-    /**
-     * Returns true if the user service is enabled. If not enabled, it will not
-     * accept requests to create new accounts.
-     *
-     * @return true if the user service is enabled.
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Enables or disables the user service. If not enabled, it will not accept
-     * requests to create new accounts.
-     *
-     * @param enabled
-     *            true if the user service should be enabled.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        JiveGlobals.setProperty("plugin.restapi.enabled", enabled ? "true" : "false");
-    }
-
-    /**
-     * Gets the http authentication mechanism.
-     *
-     * @return the http authentication mechanism
-     */
-    public String getHttpAuth() {
-        return httpAuth;
-    }
-
-    /**
-     * Sets the http auth.
-     *
-     * @param httpAuth the new http auth
-     */
-    public void setHttpAuth(String httpAuth) {
-        this.httpAuth = httpAuth;
-        JiveGlobals.setProperty("plugin.restapi.httpAuth", httpAuth);
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#propertySet(java.lang.String, java.util.Map)
-     */
-    public void propertySet(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.secret")) {
-            this.secret = (String) params.get("value");
-        } else if (property.equals("plugin.restapi.enabled")) {
-            this.enabled = Boolean.parseBoolean((String) params.get("value"));
-        } else if (property.equals("plugin.restapi.allowedIPs")) {
-            this.allowedIPs = StringUtils.stringToCollection((String) params.get("value"));
-        } else if (property.equals("plugin.restapi.httpAuth")) {
-            this.httpAuth = (String) params.get("value");
-        } else if(property.equals(CUSTOM_AUTH_FILTER_PROPERTY_NAME)) {
-            this.customAuthFilterClassName = (String) params.get("value");
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#propertyDeleted(java.lang.String, java.util.Map)
-     */
-    public void propertyDeleted(String property, Map<String, Object> params) {
-        if (property.equals("plugin.restapi.secret")) {
-            this.secret = "";
-        } else if (property.equals("plugin.restapi.enabled")) {
-            this.enabled = false;
-        } else if (property.equals("plugin.restapi.allowedIPs")) {
-            this.allowedIPs = Collections.emptyList();
-        } else if (property.equals("plugin.restapi.httpAuth")) {
-            this.httpAuth = "basic";
-        } else if(property.equals(CUSTOM_AUTH_FILTER_PROPERTY_NAME)) {
-            this.customAuthFilterClassName = null;
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#xmlPropertySet(java.lang.String, java.util.Map)
-     */
-    public void xmlPropertySet(String property, Map<String, Object> params) {
-        // Do nothing
-    }
-
-    /* (non-Javadoc)
-     * @see org.jivesoftware.util.PropertyEventListener#xmlPropertyDeleted(java.lang.String, java.util.Map)
-     */
-    public void xmlPropertyDeleted(String property, Map<String, Object> params) {
-        // Do nothing
     }
 }

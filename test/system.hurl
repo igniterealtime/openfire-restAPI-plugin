@@ -103,3 +103,146 @@ HTTP 400
 DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.key
 Authorization: {{authkey}}
 HTTP 200
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.enabled
+Authorization: {{authkey}}
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.enabled
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin.restapi.enabled" value="true" />
+```
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.enabled
+Authorization: {{authkey}}
+HTTP 403
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.httpAuth
+Authorization: {{authkey}}
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.httpAuth
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin.restapi.httpAuth" value="custom" />
+```
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.httpAuth
+Authorization: {{authkey}}
+HTTP 403
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.customAuthFilter
+Authorization: {{authkey}}
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.customAuthFilter
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin.restapi.customAuthFilter" value="test.class" />
+```
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.customAuthFilter
+Authorization: {{authkey}}
+HTTP 403
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.secret
+Authorization: {{authkey}}
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.secret
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin.restapi.secret" value="test" />
+```
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.secret
+Authorization: {{authkey}}
+HTTP 403
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.serviceLoggingEnabled
+Authorization: {{authkey}}
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.serviceLoggingEnabled
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin.restapi.serviceLoggingEnabled" value="true" />
+```
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.serviceLoggingEnabled
+Authorization: {{authkey}}
+HTTP 403
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
+Authorization: {{authkey}}
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin.restapi.allowedIPs" value="true" />
+```
+HTTP 403
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The REST API plugin should not allow users to access properties used to control the plugin's functionality.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
+Authorization: {{authkey}}
+HTTP 403

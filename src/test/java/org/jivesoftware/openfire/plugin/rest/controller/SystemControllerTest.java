@@ -15,25 +15,33 @@
  */
 package org.jivesoftware.openfire.plugin.rest.controller;
 
+import org.jivesoftware.openfire.XMPPServer;
+import org.jivesoftware.openfire.container.PluginManager;
+import org.jivesoftware.openfire.plugin.rest.RESTServicePlugin;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.util.JiveGlobals;
 import org.jivesoftware.util.SystemProperty;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 /**
  * Unit tests for {@link SystemController}, in particular for the retrieval of an individual system property.
@@ -46,6 +54,39 @@ import static org.mockito.Mockito.when;
 public class SystemControllerTest {
 
     private SystemController systemController;
+
+    /**
+     * Constructs a mock of the XMPPServer implementation, providing enough metadata to allow
+     * {@link RESTServicePlugin}'s static {@link SystemProperty} fields to be built.
+     *
+     * @return A mock of a XMPPServer
+     */
+    private static XMPPServer constructMockXmppServer() {
+        final PluginManager pluginManager = mock(PluginManager.class, withSettings().lenient());
+        final XMPPServer xmppServer = mock(XMPPServer.class, withSettings().lenient());
+        doAnswer(invocationOnMock -> pluginManager).when(xmppServer).getPluginManager();
+        return xmppServer;
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+        // SystemController#getForbiddenPropertyKeys() (invoked by getSystemProperty()) references
+        // RESTServicePlugin.ENABLED, triggering the one-time, JVM-wide static initialization of RESTServicePlugin.
+        // That initialization builds SystemProperty instances, which require a running server. Install a mock here
+        // so that this test class does not depend on some other, unrelated test class having already done so, in
+        // whatever arbitrary order Surefire happens to run test classes in.
+        XMPPServer.setInstance(constructMockXmppServer());
+
+        // Force RESTServicePlugin to load now, while the mock above is in place and no test-method-scoped
+        // MockedStatic block is active, rather than relying on it being lazily loaded as a side effect of
+        // whichever test happens to run first.
+        RESTServicePlugin.ENABLED.getPlugin();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        XMPPServer.setInstance(null);
+    }
 
     @Before
     public void setUp() {
@@ -179,6 +220,30 @@ public class SystemControllerTest {
             systemController.getSystemProperty(key);
 
             jiveGlobalsMock.verify(() -> JiveGlobals.getProperty(eq(key)), never());
+        }
+    }
+
+    /**
+     * A property that belongs to this plugin (identified by its {@code plugin.restapi.} key prefix) must remain
+     * forbidden even when it is not (yet) present in {@link SystemProperty#getProperties()} - which can happen when
+     * the class that declares it (e.g. {@code MUCRoomController}) has not yet been loaded by the JVM, as
+     * SystemProperty registration happens as a side effect of static initialization.
+     */
+    @Test
+    public void testGetSystemPropertyWithRestApiPrefixIsForbiddenEvenWhenNotYetRegistered() {
+        final String key = "plugin.restapi.muc.room-mutex.enabled";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class)) {
+            // Simulate the property's owning class not having loaded yet: it's absent from both lookups.
+            systemPropertyMock.when(() -> SystemProperty.getProperty(eq(key))).thenReturn(Optional.empty());
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(eq(key))).thenReturn("false");
+
+            final ServiceException exception = assertThrows(ServiceException.class, () -> systemController.getSystemProperty(key));
+
+            assertEquals(ExceptionType.NOT_ALLOWED, exception.getException());
+            assertEquals(Response.Status.FORBIDDEN, exception.getStatus());
         }
     }
 }

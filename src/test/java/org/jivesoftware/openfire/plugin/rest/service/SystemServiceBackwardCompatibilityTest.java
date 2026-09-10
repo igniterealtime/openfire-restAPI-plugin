@@ -25,6 +25,7 @@ import org.jivesoftware.openfire.plugin.rest.entity.SystemProperty;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -98,6 +99,11 @@ public class SystemServiceBackwardCompatibilityTest extends JerseyTest {
     public static void setUpClass() throws ServiceException {
         // Override the service controller with a mock controller.
         SystemController.setInstance(constructMockController());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        SystemController.setInstance(null);
     }
 
     @Override

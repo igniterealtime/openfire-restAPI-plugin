@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022.
+ * Copyright (c) 2022-2026 Ignite Realtime Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class SystemService {
         description = "Get a specific Openfire system property.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The requested system property.", content = @Content(schema = @Schema(implementation = SystemProperty.class))),
+            @ApiResponse(responseCode = "403", description = "Reading this system property is prohibited."),
             @ApiResponse(responseCode = "404", description = "The system property could not be found.")
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -71,6 +72,7 @@ public class SystemService {
         description = "Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The system property is created."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to create this system property."),
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createSystemProperty(
@@ -88,6 +90,7 @@ public class SystemService {
         responses = {
             @ApiResponse(responseCode = "200", description = "The system property is updated."),
             @ApiResponse(responseCode = "400", description = "The provided system property does not match the name in the URL."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to update this system property."),
             @ApiResponse(responseCode = "404", description = "The system property could not be found.")
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -106,6 +109,7 @@ public class SystemService {
         description = "Removes an existing Openfire system property.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system property is deleted."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to delete this system property."),
             @ApiResponse(responseCode = "404", description = "The system property could not be found.")
         })
     public Response deleteSystemProperty(
