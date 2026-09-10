@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Ignite Realtime Foundation. All rights reserved.
+ * Copyright (C) 2022-2026 Ignite Realtime Foundation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.jivesoftware.openfire.plugin.rest.entity.RosterItemEntity;
 import org.jivesoftware.openfire.plugin.rest.exceptions.RESTExceptionMapper;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.roster.RosterItem;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -75,6 +76,11 @@ public class UserRosterServiceBackwardCompatibilityTest extends JerseyTest {
     public static void setUpClass() throws ServiceException {
         // Override the service controller with a mock controller.
         UserServiceController.setInstance(constructMockController());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        UserServiceController.setInstance(null);
     }
 
     @Override
