@@ -40,6 +40,11 @@ import java.util.stream.Collectors;
 public class SystemController {
     private static final Logger LOG = LoggerFactory.getLogger(SystemController.class);
 
+    /**
+     * Key prefix used by all system properties owned by this plugin.
+     */
+    private static final String RESTRICTED_PROPERTY_KEY_PREFIX = "plugin.restapi.";
+
     private static SystemController INSTANCE = null;
 
     /**
@@ -84,7 +89,7 @@ public class SystemController {
 
         // Ensure that we're not exposing any 'forbidden' properties.
         final Set<String> forbiddenPropertyKeys = getForbiddenPropertyKeys();
-        compoundProperties.removeIf(systemProperty -> forbiddenPropertyKeys.contains(systemProperty.getKey()));
+        compoundProperties.removeIf(systemProperty -> isForbiddenPropertyKey(systemProperty.getKey(), forbiddenPropertyKeys));
 
         // And sort by key
         compoundProperties.sort(Comparator.comparing(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty::getKey));
@@ -107,7 +112,7 @@ public class SystemController {
 
         final Optional<SystemProperty> systemProperty = SystemProperty.getProperty(propertyKey);
         if (systemProperty.isPresent()) {
-            if (forbiddenPropertyKeys.contains(systemProperty.get().getKey())) {
+            if (isForbiddenPropertyKey(systemProperty.get().getKey(), forbiddenPropertyKeys)) {
                 // Ensure that we're not exposing any 'forbidden' properties.
                 throw new ServiceException("Access to property is forbidden", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
             }
@@ -116,7 +121,7 @@ public class SystemController {
         }
 
         // No system property found. Check JiveGlobals. This cannot distinguish between a property that is not set and a property that is set to null.
-        if (forbiddenPropertyKeys.contains(propertyKey)) {
+        if (isForbiddenPropertyKey(propertyKey, forbiddenPropertyKeys)) {
             // Ensure that we're not exposing any 'forbidden' properties.
             throw new ServiceException("Access to property is forbidden", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
@@ -137,7 +142,7 @@ public class SystemController {
     public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException
     {
         // Ensure that we're not exposing any 'forbidden' properties.
-        if (getForbiddenPropertyKeys().contains(systemProperty.getKey())) {
+        if (isForbiddenPropertyKey(systemProperty.getKey(), getForbiddenPropertyKeys())) {
             throw new ServiceException("Could not create property", systemProperty.getKey(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
         JiveGlobals.setProperty(systemProperty.getKey(), systemProperty.getValue());
@@ -151,7 +156,7 @@ public class SystemController {
      */
     public void deleteSystemProperty(String propertyKey) throws ServiceException {
         // Ensure that we're not exposing any 'forbidden' properties.
-        if (getForbiddenPropertyKeys().contains(propertyKey)) {
+        if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
             throw new ServiceException("Could not delete property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
@@ -172,7 +177,7 @@ public class SystemController {
      */
     public void updateSystemProperty(String propertyKey, org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException {
         // Ensure that we're not exposing any 'forbidden' properties.
-        if (getForbiddenPropertyKeys().contains(propertyKey)) {
+        if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
             throw new ServiceException("Could not update property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
         if(JiveGlobals.getProperty(propertyKey) != null) {
@@ -327,5 +332,22 @@ public class SystemController {
 
             .map(org.jivesoftware.util.SystemProperty::getKey)
             .collect(Collectors.toSet());
+    }
+
+    /**
+     * Determines whether a property key is one that this plugin should not expose or allow modification of.
+     *
+     * Checks the prefix in addition to the given set, as the set can only reflect properties whose owning class has
+     * already been loaded by the JVM (SystemProperty registration is a side effect of static initialization, which
+     * for some of this plugin's properties - e.g. those declared by MUCRoomController - isn't guaranteed to have
+     * happened yet).
+     *
+     * @param propertyKey the property key to check.
+     * @param forbiddenPropertyKeys the result of {@link #getForbiddenPropertyKeys()}, provided by the caller to avoid recomputing it.
+     * @return true if the property key is forbidden, otherwise false.
+     */
+    private static boolean isForbiddenPropertyKey(final String propertyKey, final Set<String> forbiddenPropertyKeys)
+    {
+        return propertyKey != null && (forbiddenPropertyKeys.contains(propertyKey) || propertyKey.startsWith(RESTRICTED_PROPERTY_KEY_PREFIX));
     }
 }
