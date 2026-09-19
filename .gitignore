@@ -28,3 +28,8 @@ nbbuild/
 # build temp folders
 rpmbuild/
 debian/
+
+# Agent things
+/AGENTS.md
+/CLAUDE.md
+/.claude/settings.local.json
