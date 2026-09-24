@@ -404,47 +404,44 @@ public class SystemControllerTest {
     }
 
     /**
-     * Verifies that creating a property is forbidden when its key only differs from that of an encrypted property by
-     * characters that Openfire strips when storing a property (surrounding whitespace, or a trailing dot). Without
-     * normalizing the key before checking it, such a request would overwrite the encrypted property, storing the new
-     * value without encryption.
+     * Verifies that creating a property is rejected when its key is not valid: when it contains characters that
+     * Openfire or its database could interpret rather than store literally (such as whitespace, SQL LIKE wildcards
+     * or non-ASCII characters), or when it has an empty part (such as a trailing dot, which Openfire strips).
      */
     @Test
-    public void testCreateEncryptedPropertyWithDenormalizedKeyIsForbidden()
+    public void testCreatePropertyWithInvalidKeyIsRejected()
     {
-        // Setup test fixture.
-        final String key = "foo.bar.secret";
-
-        for (final String denormalizedKey : Arrays.asList(key + " ", " " + key, key + ".", " " + key + "."))
+        for (final String key : Arrays.asList("", ".", "foo.", ".foo", "foo..bar", "foo.bar ", " foo.bar", "foo bar", "foo%", "%", "foo\\.bar", "foo[.]bar", "pl\u00fcgin.restapi.secret"))
         {
-            final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(denormalizedKey, "new");
+            final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
 
             try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
                  final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
             {
+                // Setup test fixture.
                 systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
-                jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(key))).thenReturn(true);
 
                 // Execute system under test.
-                final ServiceException result = assertThrows("Expected creation of property '" + denormalizedKey + "' (which Openfire stores as encrypted property '" + key + "') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+                final ServiceException result = assertThrows("Expected creation of property '" + key + "' (which has an invalid key) to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
 
                 // Verify result.
-                assertEquals("Unexpected HTTP status when creating property '" + denormalizedKey + "'.", Response.Status.FORBIDDEN, result.getStatus());
-                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of property '" + denormalizedKey + "' should not have changed the stored value of '" + key + "'."));
-                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected creation of property '" + denormalizedKey + "' should not have changed the stored value of '" + key + "'."));
+                assertEquals("Unexpected HTTP status when creating property '" + key + "'.", Response.Status.BAD_REQUEST, result.getStatus());
+                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of property '" + key + "' should not have stored anything."));
+                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected creation of property '" + key + "' should not have stored anything."));
             }
         }
     }
 
     /**
-     * Verifies that creating a property is forbidden when its key has the prefix used by this plugin's own
-     * properties once surrounding whitespace (which Openfire strips when storing a property) is removed.
+     * Verifies that creating a property is allowed when its key contains all characters that are allowed in a key,
+     * such as the apostrophes that Openfire uses in the keys of properties for caches of MUC services.
      */
     @Test
-    public void testCreateRestApiPropertyWithLeadingWhitespaceIsForbidden()
+    public void testCreatePropertyWithValidKeyIsAllowed() throws Exception
     {
         // Setup test fixture.
-        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(" plugin.restapi.secret", "new");
+        final String key = "cache.MUCService'conference'Rooms.max_size-2";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
 
         try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
              final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
@@ -452,11 +449,10 @@ public class SystemControllerTest {
             systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
 
             // Execute system under test.
-            final ServiceException result = assertThrows("Expected creation of a property of this plugin, prefixed with whitespace, to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+            systemController.createSystemProperty(property);
 
             // Verify result.
-            assertEquals("Unexpected HTTP status when creating a property of this plugin, prefixed with whitespace.", Response.Status.FORBIDDEN, result.getStatus());
-            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of a property of this plugin should not have changed its stored value."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(eq(key), eq("new")));
         }
     }
 
@@ -585,6 +581,165 @@ public class SystemControllerTest {
             jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar.plain", "foo.barsecret"));
             jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
             jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq("foo.barsecret"))).thenReturn(true);
+
+            // Execute system under test.
+            systemController.deleteSystemProperty(key);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(eq(key)));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property is rejected when the database statement that Openfire uses to delete it could
+     * also delete a property other than the property itself and its children. That statement uses SQL LIKE without
+     * escaping the key, so that the {@code _} character acts as a wildcard. Matching can also be case-insensitive,
+     * depending on the database.
+     */
+    @Test
+    public void testDeleteOfKeyThatMatchesOtherPropertyInDatabaseIsRejected()
+    {
+        for (final String key : Arrays.asList("foo_bar", "foo.ba_", "f_o.bar", "_oo", "Foo.Bar", "Foo.Bar.Baz"))
+        {
+            try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+                 final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+            {
+                // Setup test fixture.
+                systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+                jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar.baz"));
+                jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+                // Execute system under test.
+                final ServiceException result = assertThrows("Expected deletion of property '" + key + "' (which the database could match to 'foo.bar.baz') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+                // Verify result.
+                assertEquals("Unexpected HTTP status when deleting property '" + key + "'.", Response.Status.CONFLICT, result.getStatus());
+                jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of property '" + key + "' should not have removed anything."));
+            }
+        }
+    }
+
+    /**
+     * Verifies that deleting a property is rejected when the database statement that Openfire uses to delete it could
+     * also delete the children of a different property, of which the key differs only where the key of the deleted
+     * property has an underscore.
+     */
+    @Test
+    public void testDeleteOfKeyWithUnderscoreThatMatchesChildrenOfOtherPropertyIsRejected()
+    {
+        // Setup test fixture.
+        final String key = "foo_bar";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "fooXbar", "fooXbar.child"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected deletion of property '" + key + "' (which the database could match to 'fooXbar.child') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when deleting property '" + key + "'.", Response.Status.CONFLICT, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of property '" + key + "' should not have removed anything."));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property is rejected when the database statement that Openfire uses to delete it could
+     * also delete a forbidden property.
+     */
+    @Test
+    public void testDeleteOfKeyThatMatchesForbiddenPropertyInDatabaseIsRejected()
+    {
+        // Setup test fixture.
+        final String key = "plugin_restapi";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "plugin.restapi.secret"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected deletion of property '" + key + "' (which the database could match to 'plugin.restapi.secret') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when deleting property '" + key + "'.", Response.Status.CONFLICT, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of property '" + key + "' should not have removed anything."));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property that has an underscore in its key is allowed, when the database statement
+     * that Openfire uses to delete it cannot match any other property.
+     */
+    @Test
+    public void testDeleteOfKeyWithUnderscoreIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "foo_bar";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo_bar.child", "plugin.restapi.secret"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            systemController.deleteSystemProperty(key);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(eq(key)));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property is rejected when its key is not valid (see
+     * {@link #testCreatePropertyWithInvalidKeyIsRejected()}).
+     */
+    @Test
+    public void testDeletePropertyWithInvalidKeyIsRejected()
+    {
+        for (final String key : Arrays.asList("", ".", "foo.", ".foo", "foo..bar", "foo.bar ", " foo.bar", "foo bar", "foo%", "%", "foo\\.bar", "foo[.]bar", "pl\u00fcgin.restapi.secret"))
+        {
+            try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+                 final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+            {
+                // Setup test fixture.
+                systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+                jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Collections.singletonList(key));
+                jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+                // Execute system under test.
+                final ServiceException result = assertThrows("Expected deletion of property '" + key + "' (which has an invalid key) to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+                // Verify result.
+                assertEquals("Unexpected HTTP status when deleting property '" + key + "'.", Response.Status.BAD_REQUEST, result.getStatus());
+                jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of property '" + key + "' should not have removed anything."));
+            }
+        }
+    }
+
+    /**
+     * Verifies that deleting a property that has apostrophes in its key (as used by Openfire in the keys of
+     * properties for caches of MUC services) is allowed.
+     */
+    @Test
+    public void testDeleteOfKeyWithApostrophesIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "cache.MUCService'conference'Rooms.size";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "cache.MUCService'conference'Rooms.maxLifetime"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
 
             // Execute system under test.
             systemController.deleteSystemProperty(key);
