@@ -1650,7 +1650,7 @@ Endpoint to get information over specific system property
 >**GET** http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain
 
 ## Create a system property 
-Endpoint to create a system property
+Endpoint to create a system property. Note that the name of the property must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.
 >**POST** system/properties
 
 **Payload:** System Property
@@ -1672,7 +1672,7 @@ Endpoint to create a system property
 ```
 
 ## Delete a system property
-Endpoint to delete a system property
+Endpoint to delete a system property, together with all of its child properties (properties of which the name starts with the name of this property, followed by a dot). Note that the name of the property must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. A deletion that could also delete other properties (for example, because the name contains an underscore, which can match any character) is rejected.
 >**DELETE** /system/properties/{propertyName}
 
 **Payload:** none
