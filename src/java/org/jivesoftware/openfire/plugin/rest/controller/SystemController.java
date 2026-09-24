@@ -318,7 +318,14 @@ public class SystemController {
     }
 
     /**
-     * Returns a set of system property keys that are not allowed to be modified via the REST API.
+     * Returns a set of keys of registered system properties that must not be exposed or modified via the REST API.
+     *
+     * This covers properties that are used to configure this plugin itself, and properties that are flagged as being
+     * encrypted.
+     *
+     * The returned set is based on {@link SystemProperty} registrations only. It is therefore incomplete: callers
+     * should use {@code isForbiddenPropertyKey(String, Set)} to determine if a particular property key is forbidden,
+     * as that also applies checks that do not depend on a property being registered.
      *
      * @return a set of system property keys (never null, possibly empty).
      */
@@ -327,9 +334,13 @@ public class SystemController {
         final String pluginName = RESTServicePlugin.ENABLED.getPlugin();
         return org.jivesoftware.util.SystemProperty.getProperties().stream()
 
-            // Do not allow modifications of the configuration of this plugin itself. See https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
-            .filter(p -> pluginName.equals(p.getPlugin())) // This works only because all properties used by the plugin are SystemProperty instances (as opposed to using JiveGlobals directly).
-
+            // Do not expose or allow modifications of the configuration of this plugin itself (see https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244)
+            // or of properties that are encrypted (see https://github.com/igniterealtime/openfire-restAPI-plugin/issues/248). Checking the
+            // registration (rather than only the stored value, as isForbiddenPropertyKey does) also catches properties that are defined to be
+            // encrypted, for which no encrypted value has been stored yet.
+            .filter(p -> p.isEncrypted()
+                || pluginName.equals(p.getPlugin()) // This works only because all properties used by the plugin are SystemProperty instances (as opposed to using JiveGlobals directly).
+            )
             .map(org.jivesoftware.util.SystemProperty::getKey)
             .collect(Collectors.toSet());
     }
@@ -337,10 +348,18 @@ public class SystemController {
     /**
      * Determines whether a property key is one that this plugin should not expose or allow modification of.
      *
-     * Checks the prefix in addition to the given set, as the set can only reflect properties whose owning class has
-     * already been loaded by the JVM (SystemProperty registration is a side effect of static initialization, which
-     * for some of this plugin's properties - e.g. those declared by MUCRoomController - isn't guaranteed to have
-     * happened yet).
+     * A property key is forbidden when:
+     * <ul>
+     *     <li>it is part of the provided set (see {@link #getForbiddenPropertyKeys()});</li>
+     *     <li>it has the key prefix used by this plugin's own properties. The set can only reflect properties whose
+     *     owning class has already been loaded by the JVM (SystemProperty registration is a side effect of static
+     *     initialization, which for some of this plugin's properties - e.g. those declared by MUCRoomController -
+     *     isn't guaranteed to have happened yet);</li>
+     *     <li>its value is stored encrypted (which applies also to properties that are not registered as a
+     *     {@link SystemProperty}, such as LDAP or SMTP credentials);</li>
+     *     <li>it is considered sensitive by its name (e.g. it contains 'password'), which is a convention that the
+     *     Openfire admin console also uses to hide the value of a property.</li>
+     * </ul>
      *
      * @param propertyKey the property key to check.
      * @param forbiddenPropertyKeys the result of {@link #getForbiddenPropertyKeys()}, provided by the caller to avoid recomputing it.
@@ -348,6 +367,9 @@ public class SystemController {
      */
     private static boolean isForbiddenPropertyKey(final String propertyKey, final Set<String> forbiddenPropertyKeys)
     {
-        return propertyKey != null && (forbiddenPropertyKeys.contains(propertyKey) || propertyKey.startsWith(RESTRICTED_PROPERTY_KEY_PREFIX));
+        return propertyKey != null && (forbiddenPropertyKeys.contains(propertyKey)
+            || propertyKey.startsWith(RESTRICTED_PROPERTY_KEY_PREFIX)
+            || JiveGlobals.isPropertyEncrypted(propertyKey)
+            || JiveGlobals.isPropertySensitive(propertyKey));
     }
 }
