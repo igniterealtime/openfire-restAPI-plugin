@@ -34,7 +34,7 @@ jobs:
       - name: Run Openfire
         uses: igniterealtime/launch-openfire-action@main # Should this be tied to the Openfire version?
         with:
-          version: 5.0.2
+          version: 5.1.2
           config: ./test/demoboot-with-additions.xml
           plugin: ./restAPI.jar
       

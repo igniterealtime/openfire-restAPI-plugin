@@ -246,3 +246,72 @@ HTTP 403
 DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
 Authorization: {{authkey}}
 HTTP 403
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# Openfire deletes a property together with all of its child properties. Deleting the parent of the plugin's own
+# properties (which exist in this setup) should therefore not be allowed either.
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi
+Authorization: {{authkey}}
+HTTP 403
+
+
+# Deleting a property also deletes its child properties.
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.parent" value="parent-value" />
+```
+HTTP 201
+
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.parent.child" value="child-value" />
+```
+HTTP 201
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.parent
+Authorization: {{authkey}}
+HTTP 200
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.parent.child
+Authorization: {{authkey}}
+HTTP 404
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/259
+# Openfire itself uses apostrophes in property keys (e.g. for the caches of MUC services), which should be usable in
+# the URL path.
+GET http://localhost:9090/plugins/restapi/v1/system/properties/cache.MUCService'conference'Rooms.size
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "string(/property/@key)" == "cache.MUCService'conference'Rooms.size"
+
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.MUCService'room'Rooms.size" value="42" />
+```
+HTTP 201
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "string(/property/@value)" == "42"
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
+Authorization: {{authkey}}
+HTTP 200
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
+Authorization: {{authkey}}
+HTTP 404
