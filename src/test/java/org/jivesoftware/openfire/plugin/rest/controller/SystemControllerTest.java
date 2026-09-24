@@ -29,12 +29,17 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 
 import javax.ws.rs.core.Response;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -50,6 +55,7 @@ import static org.mockito.Mockito.withSettings;
  * outside of a running Openfire server.
  *
  * @see <a href="https://github.com/igniterealtime/openfire-restAPI-plugin/issues/242">issue #242</a>
+ * @see <a href="https://github.com/igniterealtime/openfire-restAPI-plugin/issues/248">issue #248</a>
  */
 public class SystemControllerTest {
 
@@ -244,6 +250,209 @@ public class SystemControllerTest {
 
             assertEquals(ExceptionType.NOT_ALLOWED, exception.getException());
             assertEquals(Response.Status.FORBIDDEN, exception.getStatus());
+        }
+    }
+
+    /**
+     * Creates a mock of a {@link SystemProperty} registration.
+     *
+     * @param key The key of the property
+     * @param value The value of the property, as saved
+     * @param encrypted Whether the property is flagged as being encrypted
+     * @return A mock of a SystemProperty
+     */
+    private static SystemProperty<?> mockRegisteredProperty(final String key, final String value, final boolean encrypted) {
+        final SystemProperty<?> registeredProperty = mock(SystemProperty.class);
+        when(registeredProperty.getKey()).thenReturn(key);
+        when(registeredProperty.getValueAsSaved()).thenReturn(value);
+        when(registeredProperty.isEncrypted()).thenReturn(encrypted);
+        when(registeredProperty.getPlugin()).thenReturn("Openfire");
+        return registeredProperty;
+    }
+
+    /**
+     * Verifies that retrieving a registered property that is flagged as being encrypted is forbidden.
+     */
+    @Test
+    public void testGetSystemPropertyThatIsRegisteredAndEncryptedIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar.secret";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            final SystemProperty<?> registeredProperty = mockRegisteredProperty(key, "s3cr3t", true);
+            systemPropertyMock.when(() -> SystemProperty.getProperty(eq(key))).thenReturn(Optional.of(registeredProperty));
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.singletonList(registeredProperty));
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected retrieval of a registered, encrypted property to be rejected, but its value was returned.", ServiceException.class, () -> systemController.getSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when retrieving a registered, encrypted property.", ExceptionType.NOT_ALLOWED, result.getException());
+            assertEquals("Unexpected HTTP status when retrieving a registered, encrypted property.", Response.Status.FORBIDDEN, result.getStatus());
+        }
+    }
+
+    /**
+     * Verifies that retrieving an unregistered property of which the value is stored encrypted (such as the LDAP
+     * admin password) is forbidden.
+     */
+    @Test
+    public void testGetSystemPropertyThatIsOnlyInJiveGlobalsAndEncryptedIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar.secret";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(() -> SystemProperty.getProperty(eq(key))).thenReturn(Optional.empty());
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(eq(key))).thenReturn("s3cr3t");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(key))).thenReturn(true);
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected retrieval of an unregistered property with an encrypted value to be rejected, but its value was returned.", ServiceException.class, () -> systemController.getSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when retrieving an unregistered property with an encrypted value.", ExceptionType.NOT_ALLOWED, result.getException());
+            assertEquals("Unexpected HTTP status when retrieving an unregistered property with an encrypted value.", Response.Status.FORBIDDEN, result.getStatus());
+        }
+    }
+
+    /**
+     * Verifies that retrieving an unencrypted property that is considered sensitive based on its name (such as the
+     * SMTP password) is forbidden.
+     */
+    @Test
+    public void testGetSystemPropertyThatIsSensitiveIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "mail.smtp.password";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(() -> SystemProperty.getProperty(eq(key))).thenReturn(Optional.empty());
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(eq(key))).thenReturn("s3cr3t");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertySensitive(anyString())).thenCallRealMethod();
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected retrieval of property '" + key + "' (which has a sensitive name) to be rejected, but its value was returned.", ServiceException.class, () -> systemController.getSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when retrieving a property with a sensitive name.", ExceptionType.NOT_ALLOWED, result.getException());
+            assertEquals("Unexpected HTTP status when retrieving a property with a sensitive name.", Response.Status.FORBIDDEN, result.getStatus());
+        }
+    }
+
+    /**
+     * Verifies that retrieving all properties omits those that are encrypted or sensitive, while still returning others.
+     */
+    @Test
+    public void testGetSystemPropertiesOmitsEncryptedAndSensitiveProperties()
+    {
+        // Setup test fixture.
+        final SystemProperty<?> registeredPlain = mockRegisteredProperty("registered.plain", "a", false);
+        final SystemProperty<?> registeredEncrypted = mockRegisteredProperty("registered.encrypted", "b", true);
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Arrays.asList(registeredPlain, registeredEncrypted));
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList("unregistered.plain", "unregistered.encrypted", "ldap.adminPassword"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("c");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq("unregistered.encrypted"))).thenReturn(true);
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertySensitive(anyString())).thenCallRealMethod();
+
+            // Execute system under test.
+            final List<String> result = systemController.getSystemProperties().getProperties().stream()
+                .map(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty::getKey)
+                .collect(Collectors.toList());
+
+            // Verify result.
+            assertEquals("Expected exactly the properties that are neither encrypted nor sensitive to be returned (in order).",
+                Arrays.asList("registered.plain", "unregistered.plain"), result);
+        }
+    }
+
+    /**
+     * Verifies that creating a property that is stored encrypted is forbidden, and does not change the stored value.
+     */
+    @Test
+    public void testCreateEncryptedPropertyIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar.secret";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(key))).thenReturn(true);
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected creation of an encrypted property to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when creating an encrypted property.", Response.Status.FORBIDDEN, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of an encrypted property should not have changed its stored value."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected creation of an encrypted property should not have changed its stored value."));
+        }
+    }
+
+    /**
+     * Verifies that updating a property that is stored encrypted is forbidden, and does not change the stored value
+     * (which would otherwise also be stored without encryption).
+     */
+    @Test
+    public void testUpdateEncryptedPropertyIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar.secret";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(eq(key))).thenReturn("s3cr3t");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(key))).thenReturn(true);
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected update of an encrypted property to be rejected, but it was accepted.", ServiceException.class, () -> systemController.updateSystemProperty(key, property));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when updating an encrypted property.", Response.Status.FORBIDDEN, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected update of an encrypted property should not have changed its stored value."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected update of an encrypted property should not have changed its stored value."));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property that is stored encrypted is forbidden, and does not remove it.
+     */
+    @Test
+    public void testDeleteEncryptedPropertyIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar.secret";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(eq(key))).thenReturn("s3cr3t");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(key))).thenReturn(true);
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected deletion of an encrypted property to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when deleting an encrypted property.", Response.Status.FORBIDDEN, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of an encrypted property should not have removed it."));
         }
     }
 }
