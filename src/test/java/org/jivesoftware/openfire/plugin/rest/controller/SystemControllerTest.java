@@ -485,6 +485,117 @@ public class SystemControllerTest {
     }
 
     /**
+     * Verifies that creating a property is rejected when its key differs only in case from the key of an existing
+     * property. Depending on the database, such keys are considered equal, so that creating the property could change
+     * the value of the existing property.
+     */
+    @Test
+    public void testCreatePropertyWithKeyDifferingOnlyInCaseIsRejected()
+    {
+        for (final String[] keys : Arrays.asList(new String[] {"Foo.Bar", "foo.bar"}, new String[] {"Plugin.RestAPI.Secret", "plugin.restapi.secret"}))
+        {
+            final String key = keys[0];
+            final String existingKey = keys[1];
+            final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
+
+            try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+                 final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+            {
+                // Setup test fixture.
+                systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+                jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Collections.singletonList(existingKey));
+
+                // Execute system under test.
+                final ServiceException result = assertThrows("Expected creation of property '" + key + "' (which differs only in case from existing property '" + existingKey + "') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+
+                // Verify result.
+                assertEquals("Unexpected HTTP status when creating property '" + key + "'.", Response.Status.CONFLICT, result.getStatus());
+                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of property '" + key + "' should not have stored anything."));
+                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected creation of property '" + key + "' should not have stored anything."));
+            }
+        }
+    }
+
+    /**
+     * Verifies that creating a property that has the exact same key as an existing property is allowed (which
+     * overwrites the value of the existing property).
+     */
+    @Test
+    public void testCreatePropertyWithKeyOfExistingPropertyIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar.child", "foo.barx"));
+
+            // Execute system under test.
+            systemController.createSystemProperty(property);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(eq(key), eq("new")));
+        }
+    }
+
+    /**
+     * Verifies that updating a property is rejected when its key differs only in case from the key of another
+     * existing property. Depending on the database, such keys are considered equal, so that updating the property
+     * could change the value of the other property.
+     */
+    @Test
+    public void testUpdatePropertyWithKeyDifferingOnlyInCaseIsRejected()
+    {
+        // Setup test fixture.
+        final String key = "Foo.Bar";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected update of property '" + key + "' (which differs only in case from existing property 'foo.bar') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.updateSystemProperty(key, property));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when updating property '" + key + "'.", Response.Status.CONFLICT, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected update of property '" + key + "' should not have stored anything."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected update of property '" + key + "' should not have stored anything."));
+        }
+    }
+
+    /**
+     * Verifies that updating a property is allowed when no other property has a key that differs only in case.
+     */
+    @Test
+    public void testUpdatePropertyIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "new");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar.child"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            systemController.updateSystemProperty(key, property);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(eq(key), eq("new")));
+        }
+    }
+
+    /**
      * Verifies that deleting a property that is stored encrypted is forbidden, and does not remove it.
      */
     @Test
