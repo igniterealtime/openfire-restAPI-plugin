@@ -512,4 +512,85 @@ public class SystemControllerTest {
             jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of an encrypted property should not have removed it."));
         }
     }
+
+    /**
+     * Verifies that deleting a property is forbidden when one of its child properties is stored encrypted, as
+     * Openfire deletes all child properties along with the property that is deleted.
+     */
+    @Test
+    public void testDeleteParentOfEncryptedPropertyIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+        final String childKey = "foo.bar.secret";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar.plain", childKey));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(childKey))).thenReturn(true);
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected deletion of a parent of an encrypted property to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when deleting a parent of an encrypted property.", Response.Status.FORBIDDEN, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of a parent of an encrypted property should not have removed anything."));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property is forbidden when it is the parent of this plugin's own properties (which
+     * would otherwise delete the configuration of this plugin), even though its key does not have the prefix of
+     * those properties itself.
+     */
+    @Test
+    public void testDeleteParentOfRestApiPropertiesIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "plugin.restapi";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "plugin.restapi.secret"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected deletion of the parent of this plugin's properties to be rejected, but it was accepted.", ServiceException.class, () -> systemController.deleteSystemProperty(key));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when deleting the parent of this plugin's properties.", Response.Status.FORBIDDEN, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected deletion of the parent of this plugin's properties should not have removed anything."));
+        }
+    }
+
+    /**
+     * Verifies that deleting a property is allowed when none of its child properties is forbidden, and that a
+     * forbidden property that merely shares a prefix with it (without being a child) does not prevent deletion.
+     */
+    @Test
+    public void testDeleteParentOfAllowedPropertiesIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "foo.bar.plain", "foo.barsecret"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+            jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq("foo.barsecret"))).thenReturn(true);
+
+            // Execute system under test.
+            systemController.deleteSystemProperty(key);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(eq(key)));
+        }
+    }
 }
