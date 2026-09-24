@@ -74,6 +74,7 @@ public class SystemService {
             @ApiResponse(responseCode = "201", description = "The system property is created."),
             @ApiResponse(responseCode = "400", description = "The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens."),
             @ApiResponse(responseCode = "403", description = "Prohibited to create this system property."),
+            @ApiResponse(responseCode = "409", description = "The name of the system property differs only in case from the name of an existing system property."),
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createSystemProperty(
@@ -92,7 +93,8 @@ public class SystemService {
             @ApiResponse(responseCode = "200", description = "The system property is updated."),
             @ApiResponse(responseCode = "400", description = "The provided system property does not match the name in the URL."),
             @ApiResponse(responseCode = "403", description = "Prohibited to update this system property."),
-            @ApiResponse(responseCode = "404", description = "The system property could not be found.")
+            @ApiResponse(responseCode = "404", description = "The system property could not be found."),
+            @ApiResponse(responseCode = "409", description = "The name of the system property differs only in case from the name of another existing system property.")
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response updateSystemProperty(

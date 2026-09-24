@@ -145,9 +145,11 @@ public class SystemController {
     }
 
     /**
-     * Creates the system property.
+     * Creates the system property, or overwrites the value of an existing property that has the same key.
      *
      * @param systemProperty the system property
+     * @throws ServiceException when the key is not valid (400), when the property is forbidden (403), or when the key
+     * differs only in case from the key of an existing property (409).
      */
     public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException
     {
@@ -158,6 +160,11 @@ public class SystemController {
         if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
             throw new ServiceException("Could not create property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
+
+        if (hasCaseInsensitiveKeyCollision(propertyKey)) {
+            throw new ServiceException("Could not create property, as its key differs only in case from the key of an existing property.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
+        }
+
         JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
     }
 
@@ -205,7 +212,9 @@ public class SystemController {
      *
      * @param propertyKey the property key
      * @param systemProperty the system property
-     * @throws ServiceException the service exception
+     * @throws ServiceException when the property is forbidden (403), when the property does not exist (404), when the
+     * key in the path and the entity do not match (400), or when the key differs only in case from the key of another
+     * existing property (409).
      */
     public void updateSystemProperty(String propertyKey, org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException {
         // Ensure that we're not exposing any 'forbidden' properties.
@@ -214,6 +223,9 @@ public class SystemController {
         }
         if(JiveGlobals.getProperty(propertyKey) != null) {
             if(systemProperty.getKey().equals(propertyKey)) {
+                if (hasCaseInsensitiveKeyCollision(propertyKey)) {
+                    throw new ServiceException("Could not update property, as its key differs only in case from the key of another existing property.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
+                }
                 JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
             } else {
                 throw new ServiceException("Path property name and entity property name doesn't match", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION,
@@ -403,6 +415,20 @@ public class SystemController {
             || propertyKey.startsWith(RESTRICTED_PROPERTY_KEY_PREFIX)
             || JiveGlobals.isPropertyEncrypted(propertyKey)
             || JiveGlobals.isPropertySensitive(propertyKey));
+    }
+
+    /**
+     * Determines whether an existing property has a key that differs from the provided key only in case.
+     *
+     * Depending on the database, keys that differ only in case are considered equal. Writing a property of which the
+     * key differs only in case from that of an existing property can then change the value of that existing property.
+     *
+     * @param propertyKey the property key to check.
+     * @return true if another property exists of which the key differs only in case, otherwise false.
+     */
+    private static boolean hasCaseInsensitiveKeyCollision(final String propertyKey)
+    {
+        return JiveGlobals.getPropertyNames().stream().anyMatch(key -> !key.equals(propertyKey) && key.equalsIgnoreCase(propertyKey));
     }
 
     /**
