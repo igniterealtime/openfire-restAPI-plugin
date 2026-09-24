@@ -1847,7 +1847,7 @@
             <p><strong>GET</strong> <a href="http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain">http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain</a></p>
         </blockquote>
         <h2 id="create-a-system-property">Create a system property</h2>
-        <p>Endpoint to create a system property</p>
+        <p>Endpoint to create a system property. Note that the name of the property must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.</p>
         <blockquote>
             <p><strong>POST</strong> system/properties</p>
         </blockquote>
@@ -1864,7 +1864,7 @@
 <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>property</span> <span class="token attr-name">key</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyName<span class="token punctuation">"</span></span> <span class="token attr-name">value</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>propertyValue<span class="token punctuation">"</span></span><span class="token punctuation">/&gt;</span></span>  
 </code></pre>
         <h2 id="delete-a-system-property">Delete a system property</h2>
-        <p>Endpoint to delete a system property</p>
+        <p>Endpoint to delete a system property, together with all of its child properties (properties of which the name starts with the name of this property, followed by a dot). Note that the name of the property must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. A deletion that could also delete other properties (for example, because the name contains an underscore, which can match any character) is rejected.</p>
         <blockquote>
             <p><strong>DELETE</strong> /system/properties/{propertyName}</p>
         </blockquote>
