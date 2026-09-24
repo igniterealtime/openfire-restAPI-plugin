@@ -81,13 +81,15 @@
             RESTServicePlugin.CUSTOM_AUTH_FILTER.setValue(customAuthFilterClassName);
             RESTServicePlugin.SERVICE_LOGGING_ENABLED.setValue(loggingEnabled);
 
+            // Log the event
+            admin.logEvent("Edited REST API properties", "enabled=" + enabled + "\nauthType=" + authType + "\nallowedIPs=" + allowedIPs + "\ncustomAuthFilterClassName=" + customAuthFilterClassName + "\nloggingEnabled=" + loggingEnabled);
+
             if(is2Reload) {
-                String pluginName  = PluginMetadataHelper.getName(plugin);
                 String pluginDir = pluginManager.getPluginPath(plugin).getFileName().toString();
                 pluginManager.reloadPlugin(pluginDir);
             
                 // Log the event
-                admin.logEvent("reloaded plugin "+ pluginName, null);
+                admin.logEvent("Reloaded plugin REST API (in response to authentication configuration change).", null);
                 response.sendRedirect("/plugin-admin.jsp?reloadsuccess=true");
             }
             response.sendRedirect("rest-api.jsp?success=true");
