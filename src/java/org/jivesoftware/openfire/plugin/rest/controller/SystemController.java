@@ -159,8 +159,11 @@ public class SystemController {
      * @throws ServiceException the service exception
      */
     public void deleteSystemProperty(String propertyKey) throws ServiceException {
-        // Ensure that we're not exposing any 'forbidden' properties.
-        if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
+        // Ensure that we're not exposing any 'forbidden' properties. Openfire also deletes all child properties of the
+        // property that is deleted, so none of those can be forbidden either.
+        final Set<String> forbiddenPropertyKeys = getForbiddenPropertyKeys();
+        if (isForbiddenPropertyKey(propertyKey, forbiddenPropertyKeys)
+            || JiveGlobals.getPropertyNames().stream().anyMatch(key -> key.startsWith(propertyKey + ".") && isForbiddenPropertyKey(key, forbiddenPropertyKeys))) {
             throw new ServiceException("Could not delete property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
