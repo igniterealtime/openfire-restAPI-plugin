@@ -72,6 +72,7 @@ public class SystemService {
         description = "Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The system property is created."),
+            @ApiResponse(responseCode = "400", description = "The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens."),
             @ApiResponse(responseCode = "403", description = "Prohibited to create this system property."),
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -106,11 +107,13 @@ public class SystemService {
     @DELETE
     @Path("/properties/{propertyKey}")
     @Operation( summary = "Remove system property",
-        description = "Removes an existing Openfire system property.",
+        description = "Removes an existing Openfire system property, together with all of its child properties (properties of which the name starts with the name of this property, followed by a dot).",
         responses = {
-            @ApiResponse(responseCode = "200", description = "The system property is deleted."),
-            @ApiResponse(responseCode = "403", description = "Prohibited to delete this system property."),
-            @ApiResponse(responseCode = "404", description = "The system property could not be found.")
+            @ApiResponse(responseCode = "200", description = "The system property and its child properties are deleted."),
+            @ApiResponse(responseCode = "400", description = "The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to delete this system property, or one of its child properties."),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found."),
+            @ApiResponse(responseCode = "409", description = "Deleting this system property could also delete unintended properties (other than this property and its child properties). This can happen, for example, when its name contains an underscore, which can match any character.")
         })
     public Response deleteSystemProperty(
             @Parameter(description = "The name of the system property to delete.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey)

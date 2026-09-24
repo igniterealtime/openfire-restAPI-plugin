@@ -35,6 +35,7 @@ import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import java.lang.management.ManagementFactory;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SystemController {
@@ -44,6 +45,15 @@ public class SystemController {
      * Key prefix used by all system properties owned by this plugin.
      */
     private static final String RESTRICTED_PROPERTY_KEY_PREFIX = "plugin.restapi.";
+
+    /**
+     * The keys of system properties that can be created or deleted via the REST API: one or more dot-separated parts,
+     * each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.
+     *
+     * This excludes characters that Openfire or its database would interpret, rather than store or match literally
+     * (such as whitespace, most SQL LIKE wildcards, and characters that some databases consider equal to others).
+     */
+    private static final Pattern VALID_PROPERTY_KEY = Pattern.compile("[A-Za-z0-9_'-]+(\\.[A-Za-z0-9_'-]+)*");
 
     private static SystemController INSTANCE = null;
 
@@ -141,9 +151,8 @@ public class SystemController {
      */
     public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException
     {
-        // Openfire normalizes the key when storing it. Check (and store) that same key, so that a key like
-        // "encrypted.property " cannot be used to overwrite "encrypted.property".
-        final String propertyKey = normalizePropertyKey(systemProperty.getKey());
+        final String propertyKey = systemProperty.getKey();
+        validatePropertyKey(propertyKey);
 
         // Ensure that we're not exposing any 'forbidden' properties.
         if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
@@ -153,26 +162,42 @@ public class SystemController {
     }
 
     /**
-     * Delete system property.
+     * Deletes a system property, together with all of its child properties (properties of which the key starts with
+     * the key of this property, followed by a dot).
+     *
+     * The deletion is refused when the property or any of its child properties is forbidden (see
+     * {@link #isForbiddenPropertyKey(String, Set)}), and when the database could delete any other property as well
+     * (see {@link #getKeyDeletionPattern(String)}).
      *
      * @param propertyKey the property key
-     * @throws ServiceException the service exception
+     * @throws ServiceException when the key is not valid (400), when the property or one of its children is forbidden
+     * (403), when the property does not exist (404), or when deleting it could delete other properties (409).
      */
     public void deleteSystemProperty(String propertyKey) throws ServiceException {
-        // Ensure that we're not exposing any 'forbidden' properties. Openfire also deletes all child properties of the
-        // property that is deleted, so none of those can be forbidden either.
+        validatePropertyKey(propertyKey);
+
+        // Ensure that we're not exposing any 'forbidden' properties. Openfire deletes a property together with all of
+        // its child properties, so none of those can be forbidden either.
         final Set<String> forbiddenPropertyKeys = getForbiddenPropertyKeys();
+        final Collection<String> existingPropertyKeys = JiveGlobals.getPropertyNames();
         if (isForbiddenPropertyKey(propertyKey, forbiddenPropertyKeys)
-            || JiveGlobals.getPropertyNames().stream().anyMatch(key -> key.startsWith(propertyKey + ".") && isForbiddenPropertyKey(key, forbiddenPropertyKeys))) {
+            || existingPropertyKeys.stream().anyMatch(key -> key.startsWith(propertyKey + ".") && isForbiddenPropertyKey(key, forbiddenPropertyKeys))) {
             throw new ServiceException("Could not delete property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
-        if(JiveGlobals.getProperty(propertyKey) != null) {
-            JiveGlobals.deleteProperty(propertyKey);
-        } else {
+        if (JiveGlobals.getProperty(propertyKey) == null) {
             throw new ServiceException("Could not find property", propertyKey, ExceptionType.PROPERTY_NOT_FOUND,
                 Response.Status.NOT_FOUND);
         }
+
+        // The database can match more properties than the property and its children (see getKeyDeletionPattern).
+        // Refuse to delete when that would delete any other existing property.
+        final Pattern deletionPattern = getKeyDeletionPattern(propertyKey);
+        if (existingPropertyKeys.stream().anyMatch(key -> !key.equals(propertyKey) && !key.startsWith(propertyKey + ".") && deletionPattern.matcher(key).matches())) {
+            throw new ServiceException("Could not delete property, as that could also delete unintended properties (other than this property and its child properties). This can happen, for example, when the key contains an underscore, which can match any character.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
+        }
+
+        JiveGlobals.deleteProperty(propertyKey);
     }
 
     /**
@@ -381,21 +406,38 @@ public class SystemController {
     }
 
     /**
-     * Normalizes a property key in the same way that Openfire's {@code JiveProperties#put} does before storing it:
-     * a single trailing dot is removed, after which surrounding whitespace is trimmed.
+     * Verifies that a property key is one that can be created or deleted via the REST API (see
+     * {@link #VALID_PROPERTY_KEY}).
      *
-     * @param propertyKey the property key to normalize (can be null).
-     * @return the normalized property key (null if the input was null).
+     * @param propertyKey the property key to check.
+     * @throws ServiceException when the property key is not valid.
      */
-    private static String normalizePropertyKey(final String propertyKey)
+    private static void validatePropertyKey(final String propertyKey) throws ServiceException
     {
-        if (propertyKey == null) {
-            return null;
+        if (propertyKey == null || !VALID_PROPERTY_KEY.matcher(propertyKey).matches()) {
+            throw new ServiceException("Invalid property key. Keys consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
         }
-        String result = propertyKey;
-        if (result.endsWith(".")) {
-            result = result.substring(0, result.length() - 1);
+    }
+
+    /**
+     * Returns a pattern that matches the keys of all properties that Openfire could delete when the property with
+     * the provided key is deleted.
+     *
+     * Openfire deletes a property together with all of its child properties, using the database statement
+     * {@code DELETE FROM ofProperty WHERE name = ? OR name LIKE ?} (with {@code key + ".%"} as the second argument).
+     * As the key is not escaped, any {@code _} character in it acts as a wildcard (other wildcards are not allowed in
+     * a key, see {@link #VALID_PROPERTY_KEY}). Depending on the database, matching can also be case-insensitive.
+     *
+     * @param propertyKey the (valid) key of the property that is to be deleted.
+     * @return a pattern matching the keys of properties that could be deleted.
+     */
+    private static Pattern getKeyDeletionPattern(final String propertyKey)
+    {
+        final StringBuilder regex = new StringBuilder();
+        for (final char c : propertyKey.toCharArray()) {
+            regex.append(c == '_' ? "." : Pattern.quote(String.valueOf(c))); // SQL LIKE: '_' matches any single character.
         }
-        return result.trim();
+        regex.append("(\\..*)?"); // The property itself, or any of its children.
+        return Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE);
     }
 }
