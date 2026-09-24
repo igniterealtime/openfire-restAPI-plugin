@@ -141,11 +141,15 @@ public class SystemController {
      */
     public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException
     {
+        // Openfire normalizes the key when storing it. Check (and store) that same key, so that a key like
+        // "encrypted.property " cannot be used to overwrite "encrypted.property".
+        final String propertyKey = normalizePropertyKey(systemProperty.getKey());
+
         // Ensure that we're not exposing any 'forbidden' properties.
-        if (isForbiddenPropertyKey(systemProperty.getKey(), getForbiddenPropertyKeys())) {
-            throw new ServiceException("Could not create property", systemProperty.getKey(), ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
+            throw new ServiceException("Could not create property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
-        JiveGlobals.setProperty(systemProperty.getKey(), systemProperty.getValue());
+        JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
     }
 
     /**
@@ -371,5 +375,24 @@ public class SystemController {
             || propertyKey.startsWith(RESTRICTED_PROPERTY_KEY_PREFIX)
             || JiveGlobals.isPropertyEncrypted(propertyKey)
             || JiveGlobals.isPropertySensitive(propertyKey));
+    }
+
+    /**
+     * Normalizes a property key in the same way that Openfire's {@code JiveProperties#put} does before storing it:
+     * a single trailing dot is removed, after which surrounding whitespace is trimmed.
+     *
+     * @param propertyKey the property key to normalize (can be null).
+     * @return the normalized property key (null if the input was null).
+     */
+    private static String normalizePropertyKey(final String propertyKey)
+    {
+        if (propertyKey == null) {
+            return null;
+        }
+        String result = propertyKey;
+        if (result.endsWith(".")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result.trim();
     }
 }

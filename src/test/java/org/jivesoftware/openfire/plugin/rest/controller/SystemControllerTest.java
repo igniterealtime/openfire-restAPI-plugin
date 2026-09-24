@@ -404,6 +404,63 @@ public class SystemControllerTest {
     }
 
     /**
+     * Verifies that creating a property is forbidden when its key only differs from that of an encrypted property by
+     * characters that Openfire strips when storing a property (surrounding whitespace, or a trailing dot). Without
+     * normalizing the key before checking it, such a request would overwrite the encrypted property, storing the new
+     * value without encryption.
+     */
+    @Test
+    public void testCreateEncryptedPropertyWithDenormalizedKeyIsForbidden()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar.secret";
+
+        for (final String denormalizedKey : Arrays.asList(key + " ", " " + key, key + ".", " " + key + "."))
+        {
+            final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(denormalizedKey, "new");
+
+            try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+                 final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+            {
+                systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+                jiveGlobalsMock.when(() -> JiveGlobals.isPropertyEncrypted(eq(key))).thenReturn(true);
+
+                // Execute system under test.
+                final ServiceException result = assertThrows("Expected creation of property '" + denormalizedKey + "' (which Openfire stores as encrypted property '" + key + "') to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+
+                // Verify result.
+                assertEquals("Unexpected HTTP status when creating property '" + denormalizedKey + "'.", Response.Status.FORBIDDEN, result.getStatus());
+                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of property '" + denormalizedKey + "' should not have changed the stored value of '" + key + "'."));
+                jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString(), anyBoolean()), never().description("Rejected creation of property '" + denormalizedKey + "' should not have changed the stored value of '" + key + "'."));
+            }
+        }
+    }
+
+    /**
+     * Verifies that creating a property is forbidden when its key has the prefix used by this plugin's own
+     * properties once surrounding whitespace (which Openfire strips when storing a property) is removed.
+     */
+    @Test
+    public void testCreateRestApiPropertyWithLeadingWhitespaceIsForbidden()
+    {
+        // Setup test fixture.
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(" plugin.restapi.secret", "new");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected creation of a property of this plugin, prefixed with whitespace, to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+
+            // Verify result.
+            assertEquals("Unexpected HTTP status when creating a property of this plugin, prefixed with whitespace.", Response.Status.FORBIDDEN, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), anyString()), never().description("Rejected creation of a property of this plugin should not have changed its stored value."));
+        }
+    }
+
+    /**
      * Verifies that updating a property that is stored encrypted is forbidden, and does not change the stored value
      * (which would otherwise also be stored without encryption).
      */
