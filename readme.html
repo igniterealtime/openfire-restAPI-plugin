@@ -18,7 +18,7 @@
                     <li><a href="#ci-build-status">CI Build Status</a></li>
                     <li><a href="#reporting-issues">Reporting Issues</a></li>
                     <li><a href="#feature-list">Feature list</a></li>
-                    <li><a href="#available-rest-api-clients">Available REST API clients</a></li>
+                    <li><a href="#generating-a-rest-api-client">Generating a REST API client</a></li>
                     <li><a href="#installation">Installation</a></li>
                     <li><a href="#explanation-of-rest">Explanation of REST</a></li>
                     <li><a href="#authentication">Authentication</a></li>
@@ -154,19 +154,17 @@
             <li>Get clustering status of Openfire</li>
             <li>Get overview of ‘readiness’ and ‘liveness’ state of Openfire</li>
         </ul>
-        <h2 id="available-rest-api-clients">Available REST API clients</h2>
-        <p>REST API clients are implementations of the REST API in a specific programming language.</p>
-        <h3 id="official">Official</h3>
+        <h2 id="generating-a-rest-api-client">Generating a REST API client</h2>
+        <p>The plugin publishes an <a href="https://www.openapis.org/">OpenAPI</a> specification that describes all of its endpoints. Rather
+            than relying on a hand-written client library, use this specification to generate a client for your programming
+            language of choice, using tools like <a href="https://openapi-generator.tech/">OpenAPI Generator</a>.</p>
+        <p>When the plugin is installed, the specification is available at:</p>
         <ul>
-            <li>JAVA: <a href="https://github.com/igniterealtime/REST-API-Client">https://github.com/igniterealtime/REST-API-Client</a></li>
+            <li><code>http://example.org:9090/plugins/restapi/v1/openapi.yaml</code> (YAML)</li>
+            <li><code>http://example.org:9090/plugins/restapi/v1/openapi.json</code> (JSON)</li>
         </ul>
-        <h3 id="third-party">Third party</h3>
-        <ul>
-            <li>PHP: <a href="https://github.com/gidkom/php-openfire-restapi">https://github.com/gidkom/php-openfire-restapi</a> (partly implemented)</li>
-            <li>PHP: <a href="https://github.com/gnello/php-openfire-restapi">https://github.com/gnello/php-openfire-restapi</a> (partly implemented)</li>
-            <li>GO Lang: <a href="https://github.com/Urethramancer/fireman">https://github.com/Urethramancer/fireman</a> (partly implemented)</li>
-            <li>Python: <a href="https://github.com/seamus-45/openfire-restapi">https://github.com/seamus-45/openfire-restapi</a> (partly implemented)</li>
-        </ul>
+        <p>An interactive version of the documentation, based on this specification, is linked from the plugin's page in the
+            Openfire admin console.</p>
         <h2 id="installation">Installation</h2>
         <p>Copy restAPI.jar into the plugins directory of your Openfire server. The plugin will be automatically deployed. To upgrade to a newer version, overwrite the restAPI.jar file with the new one.</p>
         <p><em>Important Step:</em> To enable the plugin make sure to set the system property <code>adminConsole.access.allow-wildcards-in-excludes</code> to <code>true</code></p>

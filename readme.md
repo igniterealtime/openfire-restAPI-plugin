@@ -26,17 +26,17 @@ Issues may be reported to the [forums](https://discourse.igniterealtime.org) or 
 * Get clustering status of Openfire
 * Get overview of 'readiness' and 'liveness' state of Openfire
 
-## Available REST API clients
-REST API clients are implementations of the REST API in a specific programming language.
+## Generating a REST API client
+The plugin publishes an [OpenAPI](https://www.openapis.org/) specification that describes all of its endpoints. Rather
+than relying on a hand-written client library, use this specification to generate a client for your programming
+language of choice, using tools like [OpenAPI Generator](https://openapi-generator.tech/).
 
-### Official
-* JAVA: https://github.com/igniterealtime/REST-API-Client
+When the plugin is installed, the specification is available at:
+* `http://example.org:9090/plugins/restapi/v1/openapi.yaml` (YAML)
+* `http://example.org:9090/plugins/restapi/v1/openapi.json` (JSON)
 
-### Third party
-* PHP: https://github.com/gidkom/php-openfire-restapi (partly implemented)
-* PHP: https://github.com/gnello/php-openfire-restapi (partly implemented)
-* GO Lang: https://github.com/Urethramancer/fireman (partly implemented)
-* Python: https://github.com/seamus-45/openfire-restapi (partly implemented)
+An interactive version of the documentation, based on this specification, is linked from the plugin's page in the
+Openfire admin console.
 
 ## Installation
 
