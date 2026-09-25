@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -25,6 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "session")
 @XmlType(propOrder = { "sessionId", "username", "resource", "node", "sessionStatus", "presenceStatus", "presenceMessage", "priority",
         "hostAddress", "hostName", "creationDate", "lastActionDate", "secure" })
+@Schema(description = "A client session.")
 public class SessionEntity {
 
     private String sessionId;
@@ -47,6 +50,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The (full) JID of the session.", example = "john@example.org/laptop")
     public String getSessionId() {
         return sessionId;
     }
@@ -56,6 +60,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The username of the user of the session, or 'Anonymous' for anonymous sessions.", example = "john")
     public String getUsername() {
         return username;
     }
@@ -65,6 +70,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The resource part of the JID of the session.", example = "laptop")
     public String getResource() {
         return resource;
     }
@@ -74,6 +80,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the session is connected to the cluster node that processes the request ('Local'), or to another cluster node ('Remote').", example = "Local")
     public String getNode() {
         return node;
     }
@@ -83,6 +90,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The status of the session. One of: 'Closed', 'Connected', 'Authenticated', 'Unknown'.", example = "Authenticated")
     public String getSessionStatus() {
         return sessionStatus;
     }
@@ -92,6 +100,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The availability of the user of the session. One of: 'Online', 'Away', 'Available to Chat', 'Do Not Disturb', 'Extended Away', 'Unknown/Not Recognized'.", example = "Online")
     public String getPresenceStatus() {
         return presenceStatus;
     }
@@ -100,6 +109,7 @@ public class SessionEntity {
         this.presenceStatus = presenceStatus;
     }
 
+    @Schema(description = "The (optional) natural-language description of the availability of the user of the session.", example = "In a meeting")
     public String getPresenceMessage() {
         return presenceMessage;
     }
@@ -109,6 +119,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The presence priority of the session, from -128 to 127.", example = "0")
     public int getPriority() {
         return priority;
     }
@@ -118,6 +129,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The IP address of the client.", example = "192.168.0.20")
     public String getHostAddress() {
         return hostAddress;
     }
@@ -127,6 +139,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The host name of the client.", example = "laptop.example.org")
     public String getHostName() {
         return hostName;
     }
@@ -136,6 +149,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The moment at which the session was created.")
     public Date getCreationDate() {
         return creationDate;
     }
@@ -145,6 +159,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "The moment at which the session last had activity.")
     public Date getLastActionDate() {
         return lastActionDate;
     }
@@ -154,6 +169,7 @@ public class SessionEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the connection of the session is encrypted.", example = "true")
     public boolean isSecure() {
         return secure;
     }

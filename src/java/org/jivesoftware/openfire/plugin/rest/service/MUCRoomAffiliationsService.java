@@ -170,7 +170,7 @@ public class MUCRoomAffiliationsService
         })
     public Response addMUCRoomAffiliation(
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
-            @Parameter(description = "The (bare) JID of the entity that is to be affiliated.", example = "john@example.org", required = true) @PathParam("jid") String jid,
+            @Parameter(description = "The entity that is to be affiliated: a (bare) JID, or the name of a local user.", example = "john@example.org", required = true) @PathParam("jid") String jid,
             @Parameter(description = "The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'.", example = "members", required = true) @PathParam("affiliation") String affiliations,
             @Parameter(description = "The name of the MUC room to which an affiliation is to be added.", example = "lobby", required = true) @PathParam("roomName") String roomName,
             @Parameter(description = "Whether to send invitations to newly affiliated users.", example = "true", required = false) @DefaultValue("false") @QueryParam("sendInvitations") boolean sendInvitations)
@@ -232,7 +232,7 @@ public class MUCRoomAffiliationsService
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response deleteMUCRoomAffiliation(
-            @Parameter(description = "The (bare) JID of the entity for which the room affiliation is to be removed.", example = "john@example.org", required = true) @PathParam("jid") String jid,
+            @Parameter(description = "The entity for which the room affiliation is to be removed: a (bare) JID, or the name of a local user.", example = "john@example.org", required = true) @PathParam("jid") String jid,
             @Parameter(description = "The name of the MUC service that the MUC room is part of.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @Parameter(description = "The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'.", example = "members", required = true) @PathParam("affiliation") String affiliations,
             @Parameter(description = "The name of the MUC room from which an affiliation is to be removed.", example = "lobby", required = true) @PathParam("roomName") String roomName)

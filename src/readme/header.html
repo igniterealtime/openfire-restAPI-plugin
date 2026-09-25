@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<!--
+  This file is generated from readme.md during the Maven build. Do not edit it directly: edit readme.md instead.
+  The header and footer templates are in src/readme/.
+-->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>titleToken</title>
+    <!-- Styles are inlined, as the Openfire admin console's Content-Security-Policy does not allow external stylesheets. -->
+    <style>
+        :root {
+            --text: #1f2328;
+            --muted: #59636e;
+            --bg: #ffffff;
+            --bg-subtle: #f6f8fa;
+            --border: #d1d9e0;
+            --link: #0969da;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text: #e6edf3;
+                --muted: #9198a1;
+                --bg: #0d1117;
+                --bg-subtle: #151b23;
+                --border: #3d444d;
+                --link: #4493f8;
+            }
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+        }
+        a { color: var(--link); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        #toc {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-subtle);
+            font-size: 14px;
+        }
+        #toc:empty { display: none; }
+        #toc ul { list-style: none; margin: 0; padding: 0; }
+        #toc ul ul { padding-left: 16px; }
+        #toc li { margin: 2px 0; }
+        #toc > details > ul > li > a { font-weight: 600; }
+        #toc summary { cursor: pointer; font-weight: 600; }
+        #toc details[open] > summary { margin-bottom: 8px; }
+
+        main { max-width: 960px; margin: 0 auto; padding: 16px 16px 64px; overflow-wrap: break-word; }
+        @media (min-width: 1100px) {
+            #toc {
+                position: fixed;
+                top: 0; bottom: 0; left: 0;
+                width: 300px;
+                overflow-y: auto;
+                border-bottom: 0;
+                border-right: 1px solid var(--border);
+            }
+            #toc:not(:empty) ~ main { margin-left: 300px; padding: 16px 48px 64px; }
+            #toc summary { display: none; }
+        }
+
+        h1, h2, h3, h4, h5, h6 { margin: 1.5em 0 0.5em; line-height: 1.25; font-weight: 600; scroll-margin-top: 16px; }
+        h1 { font-size: 2em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
+        h2 { font-size: 1.5em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
+        h3 { font-size: 1.25em; }
+        h4 { font-size: 1em; }
+        h1 > a, h2 > a, h3 > a, h4 > a, h5 > a, h6 > a { color: inherit; }
+        main > h1:first-child { margin-top: 0.5em; }
+
+        p, ul, ol, table, pre, blockquote { margin: 0 0 1em; }
+        img { max-width: 100%; }
+        hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+        blockquote { margin-left: 0; padding: 0 1em; color: var(--muted); border-left: 4px solid var(--border); }
+
+        code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace; font-size: 85%; }
+        code { overflow-wrap: anywhere; padding: 0.2em 0.4em; border-radius: 6px; background: var(--bg-subtle); }
+        pre { padding: 16px; overflow-x: auto; line-height: 1.45; border-radius: 6px; background: var(--bg-subtle); border: 1px solid var(--border); }
+        pre code { overflow-wrap: normal; padding: 0; background: none; font-size: 100%; }
+
+        table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+        th, td { padding: 6px 13px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+        th { font-weight: 600; background: var(--bg-subtle); }
+    </style>
+</head>
+<body>
+<nav id="toc" aria-label="Table of contents"></nav>
+<main>

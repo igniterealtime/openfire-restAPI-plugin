@@ -46,6 +46,111 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.6.0</version> <!-- Override inherited 2.17 to enable JUnit 5 tests -->
             </plugin>
+
+            <!-- Generate the documentation of endpoints and data types in readme.md from the OpenAPI annotations, so that it can't get out of sync with the implementation. -->
+            <plugin>
+                <!-- Generate the OpenAPI specification from the annotations in the compiled classes. -->
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>${swagger.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-openapi-spec</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputPath>${project.build.directory}/openapi</outputPath>
+                    <outputFileName>openapi</outputFileName>
+                    <outputFormat>JSON</outputFormat>
+                    <prettyPrint>true</prettyPrint>
+                    <resourcePackages>
+                        <package>org.jivesoftware.openfire.plugin.rest.service</package>
+                    </resourcePackages>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Replace the documentation of endpoints and data types in readme.md with documentation generated from the OpenAPI specification. -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <executions>
+                    <execution>
+                        <id>generate-readme-documentation</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <!-- 'compile' includes the 'provided' dependencies (like Openfire), which provide the JAXB implementation that the generator uses. -->
+                            <classpathScope>compile</classpathScope>
+                            <arguments>
+                                <argument>-Dslf4j.internal.verbosity=ERROR</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>${project.basedir}/src/build/ReadmeGenerator.java</argument>
+                                <argument>${project.build.directory}/openapi/openapi.json</argument>
+                                <argument>${project.basedir}/readme.md</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Generate readme.html from readme.md, so that the two can't get out of sync. This is done in the 'prepare-package'
+                 phase, after readme.md has been updated with the generated documentation (in the 'process-classes' phase). -->
+            <plugin>
+                <!-- Isolate readme.md, to prevent other (untracked) markdown files in the project root from being rendered and packaged. -->
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-readme-markdown</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/readme</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <includes>
+                                        <include>readme.md</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- The output is written to the project root, as that's where the plugin assembly picks up readme.html. -->
+                <groupId>com.ruleoftech</groupId>
+                <artifactId>markdown-page-generator-plugin</artifactId>
+                <version>2.5.2</version>
+                <executions>
+                    <execution>
+                        <id>generate-readme-html</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <inputDirectory>${project.build.directory}/readme</inputDirectory>
+                    <outputDirectory>${project.basedir}</outputDirectory>
+                    <headerHtmlFile>${project.basedir}/src/readme/header.html</headerHtmlFile>
+                    <footerHtmlFile>${project.basedir}/src/readme/footer.html</footerHtmlFile>
+                    <defaultTitle>Openfire REST API Plugin Readme</defaultTitle>
+                    <alwaysUseDefaultTitle>true</alwaysUseDefaultTitle>
+                    <pegdownExtensions>TABLES,FENCED_CODE_BLOCKS,AUTOLINKS,STRIKETHROUGH,ANCHORLINKS</pegdownExtensions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

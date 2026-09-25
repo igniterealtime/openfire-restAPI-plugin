@@ -33,3 +33,6 @@ debian/
 /AGENTS.md
 /CLAUDE.md
 /.claude/settings.local.json
+
+# Generated from readme.md during the build
+/readme.html

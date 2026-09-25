@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.exceptions;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -23,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class ErrorResponse.
  */
 @XmlRootElement(name = "error")
+@Schema(description = "A description of an error that occurred while processing a request.")
 public class ErrorResponse {
 
 	/** The resource. */
@@ -43,6 +46,7 @@ public class ErrorResponse {
 	 * @return the resource
 	 */
 	@XmlElement(name = "resource")
+	@Schema(description = "The resource (for example, a username or room name) that the error relates to.", example = "john")
 	public String getResource() {
 		return resource;
 	}
@@ -62,6 +66,7 @@ public class ErrorResponse {
 	 * @return the message
 	 */
 	@XmlElement(name = "message")
+	@Schema(description = "A description of the error.", example = "Could not get user")
 	public String getMessage() {
 		return message;
 	}
@@ -81,6 +86,7 @@ public class ErrorResponse {
 	 * @return the exception
 	 */
 	@XmlElement(name = "exception")
+	@Schema(description = "The type of the error.", example = "UserNotFoundException")
 	public String getException() {
 		return exception;
 	}
@@ -100,6 +106,7 @@ public class ErrorResponse {
 	 * @return the exception stack
 	 */
 	@XmlElement(name = "exceptionStack")
+	@Schema(hidden = true)
 	public String getExceptionStack() {
 		return exceptionStack;
 	}

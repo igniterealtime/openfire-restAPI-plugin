@@ -15,6 +15,7 @@
  */
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.jivesoftware.openfire.cluster.ClusterNodeInfo;
 import org.jivesoftware.openfire.cluster.NodeID;
 
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Date;
 
 @XmlRootElement(name = "clusterNode")
+@Schema(description = "A node in an Openfire cluster.")
 public class ClusterNodeEntity {
 
     private String hostName;
@@ -49,6 +51,7 @@ public class ClusterNodeEntity {
     }
 
     @XmlElement
+    @Schema(description = "The host name and IP address of the server on which this cluster node is running.", example = "xmpp1.example.org (192.168.0.10)")
     public String getHostName() {
         return hostName;
     }
@@ -58,6 +61,7 @@ public class ClusterNodeEntity {
     }
 
     @XmlElement
+    @Schema(description = "The unique identifier of this cluster node.", example = "a3f1c2d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d")
     public String getNodeID() {
         return nodeID;
     }
@@ -67,6 +71,7 @@ public class ClusterNodeEntity {
     }
 
     @XmlElement
+    @Schema(description = "The moment at which this node joined the cluster.")
     public Date getJoinedTime() {
         return joinedTime;
     }
@@ -76,6 +81,7 @@ public class ClusterNodeEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether this node currently is the senior member of the cluster.", example = "true")
     public boolean isSeniorMember() {
         return seniorMember;
     }

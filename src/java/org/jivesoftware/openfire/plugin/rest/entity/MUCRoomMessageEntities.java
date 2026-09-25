@@ -16,11 +16,16 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement(name = "messages")
+@Schema(description = "A list of messages from the history of a multi-user chat room.")
 public class MUCRoomMessageEntities {
     List<MUCRoomMessageEntity> messages;
 
@@ -32,6 +37,8 @@ public class MUCRoomMessageEntities {
     }
 
     @XmlElement(name = "message")
+    @JsonProperty(value = "message")
+    @ArraySchema(arraySchema = @Schema(description = "The messages."))
     public List<MUCRoomMessageEntity> getMessages() {
         return messages;
     }

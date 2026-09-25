@@ -16,22 +16,25 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * The Class MsgArchiveEntity.
  */
 @XmlRootElement(name = "archive")
+@XmlType(propOrder = { "jid", "count" })
+@Schema(description = "The number of unread messages of a user.")
 public class MsgArchiveEntity {
 
-    @XmlElement
     String jid;
 
     /**
      * unread messages count
      */
-    @XmlElement
     int count;
 
     public MsgArchiveEntity() {
@@ -42,4 +45,15 @@ public class MsgArchiveEntity {
         this.count = count;
     }
 
+    @XmlElement
+    @Schema(description = "The JID of the user.", example = "john@example.org")
+    public String getJid() {
+        return jid;
+    }
+
+    @XmlElement
+    @Schema(description = "The number of unread messages.", example = "3")
+    public int getCount() {
+        return count;
+    }
 }
