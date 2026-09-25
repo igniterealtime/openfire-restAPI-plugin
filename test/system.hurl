@@ -35,8 +35,11 @@ Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/properties/property" count > 150
-# TODO test that property with attribute key=admin.authorizedJIDs exists
-# TODO test that property with attribute key=plugin.restapi.enabled has value=true
+xpath "/properties/property[@key='admin.authorizedJIDs']" exists
+xpath "string(/properties/property[@key='abstractGroupProvider.shared.recursive']/@value)" == "false"
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
+# The plugin's own properties (e.g. plugin.restapi.enabled) must not be exposed in the listing.
+xpath "/properties/property[starts-with(@key, 'plugin.restapi.')]" not exists
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/242
 # abstractGroupProvider.shared.recursive is registered through Openfire's SystemProperty API with a default value.
@@ -71,7 +74,8 @@ Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/property" count == 1
-# TODO test that property with attribute key=test.key has value=test-value
+xpath "string(/property/@key)" == "test.key"
+xpath "string(/property/@value)" == "test-value"
 
 PUT http://localhost:9090/plugins/restapi/v1/system/properties/test.key
 Authorization: {{authkey}}
@@ -81,6 +85,12 @@ Content-Type: application/xml
 <property key="test.key" value="new-value" />
 ```
 HTTP 200
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "string(/property/@value)" == "new-value"
 
 PUT http://localhost:9090/plugins/restapi/v1/system/properties/wrong.key
 Authorization: {{authkey}}
@@ -103,6 +113,10 @@ HTTP 400
 DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.key
 Authorization: {{authkey}}
 HTTP 200
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+Authorization: {{authkey}}
+HTTP 404
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
