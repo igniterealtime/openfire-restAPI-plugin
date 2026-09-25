@@ -1,3 +1,4 @@
+# TEST: There are no sessions initially
 GET {{restapi_url}}/sessions
 Authorization: {{authkey}}
 HTTP 200
@@ -5,6 +6,7 @@ HTTP 200
 xpath "/sessions" exists
 xpath "/sessions[not(child::node())]" count == 1 # sessions at the root, with no child nodes
 
+# TEST: A user without sessions has an empty list of sessions
 GET {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200
@@ -12,6 +14,7 @@ HTTP 200
 xpath "/sessions" exists
 xpath "/sessions/session" count == 0
 
+# TEST: A user that does not exist has an empty list of sessions
 # Openfire does not check whether the user exists: a user that does not exist simply has no sessions. The API documents
 # no other response than 200 for this endpoint.
 GET {{restapi_url}}/sessions/nonexistent
@@ -22,6 +25,7 @@ xpath "/sessions" exists
 xpath "/sessions/session" count == 0
 
 
+# TEST: A logged-in client's session is listed with its details, for its user only
 # Create a session for john, by logging in over BOSH (XEP-0124/XEP-0206).
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
@@ -94,7 +98,7 @@ HTTP 200
 [Asserts]
 xpath "/sessions/session" count == 0
 
-# Kick the session.
+# TEST: Kicking a user's sessions closes them
 DELETE {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200
@@ -120,7 +124,7 @@ retry-interval: 100ms
 ```
 HTTP 404
 
-# Kicking the sessions of a user without sessions is fine.
+# TEST: Kicking the sessions of a user that has no sessions is fine
 DELETE {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200

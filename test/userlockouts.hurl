@@ -11,6 +11,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
+# TEST: Locking out a user closes its sessions
 # Log in as worf over BOSH (XEP-0124/XEP-0206), so that there is a session for the lockout to close.
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
@@ -63,7 +64,6 @@ Authorization: {{authkey}}
 HTTP 201
 
 # Sessions are closed asynchronously, so allow for some delay.
-# Locking out a user closes its sessions.
 GET {{restapi_url}}/sessions/worf
 Authorization: {{authkey}}
 [Options]
@@ -84,12 +84,12 @@ retry-interval: 100ms
 ```
 HTTP 404
 
-# Locking out a user that is already locked out is fine.
+# TEST: Locking out a user that is already locked out is fine
 POST {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 201
 
-# A user that is locked out cannot log in.
+# TEST: A user that is locked out cannot log in
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
 ```
@@ -116,16 +116,17 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
+# TEST: Unlock a user
 DELETE {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 200
 
-# Unlocking a user that is not locked out is fine.
+# TEST: Unlocking a user that is not locked out is fine
 DELETE {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 200
 
-# A user that is no longer locked out can log in again.
+# TEST: A user that is no longer locked out can log in again
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
 ```
@@ -173,6 +174,7 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
+# TEST: Locking out a user that does not exist fails
 POST {{restapi_url}}/lockouts/nonexistent
 Authorization: {{authkey}}
 HTTP 404
@@ -180,6 +182,7 @@ HTTP 404
 xpath "string(/error/exception)" == "UserNotFoundException"
 xpath "string(/error/resource)" == "nonexistent"
 
+# TEST: Unlocking a user that does not exist fails
 DELETE {{restapi_url}}/lockouts/nonexistent
 Authorization: {{authkey}}
 HTTP 404

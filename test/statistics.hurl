@@ -1,3 +1,4 @@
+# TEST: Get the session statistics
 GET {{restapi_url}}/system/statistics/sessions
 Authorization: {{authkey}}
 HTTP 200

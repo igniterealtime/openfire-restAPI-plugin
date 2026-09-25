@@ -1,3 +1,4 @@
+# TEST: The default 'conference' chat service is listed
 GET {{restapi_url}}/chatservices
 Authorization: {{authkey}}
 HTTP 200
