@@ -16,6 +16,7 @@
 
 package org.jivesoftware.openfire.plugin.rest.controller;
 
+import org.jivesoftware.database.DbConnectionManager;
 import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.cluster.ClusterManager;
 import org.jivesoftware.openfire.http.HttpBindManager;
@@ -34,6 +35,10 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.ws.rs.core.Response;
 import java.lang.management.ManagementFactory;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -54,6 +59,12 @@ public class SystemController {
      * (such as whitespace, most SQL LIKE wildcards, and characters that some databases consider equal to others).
      */
     private static final Pattern VALID_PROPERTY_KEY = Pattern.compile("[A-Za-z0-9_'-]+(\\.[A-Za-z0-9_'-]+)*");
+
+    /**
+     * Selects the properties that Openfire deletes when a property is deleted (this uses the same condition as the
+     * statement that Openfire uses to delete a property).
+     */
+    private static final String LOAD_PROPERTIES_MATCHED_BY_DELETION = "SELECT name, encrypted FROM ofProperty WHERE name = ? OR name LIKE ?";
 
     private static SystemController INSTANCE = null;
 
@@ -183,21 +194,30 @@ public class SystemController {
      *
      * The deletion is refused when the property or any of its child properties is forbidden (see
      * {@link #isForbiddenPropertyKey(String, Set)}), and when the database could delete any other property as well
-     * (see {@link #getKeyDeletionPattern(String)}).
+     * (see {@link #getPersistedPropertiesMatchedByDeletion(String)}).
      *
      * @param propertyKey the property key
      * @throws ServiceException when the key is not valid (400), when the property or one of its children is forbidden
-     * (403), when the property does not exist (404), or when deleting it could delete other properties (409).
+     * (403), when the property does not exist (404), when deleting it could delete other properties (409), or when the
+     * properties that would be deleted cannot be read from the database (500).
      */
     public void deleteSystemProperty(String propertyKey) throws ServiceException {
         validatePropertyKey(propertyKey);
 
-        // Ensure that we're not exposing any 'forbidden' properties. Openfire deletes a property together with all of
-        // its child properties, so none of those can be forbidden either.
+        // Ensure that we're not exposing any 'forbidden' properties.
         final Set<String> forbiddenPropertyKeys = getForbiddenPropertyKeys();
-        final Collection<String> existingPropertyKeys = JiveGlobals.getPropertyNames();
-        if (isForbiddenPropertyKey(propertyKey, forbiddenPropertyKeys)
-            || existingPropertyKeys.stream().anyMatch(key -> key.startsWith(propertyKey + ".") && isForbiddenPropertyKey(key, forbiddenPropertyKeys))) {
+        if (isForbiddenPropertyKey(propertyKey, forbiddenPropertyKeys)) {
+            throw new ServiceException("Could not delete property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
+
+        // Openfire deletes a property together with all of its child properties, so none of those can be forbidden
+        // either. Check the database rather than the properties that Openfire has loaded, as Openfire does not load
+        // properties that it cannot decrypt, but deletes them all the same.
+        final Map<String, Boolean> persisted = getPersistedPropertiesMatchedByDeletion(propertyKey);
+        final Set<String> deletedKeys = persisted.keySet().stream()
+            .filter(key -> key.equals(propertyKey) || key.startsWith(propertyKey + "."))
+            .collect(Collectors.toSet());
+        if (deletedKeys.stream().anyMatch(key -> persisted.get(key) || JiveGlobals.isXMLPropertyEncrypted(key) || isForbiddenPropertyKey(key, forbiddenPropertyKeys))) {
             throw new ServiceException("Could not delete property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
@@ -206,10 +226,9 @@ public class SystemController {
                 Response.Status.NOT_FOUND);
         }
 
-        // The database can match more properties than the property and its children (see getKeyDeletionPattern).
-        // Refuse to delete when that would delete any other existing property.
-        final Pattern deletionPattern = getKeyDeletionPattern(propertyKey);
-        if (existingPropertyKeys.stream().anyMatch(key -> !key.equals(propertyKey) && !key.startsWith(propertyKey + ".") && deletionPattern.matcher(key).matches())) {
+        // The database can match more properties than the property and its children. Refuse to delete when that would
+        // delete any other property.
+        if (deletedKeys.size() < persisted.size()) {
             throw new ServiceException("Could not delete property, as that could also delete unintended properties (other than this property and its child properties). This can happen, for example, when the key contains an underscore, which can match any character.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
         }
 
@@ -463,24 +482,42 @@ public class SystemController {
     }
 
     /**
-     * Returns a pattern that matches the keys of all properties that Openfire could delete when the property with
-     * the provided key is deleted.
+     * Returns the properties that are stored in the database, that Openfire deletes when the property with the
+     * provided key is deleted.
      *
      * Openfire deletes a property together with all of its child properties, using the database statement
      * {@code DELETE FROM ofProperty WHERE name = ? OR name LIKE ?} (with {@code key + ".%"} as the second argument).
      * As the key is not escaped, any {@code _} character in it acts as a wildcard (other wildcards are not allowed in
-     * a key, see {@link #VALID_PROPERTY_KEY}). Depending on the database, matching can also be case-insensitive.
+     * a key, see {@link #VALID_PROPERTY_KEY}). Depending on the database, matching can also be case-insensitive. This
+     * method uses the same condition, so that it returns exactly the properties that would be deleted.
+     *
+     * Unlike {@link JiveGlobals#getPropertyNames()}, this includes properties that Openfire failed to load, such as
+     * encrypted properties of which the value could not be decrypted.
      *
      * @param propertyKey the (valid) key of the property that is to be deleted.
-     * @return a pattern matching the keys of properties that could be deleted.
+     * @return the keys of the properties that would be deleted, mapped to whether each is stored encrypted.
+     * @throws ServiceException when the properties cannot be read from the database.
      */
-    private static Pattern getKeyDeletionPattern(final String propertyKey)
+    private static Map<String, Boolean> getPersistedPropertiesMatchedByDeletion(final String propertyKey) throws ServiceException
     {
-        final StringBuilder regex = new StringBuilder();
-        for (final char c : propertyKey.toCharArray()) {
-            regex.append(c == '_' ? "." : Pattern.quote(String.valueOf(c))); // SQL LIKE: '_' matches any single character.
+        final Map<String, Boolean> result = new HashMap<>();
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            con = DbConnectionManager.getConnection();
+            pstmt = con.prepareStatement(LOAD_PROPERTIES_MATCHED_BY_DELETION);
+            pstmt.setString(1, propertyKey);
+            pstmt.setString(2, propertyKey + ".%");
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                result.put(rs.getString(1), rs.getInt(2) == 1);
+            }
+        } catch (SQLException e) {
+            throw new ServiceException("Could not delete property, as the properties that would be deleted along with it could not be determined.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.INTERNAL_SERVER_ERROR, e);
+        } finally {
+            DbConnectionManager.closeConnection(rs, pstmt, con);
         }
-        regex.append("(\\..*)?"); // The property itself, or any of its children.
-        return Pattern.compile(regex.toString(), Pattern.CASE_INSENSITIVE);
+        return result;
     }
 }

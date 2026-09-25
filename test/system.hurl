@@ -285,6 +285,44 @@ HTTP 404
 
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/259
+# Openfire deletes a property using SQL LIKE, in which an underscore matches any character. Deleting a property should
+# be refused when that would also delete a property other than the property itself and its child properties.
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.foo_bar" value="value" />
+```
+HTTP 201
+
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.fooXbar.child" value="value" />
+```
+HTTP 201
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.foo_bar
+Authorization: {{authkey}}
+HTTP 409
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.fooXbar.child
+Authorization: {{authkey}}
+HTTP 200
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.fooXbar.child
+Authorization: {{authkey}}
+HTTP 200
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.foo_bar
+Authorization: {{authkey}}
+HTTP 200
+
+
+# https://github.com/igniterealtime/openfire-restAPI-plugin/issues/259
 # Openfire itself uses apostrophes in property keys (e.g. for the caches of MUC services), which should be usable in
 # the URL path.
 GET http://localhost:9090/plugins/restapi/v1/system/properties/cache.MUCService'conference'Rooms.size
