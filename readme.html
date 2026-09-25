@@ -126,16 +126,6 @@
                     <li><a href="#data-types">Data types</a></li>
                 </ul>
             </li>
-            <li><a href="#deprecated-user-service-plugin-readme">(Deprecated) User Service Plugin Readme</a>
-                <ul>
-                    <li><a href="#overview">Overview</a></li>
-                    <li><a href="#installation-1">Installation</a></li>
-                    <li><a href="#configuration">Configuration</a></li>
-                    <li><a href="#using-the-plugin">Using the Plugin</a></li>
-                    <li><a href="#sample-html">Sample HTML</a></li>
-                    <li><a href="#server-reply">Server Reply</a></li>
-                </ul>
-            </li>
         </ul>
 
     </div>
@@ -2851,101 +2841,6 @@
                 <td>affiliation</td>
                 <td>No</td>
                 <td>Affiliation of the user</td>
-            </tr>
-            </tbody>
-        </table><h1 id="deprecated-user-service-plugin-readme">(Deprecated) User Service Plugin Readme</h1>
-        <h2 id="overview">Overview</h2>
-        <p>The User Service Plugin provides the ability to add,edit,delete users and manage their rosters by sending an http request to the server. It is intended to be used by applications automating the user administration process. This plugin’s functionality is useful for applications that need to administer users outside of the Openfire admin console. An example of such an application might be a live sports reporting application that uses XMPP as its transport, and creates/deletes users according to the receipt, or non receipt, of a subscription fee.</p>
-        <h2 id="installation-1">Installation</h2>
-        <p>Copy userservice.jar into the plugins directory of your Openfire server. The plugin will then be automatically deployed. To upgrade to a new version, copy the new userservice.jar file over the existing file.</p>
-        <h2 id="configuration">Configuration</h2>
-        <p>Access to the service is restricted with a “secret” that can be viewed and set from the User Service page in the Openfire admin console. This page is located on the admin console under “Server” and then “Server Settings”. This should really only be considered weak security. The plugin was initially written with the assumption that http access to the Openfire service was only available to trusted machines. In the case of the plugin’s author, a web application running on the same server as Openfire makes the request.</p>
-        <h2 id="using-the-plugin">Using the Plugin</h2>
-        <p>To administer users, submit HTTP requests to the userservice service. The service address is [hostname]plugins/restapi/userservice. For example, if your server name is “<a href="http://example.com">example.com</a>”, the URL is <a href="http://example.com/plugins/restapi/userservice">http://example.com/plugins/restapi/userservice</a></p>
-        <p>The following parameters can be passed into the request:</p>
-        <p>| Name         |                                                                                   | Description                                                                                                                                                                                                                                                                                                                            | |--------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|<br>
-            | type         |    Required                                                                  | The admin service required. Possible values are ‘add’, ‘delete’, ‘update’, ‘enable’, ‘disable’, ‘add_roster’, ‘update_roster’, ‘delete_roster’, ‘grouplist’, ‘usergrouplist’.                                                                                                                                                          |<br>
-            | secret       |    Required                                                                  | The secret key that allows access to the User Service.                                                                                                                                                                                                                                                                                 |<br>
-            | username     |    Required                                                                  | The username of the user to ‘add’, ‘delete’, ‘update’, ‘enable’, ‘disable’, ‘add_roster’, ‘update_roster’, ‘delete_roster’. ie the part before the @ symbol.                                                                                                                                                                           |<br>
-            | password     |    Required for ‘add’ operation                                            | The password of the new user or the user being updated.                                                                                                                                                                                                                                                                                |<br>
-            | name         |    Optional                                                                | The display name of the new user or the user being updated. For ‘add_roster’, ‘update_roster’ operations specifies the nickname of the roster item.                                                                                                                                                                                    |<br>
-            | email        |    Optional                                                                | The email address of the new user or the user being updated.                                                                                                                                                                                                                                                                           |<br>
-            | groups       |    Optional                                                                | List of groups where the user is a member. Values are comma delimited. When used with types “add” or “update”, it adds the user to shared groups and auto-creates new groups. When used with ‘add_roster’ and ‘update_roster’, it adds the user to roster groups provided the group name does not clash with an existing shared group. |<br>
-            | item_jid     |    Required for ‘add_roster’, ‘update_roster’, ‘delete_roster’ operations. | The JID of the roster item                                                                                                                                                                                                                                                                                                             |<br>
-            | subscription | Optional                                                                 | Type of subscription for ‘add_roster’, ‘update_roster’ operations. Possible numeric values are: -1(remove), 0(none), 1(to), 2(from), 3(both).                                                                                                                                                                                          |</p>
-        <h2 id="sample-html">Sample HTML</h2>
-        <p>The following example adds a user</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=add&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=franz@kafka.com">http://example.com:9090/plugins/restapi/userservice?type=add&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=franz@kafka.com</a></p>
-        <p>The following example adds a user, adds two shared groups (if not existing) and adds the user to both groups.</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=add&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=franz@kafka.com&amp;groups=support,finance">http://example.com:9090/plugins/restapi/userservice?type=add&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=franz@kafka.com&amp;groups=support,finance</a></p>
-        <p>The following example deletes a user and all roster items of the user.</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=delete&amp;secret=bigsecret&amp;username=kafka">http://example.com:9090/plugins/restapi/userservice?type=delete&amp;secret=bigsecret&amp;username=kafka</a></p>
-        <p>The following example disables a user (lockout)</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=disable&amp;secret=bigsecret&amp;username=kafka">http://example.com:9090/plugins/restapi/userservice?type=disable&amp;secret=bigsecret&amp;username=kafka</a></p>
-        <p>The following example enables a user (removes lockout)</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=enable&amp;secret=bigsecret&amp;username=kafka">http://example.com:9090/plugins/restapi/userservice?type=enable&amp;secret=bigsecret&amp;username=kafka</a></p>
-        <p>The following example updates a user</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=update&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=beetle@kafka.com">http://example.com:9090/plugins/restapi/userservice?type=update&amp;secret=bigsecret&amp;username=kafka&amp;password=drowssap&amp;name=franz&amp;email=beetle@kafka.com</a></p>
-        <p>The following example adds new roster item with subscription ‘both’ for user ‘kafka’</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=add_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com&amp;name=franz&amp;subscription=3">http://example.com:9090/plugins/restapi/userservice?type=add_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com&amp;name=franz&amp;subscription=3</a></p>
-        <p>The following example adds new roster item with subscription ‘both’ for user ‘kafka’ and adds kafka to roster groups ‘family’ and ‘friends’</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=add_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com&amp;name=franz&amp;subscription=3&amp;groups=family,friends">http://example.com:9090/plugins/restapi/userservice?type=add_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com&amp;name=franz&amp;subscription=3&amp;groups=family,friends</a></p>
-        <p>The following example updates existing roster item to subscription ‘none’ for user ‘kafka’</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=update_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com&amp;name=franz&amp;subscription=0">http://example.com:9090/plugins/restapi/userservice?type=update_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com&amp;name=franz&amp;subscription=0</a></p>
-        <p>The following example deletes a specific roster item ‘franz@kafka.com’ for user ‘kafka’</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=delete_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com">http://example.com:9090/plugins/restapi/userservice?type=delete_roster&amp;secret=bigsecret&amp;username=kafka&amp;item_jid=franz@example.com</a></p>
-        <p>The following example gets all groups</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=grouplist&amp;secret=bigsecret">http://example.com:9090/plugins/restapi/userservice?type=grouplist&amp;secret=bigsecret</a><br>
-            Which replies an XML group list formatted like this:</p>
-        <pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span><span class="token punctuation">&gt;</span></span>
- <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>group1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>group2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span>  
-</code></pre>
-        <p>The following example gets all groups for a specific user</p>
-        <p><a href="http://example.com:9090/plugins/restapi/userservice?type=usergrouplist&amp;secret=bigsecret&amp;username=kafka">http://example.com:9090/plugins/restapi/userservice?type=usergrouplist&amp;secret=bigsecret&amp;username=kafka</a><br>
-            Which replies an XML group list formatted like this:</p>
-        <pre class=" language-xml"><code class="prism  language-xml"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>result</span><span class="token punctuation">&gt;</span></span>
- <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>usergroup1<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>groupname</span><span class="token punctuation">&gt;</span></span>usergroup2<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>groupname</span><span class="token punctuation">&gt;</span></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>result</span><span class="token punctuation">&gt;</span></span>  
-</code></pre>
-        <p>When sending double characters (Chinese/Japanese/Korean etc.) you should URLEncode the string as utf8.<br>
-            In Java this is done like this</p>
-        <blockquote>
-            <p>URLEncoder.encode(username, “UTF-8”));</p>
-        </blockquote>
-        <p>If the strings are encoded incorrectly, double byte characters will look garbeled in the Admin Console.</p>
-        <h2 id="server-reply">Server Reply</h2>
-        <p>The server will reply to all User Service requests with an XML result page. If the request was processed successfully the return will be a “result” element with a text body of “OK”, or an XML grouplist formatted like in the example for “grouplist” and “usergrouplist” above. If the request was unsuccessful, the return will be an “error” element with a text body of one of the following error strings.</p>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Error String</th>
-                <th>Description</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td>IllegalArgumentException</td>
-                <td>One of the parameters passed in to the User Service was bad.</td>
-            </tr>
-            <tr>
-                <td>UserNotFoundException</td>
-                <td>No user of the name specified, for a delete or update operation, exists on this server. For ‘update_roster’ operation, roster item to be updated was not found.</td>
-            </tr>
-            <tr>
-                <td>UserAlreadyExistsException</td>
-                <td>A user with the same name as the user about to be added, already exists. For ‘add_roster’ operation, roster item with the same JID already exists.</td>
-            </tr>
-            <tr>
-                <td>RequestNotAuthorised</td>
-                <td>The supplied secret does not match the secret specified in the Admin Console or the requester is not a valid IP address.</td>
-            </tr>
-            <tr>
-                <td>UserServiceDisabled</td>
-                <td>The User Service is currently set to disabled in the Admin Console.</td>
-            </tr>
-            <tr>
-                <td>SharedGroupException</td>
-                <td>Roster item can not be added/deleted to/from a shared group for operations with roster.</td>
             </tr>
             </tbody>
         </table>
