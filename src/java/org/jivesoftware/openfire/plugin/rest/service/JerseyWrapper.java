@@ -172,7 +172,6 @@ public class JerseyWrapper extends ResourceConfig {
             UserLockoutService.class,
             UserRosterService.class,
             UserService.class,
-            UserServiceLegacy.class,
             UserVCardService.class
         );
 

@@ -76,12 +76,6 @@ public class AuthFilter implements ContainerRequestFilter {
             LOG.debug("Authentication was bypassed because of OPTIONS request");
             return;
         }
-        
-        // To be backwards compatible to userservice 1.*
-        if (containerRequest.getUriInfo().getRequestUri().getPath().contains("restapi/v1/userservice")) {
-            LOG.info("Deprecated 'userservice' endpoint was used. Please switch to the new endpoints");
-            return;
-        }
 
         if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
             // Get client's IP address. Do not inspect headers like 'X-Forwarded-For' here: these can be spoofed by the client.
