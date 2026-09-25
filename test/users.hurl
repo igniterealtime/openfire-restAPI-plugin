@@ -18,13 +18,11 @@ xpath "/users/user[username='john']" exists
 xpath "/users/user[name='John Doe']" exists
 xpath "/users/user[email='john.doe@example.com']" exists
 
-# TODO: Add a user with a property to the demoboot
-# How to launch with custom demoboot.xml locally?
-#GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea&propertyValue=earlgreyhot
-#Authorization: {{authkey}}
-#HTTP 200
-#[Asserts]
-#xpath "/users/user" count == 1
+GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "/users/user" count == 0
 
 POST http://localhost:9090/plugins/restapi/v1/users
 Authorization: {{authkey}}
@@ -51,8 +49,22 @@ xpath "/users/user" count == 1
 xpath "string(/users/user/username)" == "jeanluc"
 xpath "/users/user[name='Jean-Luc']" exists
 xpath "/users/user[email='jlp@example.com']" exists
-# TODO xpath for attributes
-xpath "/users/user/properties/property" exists
+xpath "/users/user/properties/property" count == 1
+xpath "string(/users/user/properties/property/@key)" == "tea"
+xpath "string(/users/user/properties/property/@value)" == "earlgreyhot"
+
+GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "/users/user" count == 1
+xpath "string(/users/user/username)" == "jeanluc"
+
+GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea&propertyValue=coffee
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "/users/user" count == 0
 
 PUT http://localhost:9090/plugins/restapi/v1/users/jeanluc
 Authorization: {{authkey}}
