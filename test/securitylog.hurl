@@ -22,8 +22,8 @@ POST {{adminconsole_url}}/login.jsp
 [Form]
 login: true
 csrf: {{csrf}}
-username: admin
-password: admin
+username: {{admin_username}}
+password: {{admin_password}}
 HTTP 302
 [Asserts]
 header "Location" == "/index.jsp"
@@ -35,18 +35,18 @@ HTTP 200
 [Asserts]
 xpath "/logs/log[logId > {{last_log_id}}]" count == 1
 xpath "string(/logs/log[logId > {{last_log_id}}]/summary)" == "Successful admin console login attempt"
-xpath "string(/logs/log[logId > {{last_log_id}}]/username)" == "admin"
+xpath "string(/logs/log[logId > {{last_log_id}}]/username)" == "{{admin_username}}"
 xpath "string(/logs/log[logId > {{last_log_id}}]/node)" == "example.org"
 xpath "string(/logs/log[logId > {{last_log_id}}]/details)" startsWith "The user logged in successfully to the admin console"
 xpath "/logs/log[logId > {{last_log_id}}]/timestamp" exists
 
 # TEST: Filtering by username returns only that user's events
-GET {{restapi_url}}/logs/security?username=admin
+GET {{restapi_url}}/logs/security?username={{admin_username}}
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/logs/log[logId > {{last_log_id}}]" count == 1
-xpath "/logs/log[username!='admin']" not exists
+xpath "/logs/log[username!='{{admin_username}}']" not exists
 
 # TEST: Filtering by an unknown username returns no events
 GET {{restapi_url}}/logs/security?username=nonexistent

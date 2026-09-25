@@ -1,3 +1,17 @@
+# Sessions are tested on a dedicated user, which is removed at the end.
+POST {{restapi_url}}/users
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<user>
+	<username>riker</username>
+	<password>number1</password>
+</user>
+```
+HTTP 201
+
+
 # TEST: There are no sessions initially
 GET {{restapi_url}}/sessions
 Authorization: {{authkey}}
@@ -7,7 +21,7 @@ xpath "/sessions" exists
 xpath "/sessions[not(child::node())]" count == 1 # sessions at the root, with no child nodes
 
 # TEST: A user without sessions has an empty list of sessions
-GET {{restapi_url}}/sessions/john
+GET {{restapi_url}}/sessions/riker
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -26,7 +40,7 @@ xpath "/sessions/session" count == 0
 
 
 # TEST: A logged-in client's session is listed with its details, for its user only
-# Create a session for john, by logging in over BOSH (XEP-0124/XEP-0206).
+# Create a session for the user, by logging in over BOSH (XEP-0124/XEP-0206).
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
 ```
@@ -36,11 +50,11 @@ HTTP 200
 [Captures]
 sid: xpath "string(/_:body/@sid)"
 
-# SASL PLAIN, with base64("\0john\0secret")
+# SASL PLAIN, with base64("\0riker\0number1")
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
 ```
-<body rid='1001' sid='{{sid}}' xmlns='http://jabber.org/protocol/httpbind'><auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AGpvaG4Ac2VjcmV0</auth></body>
+<body rid='1001' sid='{{sid}}' xmlns='http://jabber.org/protocol/httpbind'><auth xmlns='urn:ietf:params:xml:ns:xmpp-sasl' mechanism='PLAIN'>AHJpa2VyAG51bWJlcjE=</auth></body>
 ```
 HTTP 200
 [Asserts]
@@ -60,7 +74,7 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 [Asserts]
-xpath "string(//*[local-name()='jid'])" == "john@example.org/hurl"
+xpath "string(//*[local-name()='jid'])" == "riker@example.org/hurl"
 
 # The session is only listed once it has sent initial presence.
 POST {{bosh_url}}/http-bind/
@@ -74,15 +88,15 @@ GET {{restapi_url}}/sessions
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
-xpath "/sessions/session[sessionId='john@example.org/hurl']" exists
+xpath "/sessions/session[sessionId='riker@example.org/hurl']" exists
 
-GET {{restapi_url}}/sessions/john
+GET {{restapi_url}}/sessions/riker
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/sessions/session" count == 1
-xpath "string(/sessions/session/sessionId)" == "john@example.org/hurl"
-xpath "string(/sessions/session/username)" == "john"
+xpath "string(/sessions/session/sessionId)" == "riker@example.org/hurl"
+xpath "string(/sessions/session/username)" == "riker"
 xpath "string(/sessions/session/resource)" == "hurl"
 xpath "string(/sessions/session/node)" == "Local"
 xpath "string(/sessions/session/sessionStatus)" == "Authenticated"
@@ -99,12 +113,12 @@ HTTP 200
 xpath "/sessions/session" count == 0
 
 # TEST: Kicking a user's sessions closes them
-DELETE {{restapi_url}}/sessions/john
+DELETE {{restapi_url}}/sessions/riker
 Authorization: {{authkey}}
 HTTP 200
 
 # Sessions are closed asynchronously, so allow for some delay.
-GET {{restapi_url}}/sessions/john
+GET {{restapi_url}}/sessions/riker
 Authorization: {{authkey}}
 [Options]
 retry: 10
@@ -125,6 +139,11 @@ retry-interval: 100ms
 HTTP 404
 
 # TEST: Kicking the sessions of a user that has no sessions is fine
-DELETE {{restapi_url}}/sessions/john
+DELETE {{restapi_url}}/sessions/riker
+Authorization: {{authkey}}
+HTTP 200
+
+
+DELETE {{restapi_url}}/users/riker
 Authorization: {{authkey}}
 HTTP 200
