@@ -1,4 +1,4 @@
-GET http://localhost:9090/plugins/restapi/v1/users
+GET {{restapi_url}}/users
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -9,7 +9,7 @@ xpath "/users/user[username='john']" exists
 xpath "/users/user[name='John Doe']" exists
 xpath "/users/user[email='john.doe@example.com']" exists
 
-GET http://localhost:9090/plugins/restapi/v1/users?search=john
+GET {{restapi_url}}/users?search=john
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -18,13 +18,13 @@ xpath "/users/user[username='john']" exists
 xpath "/users/user[name='John Doe']" exists
 xpath "/users/user[email='john.doe@example.com']" exists
 
-GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea
+GET {{restapi_url}}/users?propertyKey=tea
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/users/user" count == 0
 
-POST http://localhost:9090/plugins/restapi/v1/users
+POST {{restapi_url}}/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -41,7 +41,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea&propertyValue=earlgreyhot
+GET {{restapi_url}}/users?propertyKey=tea&propertyValue=earlgreyhot
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -53,20 +53,20 @@ xpath "/users/user/properties/property" count == 1
 xpath "string(/users/user/properties/property/@key)" == "tea"
 xpath "string(/users/user/properties/property/@value)" == "earlgreyhot"
 
-GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea
+GET {{restapi_url}}/users?propertyKey=tea
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/users/user" count == 1
 xpath "string(/users/user/username)" == "jeanluc"
 
-GET http://localhost:9090/plugins/restapi/v1/users?propertyKey=tea&propertyValue=coffee
+GET {{restapi_url}}/users?propertyKey=tea&propertyValue=coffee
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/users/user" count == 0
 
-PUT http://localhost:9090/plugins/restapi/v1/users/jeanluc
+PUT {{restapi_url}}/users/jeanluc
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -83,7 +83,7 @@ Content-Type: application/xml
 HTTP 200
 
 
-GET http://localhost:9090/plugins/restapi/v1/users/jeanluc
+GET {{restapi_url}}/users/jeanluc
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -93,11 +93,11 @@ xpath "/user[name='Jean-Luc']" exists
 xpath "/user[email='jlp@example.com']" not exists
 xpath "/user[email='jeanluc@example.com']" exists
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/jeanluc
+DELETE {{restapi_url}}/users/jeanluc
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/users/jeanluc
+GET {{restapi_url}}/users/jeanluc
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]

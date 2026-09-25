@@ -1,4 +1,4 @@
-GET http://localhost:9090/plugins/restapi/v1/chatservices
+GET {{restapi_url}}/chatservices
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]

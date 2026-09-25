@@ -1,5 +1,5 @@
 # Group membership is tested on a dedicated user, which is removed at the end.
-POST http://localhost:9090/plugins/restapi/v1/users
+POST {{restapi_url}}/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -11,7 +11,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/groups
+POST {{restapi_url}}/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -26,7 +26,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/groups
+POST {{restapi_url}}/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -41,7 +41,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/groups
+POST {{restapi_url}}/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -56,17 +56,17 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/users/geordi/groups
+GET {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups/groupname" count == 0
 
-POST http://localhost:9090/plugins/restapi/v1/users/geordi/groups/security
+POST {{restapi_url}}/users/geordi/groups/security
 Authorization: {{authkey}}
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/users/geordi/groups
+POST {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -78,7 +78,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/users/geordi/groups
+GET {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -87,25 +87,25 @@ xpath "/groups[groupname='security']" exists
 xpath "/groups[groupname='klingons']" exists
 xpath "/groups[groupname='bridge']" exists
 
-GET http://localhost:9090/plugins/restapi/v1/groups/klingons
+GET {{restapi_url}}/groups/klingons
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/group/members/member" count == 1
 xpath "string(/group/members/member)" == "geordi@example.org"
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/geordi/groups/security
+DELETE {{restapi_url}}/users/geordi/groups/security
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/users/geordi/groups
+GET {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups/groupname" count == 2
 xpath "/groups[groupname='security']" not exists
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/geordi/groups
+DELETE {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -117,20 +117,20 @@ Content-Type: application/xml
 ```
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/users/geordi/groups
+GET {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups/groupname" count == 0
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/geordi/groups/nonexistent
+DELETE {{restapi_url}}/users/geordi/groups/nonexistent
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]
 xpath "string(/error/exception)" == "GroupNotFoundException"
 xpath "string(/error/resource)" == "nonexistent"
 
-GET http://localhost:9090/plugins/restapi/v1/users/nonexistent/groups
+GET {{restapi_url}}/users/nonexistent/groups
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]
@@ -144,18 +144,18 @@ xpath "string(/error/exception)" == "UserNotFoundException"
 # TODO: Adding a user that does not exist to an (existing) group returns 201 and adds the JID to the group, where
 # 404 might be expected. Add a test once the intended behaviour is decided.
 
-DELETE http://localhost:9090/plugins/restapi/v1/groups/security
+DELETE {{restapi_url}}/groups/security
 Authorization: {{authkey}}
 HTTP 200
 
-DELETE http://localhost:9090/plugins/restapi/v1/groups/klingons
+DELETE {{restapi_url}}/groups/klingons
 Authorization: {{authkey}}
 HTTP 200
 
-DELETE http://localhost:9090/plugins/restapi/v1/groups/bridge
+DELETE {{restapi_url}}/groups/bridge
 Authorization: {{authkey}}
 HTTP 200
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/geordi
+DELETE {{restapi_url}}/users/geordi
 Authorization: {{authkey}}
 HTTP 200
