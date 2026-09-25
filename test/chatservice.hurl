@@ -8,7 +8,6 @@ xpath "string(/chatServices/chatService[serviceName='conference']/description)" 
 xpath "string(/chatServices/chatService[serviceName='conference']/hidden)" == "false"
 
 # The API cannot delete a chat service, so each run creates a new one, with a unique name.
-# TODO: Once the API can delete chat services, use a fixed name, and delete the service at the end.
 
 # TEST: A created chat service is listed, and can have chat rooms
 POST {{restapi_url}}/chatservices
@@ -75,4 +74,33 @@ HTTP 409
 xpath "string(/error/exception)" == "AlreadyExistsException"
 xpath "string(/error/resource)" == "{{service}}"
 
-# TODO: Creating a chat service without a name fails with a 500, rather than a 400. Add a test once that is fixed.
+# TEST: Creating a chat service without a name is rejected
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/287 is fixed.
+POST {{restapi_url}}/chatservices
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<chatService>
+	<description>No name</description>
+	<hidden>false</hidden>
+</chatService>
+```
+HTTP 400
+
+POST {{restapi_url}}/chatservices
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<chatService>
+	<serviceName></serviceName>
+	<description>Empty name</description>
+	<hidden>false</hidden>
+</chatService>
+```
+HTTP 400

@@ -142,13 +142,83 @@ HTTP 404
 [Asserts]
 xpath "string(/error/exception)" == "UserNotFoundException"
 
-# TODO: Adding a user to a group that does not exist is documented to create that group, but fails with a 500, as
-# GroupController#createGroup dereferences the (null) members of the GroupEntity that
-# UserServiceController#addUserToGroup(s) creates. (Creating a group through POST /groups without <members/> and
-# <admins/> fails in the same way.) Add tests for automatic group creation once that is fixed.
+# TEST: Adding a user to a group that does not exist creates that group
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/279 is fixed.
+POST {{restapi_url}}/users/geordi/groups/engineering
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 201
 
-# TODO: Adding a user that does not exist to an (existing) group returns 201 and adds the JID to the group, where
-# 404 might be expected. Add a test once the intended behaviour is decided.
+GET {{restapi_url}}/groups/engineering
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/group/members[member='geordi@example.org']" exists
+
+POST {{restapi_url}}/users/geordi/groups
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<groups>
+	<groupname>sickbay</groupname>
+</groups>
+```
+HTTP 201
+
+GET {{restapi_url}}/groups/sickbay
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/group/members[member='geordi@example.org']" exists
+
+DELETE {{restapi_url}}/groups/engineering
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+
+DELETE {{restapi_url}}/groups/sickbay
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+
+# TEST: Adding a user that does not exist to a group fails
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/280 is fixed.
+POST {{restapi_url}}/users/nonexistent/groups/security
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 404
+
+POST {{restapi_url}}/users/nonexistent/groups
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<groups>
+	<groupname>security</groupname>
+</groups>
+```
+HTTP 404
+
+GET {{restapi_url}}/groups/security
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/group/members[member='nonexistent@example.org']" not exists
 
 DELETE {{restapi_url}}/groups/security
 Authorization: {{authkey}}

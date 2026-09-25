@@ -69,9 +69,51 @@ GET {{restapi_url}}/users/nonexistent/vcard
 Authorization: {{authkey}}
 HTTP 204
 
-# TODO: Storing a vCard for a user that does not exist returns 200 (and stores the vCard), and any XML document (e.g.
-# <notavcard/>) is accepted and stored as a vCard. Add tests expecting a 404 and a 400 respectively, once it is decided
-# that the API should validate these.
+# TEST: Storing a vCard for a user that does not exist fails
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/281 is fixed.
+PUT {{restapi_url}}/users/nonexistent/vcard
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<vCard xmlns="vcard-temp"><FN>Nobody</FN></vCard>
+```
+HTTP 404
+
+GET {{restapi_url}}/users/nonexistent/vcard
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 204
+
+# TEST: Storing a document that is not a vCard is rejected
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/282 is fixed.
+PUT {{restapi_url}}/users/troi/vcard
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<notavcard/>
+```
+HTTP 400
+
+PUT {{restapi_url}}/users/troi/vcard
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<vCard xmlns="wrong-namespace"><FN>Deanna Troi</FN></vCard>
+```
+HTTP 400
+
+GET {{restapi_url}}/users/troi/vcard
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 204
 
 
 DELETE {{restapi_url}}/users/troi
