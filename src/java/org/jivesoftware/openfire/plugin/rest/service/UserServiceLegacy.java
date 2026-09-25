@@ -74,17 +74,10 @@ public class UserServiceLegacy {
         PrintWriter out = response.getWriter();
 
         if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
-            // Get client's IP address
-            String ipAddress = request.getHeader("x-forwarded-for");
-            if (ipAddress == null) {
-                ipAddress = request.getHeader("X_FORWARDED_FOR");
-                if (ipAddress == null) {
-                    ipAddress = request.getHeader("X-Forward-For");
-                    if (ipAddress == null) {
-                        ipAddress = request.getRemoteAddr();
-                    }
-                }
-            }
+            // Get client's IP address. Do not inspect headers like 'X-Forwarded-For' here: these can be spoofed by the client.
+            // When Openfire is configured to be accessed through a reverse proxy, its web server already replaces the remote
+            // address with the value from such headers, but only for requests from proxies that are configured to be trusted.
+            final String ipAddress = request.getRemoteAddr();
             if (!RESTServicePlugin.ALLOWED_IPS.getValue().contains(ipAddress)) {
                 LOG.warn("User service rejected service to IP address: " + ipAddress);
                 replyError("RequestNotAuthorised", response, out);
