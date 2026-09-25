@@ -11,8 +11,8 @@
     <adminconsole>
         <tab id="tab-server">
             <sidebar id="sidebar-server-settings">
-                <item id="rest-api" name="REST API" url="rest-api.jsp"
-                     description="Click to manage the service that allows to configure the Openfire over a RESTFul API" />
+                <item id="rest-api" name="${restapi.admin.item.settings.name}" url="rest-api.jsp"
+                     description="${restapi.admin.item.settings.description}" />
             </sidebar>
         </tab>
     </adminconsole>
