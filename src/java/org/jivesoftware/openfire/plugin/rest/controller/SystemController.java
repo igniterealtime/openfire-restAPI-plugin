@@ -148,11 +148,15 @@ public class SystemController {
      * Creates the system property, or overwrites the value of an existing property that has the same key.
      *
      * @param systemProperty the system property
-     * @throws ServiceException when the key is not valid (400), when the property is forbidden (403), or when the key
-     * differs only in case from the key of an existing property (409).
+     * @throws ServiceException when no property is provided, when the key is not valid, or when the property has no
+     * value (400), when the property is forbidden (403), or when the key differs only in case from the key of an
+     * existing property (409).
      */
     public void createSystemProperty(org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException
     {
+        if (systemProperty == null) {
+            throw new ServiceException("Could not create property, as the request does not contain a property definition.", null, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
         final String propertyKey = systemProperty.getKey();
         validatePropertyKey(propertyKey);
 
@@ -163,6 +167,11 @@ public class SystemController {
 
         if (hasCaseInsensitiveKeyCollision(propertyKey)) {
             throw new ServiceException("Could not create property, as its key differs only in case from the key of an existing property.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.CONFLICT);
+        }
+
+        if (systemProperty.getValue() == null) {
+            // Setting null values in JiveGlobals will cause a property to be deleted!
+            throw new ServiceException("Could not create property, as the value is missing.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
         }
 
         JiveGlobals.setProperty(propertyKey, systemProperty.getValue());
@@ -212,15 +221,23 @@ public class SystemController {
      *
      * @param propertyKey the property key
      * @param systemProperty the system property
-     * @throws ServiceException when the property is forbidden (403), when the property does not exist (404), when the
-     * key in the path and the entity do not match (400), or when the key differs only in case from the key of another
-     * existing property (409).
+     * @throws ServiceException when the property is forbidden (403), when no property is provided, when the property
+     * has no value, or when the key in the path and the entity do not match (400), when the property does not exist
+     * (404), or when the key differs only in case from the key of another existing property (409).
      */
     public void updateSystemProperty(String propertyKey, org.jivesoftware.openfire.plugin.rest.entity.SystemProperty systemProperty) throws ServiceException {
         // Ensure that we're not exposing any 'forbidden' properties.
         if (isForbiddenPropertyKey(propertyKey, getForbiddenPropertyKeys())) {
             throw new ServiceException("Could not update property", propertyKey, ExceptionType.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
+        if (systemProperty == null) {
+            throw new ServiceException("Could not update property, as the request does not contain a property definition.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
+        if (systemProperty.getValue() == null) {
+            // Setting null values in JiveGlobals will cause a property to be deleted!
+            throw new ServiceException("Could not update property, as the new value is missing.", propertyKey, ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, Response.Status.BAD_REQUEST);
+        }
+
         if(JiveGlobals.getProperty(propertyKey) != null) {
             if(systemProperty.getKey().equals(propertyKey)) {
                 if (hasCaseInsensitiveKeyCollision(propertyKey)) {

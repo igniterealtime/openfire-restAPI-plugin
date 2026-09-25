@@ -315,3 +315,90 @@ HTTP 200
 GET http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
 Authorization: {{authkey}}
 HTTP 404
+
+
+# Openfire treats setting a property to a null value as deleting it, together with all of its child properties.
+# Creating or updating a property without a value should therefore be rejected, as it would otherwise bypass the
+# checks that prevent (forbidden) child properties from being deleted.
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.nullparent" value="parent-value" />
+```
+HTTP 201
+
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.nullparent.child" value="child-value" />
+```
+HTTP 201
+
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.nullparent" />
+```
+HTTP 400
+
+PUT http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.nullparent" />
+```
+HTTP 400
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "string(/property/@value)" == "parent-value"
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent.child
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "string(/property/@value)" == "child-value"
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent
+Authorization: {{authkey}}
+HTTP 200
+
+# The parent of the plugin's own properties may not be 'created' without a value (as that would delete the plugin's
+# configuration) either.
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="plugin" />
+```
+HTTP 400
+
+# An empty value is a value (rather than a deletion), and should be stored as such.
+POST http://localhost:9090/plugins/restapi/v1/system/properties
+Authorization: {{authkey}}
+Content-Type: application/xml
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<property key="test.emptyvalue" value="" />
+```
+HTTP 201
+
+GET http://localhost:9090/plugins/restapi/v1/system/properties/test.emptyvalue
+Authorization: {{authkey}}
+HTTP 200
+[Asserts]
+xpath "string(/property/@value)" == ""
+
+DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.emptyvalue
+Authorization: {{authkey}}
+HTTP 200

@@ -41,6 +41,8 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -592,6 +594,168 @@ public class SystemControllerTest {
 
             // Verify result.
             jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(eq(key), eq("new")));
+        }
+    }
+
+    /**
+     * Verifies that creating a property without a value is rejected. Openfire treats setting a null value as a
+     * deletion that also removes all child properties, which would allow forbidden child properties (such as this
+     * plugin's own configuration) to be deleted by 'creating' their parent.
+     */
+    @Test
+    public void testCreatePropertyWithNullValueIsRejected()
+    {
+        // Setup test fixture.
+        final String key = "plugin";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, null);
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "plugin.restapi.secret"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected creation of a property without a value to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(property));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when creating a property without a value.", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, result.getException());
+            assertEquals("Unexpected HTTP status when creating a property without a value.", Response.Status.BAD_REQUEST, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), nullable(String.class)), never().description("Rejected creation of a property without a value should not have removed it (or its child properties)."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), nullable(String.class), anyBoolean()), never().description("Rejected creation of a property without a value should not have removed it (or its child properties)."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected creation of a property without a value should not have removed it (or its child properties)."));
+        }
+    }
+
+    /**
+     * Verifies that a request to create a property that does not contain a property definition is rejected as a bad
+     * request (rather than causing an internal server error).
+     */
+    @Test
+    public void testCreateWithoutPropertyIsRejected()
+    {
+        // Setup test fixture.
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected creation without a property definition to be rejected, but it was accepted.", ServiceException.class, () -> systemController.createSystemProperty(null));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when creating without a property definition.", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, result.getException());
+            assertEquals("Unexpected HTTP status when creating without a property definition.", Response.Status.BAD_REQUEST, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), nullable(String.class)), never().description("Rejected creation without a property definition should not have changed any property."));
+        }
+    }
+
+    /**
+     * Verifies that creating a property with an empty value is allowed, as (unlike a null value) that is stored as a
+     * value, rather than causing the property to be deleted.
+     */
+    @Test
+    public void testCreatePropertyWithEmptyValueIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+
+            // Execute system under test.
+            systemController.createSystemProperty(property);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(eq(key), eq("")), description("Expected a property with an empty value to be stored."));
+        }
+    }
+
+    /**
+     * Verifies that updating a property without a value is rejected. Openfire treats setting a null value as a
+     * deletion that also removes all child properties, which would allow forbidden child properties (such as this
+     * plugin's own configuration) to be deleted by 'updating' their parent.
+     */
+    @Test
+    public void testUpdatePropertyWithNullValueIsRejected()
+    {
+        // Setup test fixture.
+        final String key = "plugin";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, null);
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Arrays.asList(key, "plugin.restapi.secret"));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected update of a property without a value to be rejected, but it was accepted.", ServiceException.class, () -> systemController.updateSystemProperty(key, property));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when updating a property without a value.", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, result.getException());
+            assertEquals("Unexpected HTTP status when updating a property without a value.", Response.Status.BAD_REQUEST, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), nullable(String.class)), never().description("Rejected update of a property without a value should not have removed it (or its child properties)."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), nullable(String.class), anyBoolean()), never().description("Rejected update of a property without a value should not have removed it (or its child properties)."));
+            jiveGlobalsMock.verify(() -> JiveGlobals.deleteProperty(anyString()), never().description("Rejected update of a property without a value should not have removed it (or its child properties)."));
+        }
+    }
+
+    /**
+     * Verifies that a request to update a property that does not contain a property definition is rejected as a bad
+     * request (rather than causing an internal server error).
+     */
+    @Test
+    public void testUpdateWithoutPropertyIsRejected()
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Collections.singletonList(key));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            final ServiceException result = assertThrows("Expected update without a property definition to be rejected, but it was accepted.", ServiceException.class, () -> systemController.updateSystemProperty(key, null));
+
+            // Verify result.
+            assertEquals("Unexpected exception type when updating without a property definition.", ExceptionType.ILLEGAL_ARGUMENT_EXCEPTION, result.getException());
+            assertEquals("Unexpected HTTP status when updating without a property definition.", Response.Status.BAD_REQUEST, result.getStatus());
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(anyString(), nullable(String.class)), never().description("Rejected update without a property definition should not have changed any property."));
+        }
+    }
+
+    /**
+     * Verifies that updating a property with an empty value is allowed, as (unlike a null value) that is stored as a
+     * value, rather than causing the property to be deleted.
+     */
+    @Test
+    public void testUpdatePropertyWithEmptyValueIsAllowed() throws Exception
+    {
+        // Setup test fixture.
+        final String key = "foo.bar";
+        final org.jivesoftware.openfire.plugin.rest.entity.SystemProperty property = new org.jivesoftware.openfire.plugin.rest.entity.SystemProperty(key, "");
+
+        try (final MockedStatic<SystemProperty> systemPropertyMock = mockStatic(SystemProperty.class);
+             final MockedStatic<JiveGlobals> jiveGlobalsMock = mockStatic(JiveGlobals.class))
+        {
+            systemPropertyMock.when(SystemProperty::getProperties).thenReturn(Collections.emptyList());
+            jiveGlobalsMock.when(JiveGlobals::getPropertyNames).thenReturn(Collections.singletonList(key));
+            jiveGlobalsMock.when(() -> JiveGlobals.getProperty(anyString())).thenReturn("value");
+
+            // Execute system under test.
+            systemController.updateSystemProperty(key, property);
+
+            // Verify result.
+            jiveGlobalsMock.verify(() -> JiveGlobals.setProperty(eq(key), eq("")), description("Expected a property with an empty value to be stored."));
         }
     }
 
