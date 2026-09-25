@@ -17,6 +17,8 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class UserGroupsEntity.
  */
 @XmlRootElement(name = "groups")
+@Schema(description = "A list of names of Openfire user groups.")
 public class UserGroupsEntity {
 
     /** The group names. */
@@ -57,6 +60,7 @@ public class UserGroupsEntity {
      */
     @XmlElement(name = "groupname")
     @JsonProperty(value = "groupnames")
+    @ArraySchema(arraySchema = @Schema(description = "The names of the groups."), schema = @Schema(example = "Sales"))
     public List<String> getGroupNames() {
         return groupNames;
     }

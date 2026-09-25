@@ -17,6 +17,8 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
@@ -30,6 +32,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlRootElement(name = "rosterItem")
 @XmlType(propOrder = { "jid", "nickname", "subscriptionType", "groups" })
+@Schema(description = "An entry in the roster (contact list) of a user.")
 public class RosterItemEntity {
 
     /** The jid. */
@@ -73,6 +76,7 @@ public class RosterItemEntity {
      * @return the jid
      */
     @XmlElement
+    @Schema(description = "The JID of the contact.", example = "jane@example.org", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getJid() {
         return jid;
     }
@@ -93,6 +97,7 @@ public class RosterItemEntity {
      * @return the nickname
      */
     @XmlElement
+    @Schema(description = "The name of the contact, as shown in this roster.", example = "Jane")
     public String getNickname() {
         return nickname;
     }
@@ -113,6 +118,7 @@ public class RosterItemEntity {
      * @return the subscription type
      */
     @XmlElement
+    @Schema(description = "The presence subscription state of the contact. One of: -1 (remove), 0 (none), 1 (to: the user receives presence updates of the contact), 2 (from: the contact receives presence updates of the user), 3 (both).", example = "3")
     public int getSubscriptionType() {
         return subscriptionType;
     }
@@ -135,6 +141,7 @@ public class RosterItemEntity {
     @XmlElement(name = "group")
     @XmlElementWrapper(name = "groups")
     @JsonProperty(value = "groups")
+    @ArraySchema(arraySchema = @Schema(description = "The roster groups (for example 'Friends' or 'Co-workers') that this contact is organized under."), schema = @Schema(example = "Friends"))
     public List<String> getGroups() {
         return groups;
     }

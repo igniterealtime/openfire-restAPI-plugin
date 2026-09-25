@@ -17,6 +17,8 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "logs")
+@Schema(description = "A list of entries of the security audit log.")
 public class SecurityAuditLogs {
 	List<SecurityAuditLog> securityAuditLog;
 
@@ -36,6 +39,7 @@ public class SecurityAuditLogs {
 
 	@XmlElement(name = "log")
 	@JsonProperty(value = "logs")
+	@ArraySchema(arraySchema = @Schema(description = "The log entries."))
 	public List<SecurityAuditLog> getSecurityAuditLog() {
 		return securityAuditLog;
 	}

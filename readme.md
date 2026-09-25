@@ -136,7 +136,7 @@ Be aware of the following:
 
 # REST Endpoints
 
-The paths of all endpoints below are relative to the root of the Openfire admin console, for example `http://example.org:9090`.
+The paths of all endpoints below are relative to the root of the Openfire admin console, for example `http://example.org:9090`. The data types that are used by these endpoints are described in [Data types](#data-types).
 
 In addition to the responses that are documented for each endpoint, every endpoint can respond with:
 
@@ -167,7 +167,7 @@ Retrieve all users defined in Openfire (with optional filtering).
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | A list of Openfire users. | `UserEntities` (XML or JSON) |
+| 200 | A list of Openfire users. | [UserEntities](#userentities) (XML or JSON) |
 
 ## Create user
 
@@ -175,15 +175,49 @@ Retrieve all users defined in Openfire (with optional filtering).
 
 Add a new user to Openfire.
 
-**Request body** (required): `UserEntity` (XML or JSON) - The definition of the user to create.
+**Request body** (required): [UserEntity](#userentity) (XML or JSON) - The definition of the user to create.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<user>
+    <username>john</username>
+    <name>John Doe</name>
+    <email>john@example.org</email>
+    <password>s3cr3t</password>
+    <properties>
+        <property key="department" value="Sales"/>
+    </properties>
+</user>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "username" : "john",
+  "name" : "John Doe",
+  "email" : "john@example.org",
+  "password" : "s3cr3t",
+  "properties" : [ {
+    "key" : "department",
+    "value" : "Sales"
+  } ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | The user was created. |  |
-| 400 | No user definition, username or password was provided. | `ErrorResponse` |
-| 409 | A user with this username already exists. | `ErrorResponse` |
+| 400 | No user definition, username or password was provided. | [ErrorResponse](#errorresponse) |
+| 409 | A user with this username already exists. | [ErrorResponse](#errorresponse) |
 
 ## Get user
 
@@ -201,8 +235,8 @@ Retrieve a user that is defined in Openfire.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The Openfire user. | `UserEntity` (XML or JSON) |
-| 404 | No user with that username was found. | `ErrorResponse` (XML or JSON) |
+| 200 | The Openfire user. | [UserEntity](#userentity) (XML or JSON) |
+| 404 | No user with that username was found. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Update user
 
@@ -216,15 +250,49 @@ Update an existing user in Openfire.
 |------|------------|----------|-------------|---------------|
 | username | path | yes | The username of the user to update. |  |
 
-**Request body** (required): `UserEntity` (XML or JSON) - The updated definition of the user.
+**Request body** (required): [UserEntity](#userentity) (XML or JSON) - The updated definition of the user.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<user>
+    <username>john</username>
+    <name>John Doe</name>
+    <email>john@example.org</email>
+    <password>s3cr3t</password>
+    <properties>
+        <property key="department" value="Sales"/>
+    </properties>
+</user>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "username" : "john",
+  "name" : "John Doe",
+  "email" : "john@example.org",
+  "password" : "s3cr3t",
+  "properties" : [ {
+    "key" : "department",
+    "value" : "Sales"
+  } ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The user was updated. |  |
-| 404 | No user with that username was found. | `ErrorResponse` |
-| 409 | The user is to be renamed, but a user with the new username already exists. | `ErrorResponse` |
+| 404 | No user with that username was found. | [ErrorResponse](#errorresponse) |
+| 409 | The user is to be renamed, but a user with the new username already exists. | [ErrorResponse](#errorresponse) |
 
 ## Delete user
 
@@ -243,7 +311,7 @@ Remove an existing user from Openfire.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The user was removed. |  |
-| 404 | No user with that username was found. | `ErrorResponse` |
+| 404 | No user with that username was found. | [ErrorResponse](#errorresponse) |
 
 ## Get user's groups
 
@@ -261,8 +329,8 @@ Retrieve names of all groups that a particular user is in.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The names of the groups that the user is in. | `UserGroupsEntity` (XML or JSON) |
-| 404 | No user with that username was found. | `ErrorResponse` (XML or JSON) |
+| 200 | The names of the groups that the user is in. | [UserGroupsEntity](#usergroupsentity) (XML or JSON) |
+| 404 | No user with that username was found. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Add user to groups
 
@@ -276,14 +344,35 @@ Add a particular user to a collection of groups. When a group that is provided d
 |------|------------|----------|-------------|---------------|
 | username | path | yes | The username of the user that is to be added to groups. |  |
 
-**Request body** (required): `UserGroupsEntity` (XML or JSON) - A collection of names for groups that the user is to be added to.
+**Request body** (required): [UserGroupsEntity](#usergroupsentity) (XML or JSON) - A collection of names for groups that the user is to be added to.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<groups>
+    <groupname>Sales</groupname>
+</groups>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "groupnames" : [ "Sales" ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | The user was added to all groups. |  |
-| 400 | The username cannot be parsed into a JID. | `ErrorResponse` |
+| 400 | The username cannot be parsed into a JID. | [ErrorResponse](#errorresponse) |
 
 ## Delete user from groups
 
@@ -297,14 +386,35 @@ Removes a user from a collection of groups.
 |------|------------|----------|-------------|---------------|
 | username | path | yes | The username of the user that is to be removed from groups. |  |
 
-**Request body** (required): `UserGroupsEntity` (XML or JSON) - A collection of names for groups from which the user is to be removed.
+**Request body** (required): [UserGroupsEntity](#usergroupsentity) (XML or JSON) - A collection of names for groups from which the user is to be removed.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<groups>
+    <groupname>Sales</groupname>
+</groups>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "groupnames" : [ "Sales" ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The user was taken out of the groups. |  |
-| 404 | One or more groups could not be found. | `ErrorResponse` |
+| 404 | One or more groups could not be found. | [ErrorResponse](#errorresponse) |
 
 ## Add user to group
 
@@ -324,7 +434,7 @@ Add a particular user to a particular group. When the group does not exist, it w
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | The user was added to the group. |  |
-| 400 | The username cannot be parsed into a JID. | `ErrorResponse` |
+| 400 | The username cannot be parsed into a JID. | [ErrorResponse](#errorresponse) |
 
 ## Delete user from group
 
@@ -344,7 +454,7 @@ Removes a user from a group.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The user was taken out of the group. |  |
-| 404 | The group could not be found. | `ErrorResponse` |
+| 404 | The group could not be found. | [ErrorResponse](#errorresponse) |
 
 ## Retrieve user roster
 
@@ -362,8 +472,8 @@ Get a list of all roster entries (buddies / contact list) of a particular user.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | All roster entries. | `RosterEntities` (XML or JSON) |
-| 404 | No user with this username exists. | `ErrorResponse` (XML or JSON) |
+| 200 | All roster entries. | [RosterEntities](#rosterentities) (XML or JSON) |
+| 404 | No user with this username exists. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Create roster entry
 
@@ -377,16 +487,45 @@ Add a roster entry to the roster (buddies / contact list) of a particular user.
 |------|------------|----------|-------------|---------------|
 | username | path | yes | The username of the user for which to add a roster entry. |  |
 
-**Request body** (required): `RosterItemEntity` (XML or JSON) - The definition of the roster entry that is to be added.
+**Request body** (required): [RosterItemEntity](#rosteritementity) (XML or JSON) - The definition of the roster entry that is to be added.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<rosterItem>
+    <jid>jane@example.org</jid>
+    <nickname>Jane</nickname>
+    <subscriptionType>3</subscriptionType>
+    <groups>
+        <group>Friends</group>
+    </groups>
+</rosterItem>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "jid" : "jane@example.org",
+  "nickname" : "Jane",
+  "subscriptionType" : 3,
+  "groups" : [ "Friends" ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | The entry was added to the roster. |  |
-| 400 | A roster entry cannot be added to a 'shared group' (try removing group names from the roster entry and try again). | `ErrorResponse` |
-| 404 | No user with this username exists. | `ErrorResponse` |
-| 409 | A roster entry already exists for the provided contact JID. | `ErrorResponse` |
+| 400 | A roster entry cannot be added to a 'shared group' (try removing group names from the roster entry and try again). | [ErrorResponse](#errorresponse) |
+| 404 | No user with this username exists. | [ErrorResponse](#errorresponse) |
+| 409 | A roster entry already exists for the provided contact JID. | [ErrorResponse](#errorresponse) |
 
 ## Update roster entry
 
@@ -401,16 +540,45 @@ Changes a roster entry on the roster (buddies / contact list) of a particular us
 | username | path | yes | The username of the user for which to update a roster entry. |  |
 | rosterJid | path | yes | The JID of the entry/contact to update. |  |
 
-**Request body** (required): `RosterItemEntity` (XML or JSON) - The updated definition of the roster entry.
+**Request body** (required): [RosterItemEntity](#rosteritementity) (XML or JSON) - The updated definition of the roster entry.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<rosterItem>
+    <jid>jane@example.org</jid>
+    <nickname>Jane</nickname>
+    <subscriptionType>3</subscriptionType>
+    <groups>
+        <group>Friends</group>
+    </groups>
+</rosterItem>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "jid" : "jane@example.org",
+  "nickname" : "Jane",
+  "subscriptionType" : 3,
+  "groups" : [ "Friends" ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The roster entry was updated. |  |
-| 400 | A roster entry cannot be added with a 'shared group'. | `ErrorResponse` |
-| 404 | No user with this username exists. | `ErrorResponse` |
-| 409 | A roster entry already exists for the provided contact JID. | `ErrorResponse` |
+| 400 | A roster entry cannot be added with a 'shared group'. | [ErrorResponse](#errorresponse) |
+| 404 | No user with this username exists. | [ErrorResponse](#errorresponse) |
+| 409 | A roster entry already exists for the provided contact JID. | [ErrorResponse](#errorresponse) |
 
 ## Remove roster entry
 
@@ -430,8 +598,8 @@ Removes one of the roster entries (contacts) of a particular user.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The entry was removed from the roster. |  |
-| 400 | A roster entry cannot be removed from a 'shared group'. | `ErrorResponse` |
-| 404 | No user with this username exists, or its roster did not contain this entry. | `ErrorResponse` |
+| 400 | A roster entry cannot be removed from a 'shared group'. | [ErrorResponse](#errorresponse) |
+| 404 | No user with this username exists, or its roster did not contain this entry. | [ErrorResponse](#errorresponse) |
 
 ## Get user's vCard
 
@@ -464,15 +632,39 @@ Creates or changes a vCard of a particular user.
 |------|------------|----------|-------------|---------------|
 | username | path | yes | The username of the user for which to update the vCard. |  |
 
-**Request body** (required): string (XML) - The updated definition of the vCard.
+**Request body** (required): string (XML) - The updated definition of the vCard, in the vcard-temp format of XEP-0054.
+
+<details>
+<summary>Example request body</summary>
+
+`Content-Type: application/xml`:
+
+```xml
+<vCard xmlns="vcard-temp">
+    <FN>Janice Francis Doe</FN>
+    <N>
+        <FAMILY>Doe</FAMILY>
+        <GIVEN>Janice</GIVEN>
+        <MIDDLE>Francis</MIDDLE>
+    </N>
+    <NICKNAME>Jane</NICKNAME>
+    <EMAIL>
+        <INTERNET/>
+        <PREF/>
+        <USERID>j.doe@example.org</USERID>
+    </EMAIL>
+</vCard>
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The vCard was updated/created. |  |
-| 400 | Provided data could not be parsed. | `ErrorResponse` |
-| 409 | Cannot change vCard, as Openfire is configured to have read-only vCards. | `ErrorResponse` |
+| 400 | Provided data could not be parsed. | [ErrorResponse](#errorresponse) |
+| 409 | Cannot change vCard, as Openfire is configured to have read-only vCards. | [ErrorResponse](#errorresponse) |
 
 ## Delete vCard
 
@@ -491,7 +683,7 @@ Removes a vCard of a particular user.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The vCard was deleted. |  |
-| 409 | Cannot delete vCard, as Openfire is configured to have read-only vCards. | `ErrorResponse` |
+| 409 | Cannot delete vCard, as Openfire is configured to have read-only vCards. | [ErrorResponse](#errorresponse) |
 
 ## Lock user out
 
@@ -510,7 +702,7 @@ Lockout / ban the user from the chat server. The user will be kicked if the user
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | The user was locked out. |  |
-| 404 | No user with this username exists. | `ErrorResponse` |
+| 404 | No user with this username exists. | [ErrorResponse](#errorresponse) |
 
 ## Unlock user
 
@@ -529,7 +721,7 @@ Removes a previously applied lockout / ban of a user.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | User is unlocked. |  |
-| 404 | No user with this username exists. | `ErrorResponse` |
+| 404 | No user with this username exists. | [ErrorResponse](#errorresponse) |
 
 # User Group
 
@@ -545,7 +737,7 @@ Get a list of all user groups.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | All groups. | `GroupEntities` (XML or JSON) |
+| 200 | All groups. | [GroupEntities](#groupentities) (XML or JSON) |
 
 ## Create group
 
@@ -553,15 +745,48 @@ Get a list of all user groups.
 
 Create a new user group.
 
-**Request body** (required): `GroupEntity` (XML or JSON) - The group that needs to be created.
+**Request body** (required): [GroupEntity](#groupentity) (XML or JSON) - The group that needs to be created.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<group>
+    <name>UserGroup1</name>
+    <description>My group of users</description>
+    <admins>
+        <admin>jane.smith</admin>
+    </admins>
+    <members>
+        <member>john.jones</member>
+    </members>
+    <shared>false</shared>
+</group>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "name" : "UserGroup1",
+  "description" : "My group of users",
+  "admins" : [ "jane.smith" ],
+  "members" : [ "john.jones" ],
+  "shared" : false
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | Group created. |  |
-| 400 | Group or group name missing, or invalid syntax for a property. | `ErrorResponse` |
-| 409 | Group already exists. | `ErrorResponse` |
+| 400 | Group or group name missing, or invalid syntax for a property. | [ErrorResponse](#errorresponse) |
+| 409 | Group already exists. | [ErrorResponse](#errorresponse) |
 
 ## Get group
 
@@ -579,8 +804,8 @@ Get one specific user group by name.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The group. | `GroupEntity` (XML or JSON) |
-| 404 | Group with this name not found. | `ErrorResponse` (XML or JSON) |
+| 200 | The group. | [GroupEntity](#groupentity) (XML or JSON) |
+| 404 | Group with this name not found. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Update group
 
@@ -594,15 +819,48 @@ Updates / overwrites an existing user group. Note that the name of the group can
 |------|------------|----------|-------------|---------------|
 | groupName | path | yes | The name of the group that needs to be updated. Example: `Colleagues` |  |
 
-**Request body** (required): `GroupEntity` (XML or JSON) - The new group definition that needs to overwrite the old definition.
+**Request body** (required): [GroupEntity](#groupentity) (XML or JSON) - The new group definition that needs to overwrite the old definition.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<group>
+    <name>UserGroup1</name>
+    <description>My group of users</description>
+    <admins>
+        <admin>jane.smith</admin>
+    </admins>
+    <members>
+        <member>john.jones</member>
+    </members>
+    <shared>false</shared>
+</group>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "name" : "UserGroup1",
+  "description" : "My group of users",
+  "admins" : [ "jane.smith" ],
+  "members" : [ "john.jones" ],
+  "shared" : false
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Group updated. |  |
-| 400 | Group or group name missing, or name does not match existing group, or invalid syntax for a property. | `ErrorResponse` |
-| 404 | Group with this name not found. | `ErrorResponse` |
+| 400 | Group or group name missing, or name does not match existing group, or invalid syntax for a property. | [ErrorResponse](#errorresponse) |
+| 404 | Group with this name not found. | [ErrorResponse](#errorresponse) |
 
 ## Delete group
 
@@ -621,7 +879,7 @@ Removes an existing user group.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Group deleted. |  |
-| 404 | Group with this name not found. | `ErrorResponse` |
+| 404 | Group with this name not found. | [ErrorResponse](#errorresponse) |
 
 # Chat service
 
@@ -637,7 +895,7 @@ Get a list of all multi-user chat services.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | All chat services. | `MUCServiceEntities` (XML or JSON) |
+| 200 | All chat services. | [MUCServiceEntities](#mucserviceentities) (XML or JSON) |
 
 ## Create chat service
 
@@ -645,15 +903,40 @@ Get a list of all multi-user chat services.
 
 Create a new multi-user chat service.
 
-**Request body** (required): `MUCServiceEntity` (XML or JSON) - The MUC service that needs to be created.
+**Request body** (required): [MUCServiceEntity](#mucserviceentity) (XML or JSON) - The MUC service that needs to be created.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<chatService>
+    <serviceName>conference</serviceName>
+    <description>A public service</description>
+    <hidden>false</hidden>
+</chatService>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "serviceName" : "conference",
+  "description" : "A public service",
+  "hidden" : false
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | Service created. |  |
-| 403 | Service creation is not permitted. | `ErrorResponse` |
-| 409 | Service already exists, or another conflict occurred while creating the service. | `ErrorResponse` |
+| 403 | Service creation is not permitted. | [ErrorResponse](#errorresponse) |
+| 409 | Service already exists, or another conflict occurred while creating the service. | [ErrorResponse](#errorresponse) |
 
 # Chat room
 
@@ -678,8 +961,8 @@ Get a list of all multi-user chat rooms of a particular chat room service.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | All chat rooms. | `MUCRoomEntities` (XML or JSON) |
-| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 200 | All chat rooms. | [MUCRoomEntities](#mucroomentities) (XML or JSON) |
+| 404 | MUC service does not exist or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Create chat room
 
@@ -694,16 +977,111 @@ Create a new multi-user chat room.
 | servicename | query | no | The name of the MUC service in which to create a chat room. Example: `conference` | `conference` |
 | sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
 
-**Request body** (required): `MUCRoomEntity` (XML or JSON) - The MUC room that needs to be created.
+**Request body** (required): [MUCRoomEntity](#mucroomentity) (XML or JSON) - The MUC room that needs to be created.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<chatRoom>
+    <roomName>global</roomName>
+    <naturalName>Global Chat</naturalName>
+    <description>A room for everyone</description>
+    <password>s3cr3t</password>
+    <subject>Welcome!</subject>
+    <creationDate>2026-01-31T12:34:56.789Z</creationDate>
+    <modificationDate>2026-01-31T12:34:56.789Z</modificationDate>
+    <maxUsers>30</maxUsers>
+    <persistent>true</persistent>
+    <publicRoom>true</publicRoom>
+    <registrationEnabled>false</registrationEnabled>
+    <canAnyoneDiscoverJID>false</canAnyoneDiscoverJID>
+    <canOccupantsChangeSubject>false</canOccupantsChangeSubject>
+    <canOccupantsInvite>false</canOccupantsInvite>
+    <canChangeNickname>true</canChangeNickname>
+    <logEnabled>true</logEnabled>
+    <loginRestrictedToNickname>false</loginRestrictedToNickname>
+    <membersOnly>false</membersOnly>
+    <moderated>false</moderated>
+    <broadcastPresenceRoles>
+        <broadcastPresenceRole>moderator</broadcastPresenceRole>
+    </broadcastPresenceRoles>
+    <owners>
+        <owner>admin@example.org</owner>
+    </owners>
+    <admins>
+        <admin>jane@example.org</admin>
+    </admins>
+    <members>
+        <member>john@example.org</member>
+    </members>
+    <outcasts>
+        <outcast>spammer@example.org</outcast>
+    </outcasts>
+    <ownerGroups>
+        <ownerGroup>Management</ownerGroup>
+    </ownerGroups>
+    <adminGroups>
+        <adminGroup>Moderators</adminGroup>
+    </adminGroups>
+    <memberGroups>
+        <memberGroup>Sales</memberGroup>
+    </memberGroups>
+    <outcastGroups>
+        <outcastGroup>Banned</outcastGroup>
+    </outcastGroups>
+    <allowPM>anyone</allowPM>
+</chatRoom>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "roomName" : "global",
+  "naturalName" : "Global Chat",
+  "description" : "A room for everyone",
+  "password" : "s3cr3t",
+  "subject" : "Welcome!",
+  "creationDate" : 1769862896789,
+  "modificationDate" : 1769862896789,
+  "maxUsers" : 30,
+  "persistent" : true,
+  "publicRoom" : true,
+  "registrationEnabled" : false,
+  "canAnyoneDiscoverJID" : false,
+  "canOccupantsChangeSubject" : false,
+  "canOccupantsInvite" : false,
+  "canChangeNickname" : true,
+  "logEnabled" : true,
+  "loginRestrictedToNickname" : false,
+  "membersOnly" : false,
+  "moderated" : false,
+  "broadcastPresenceRoles" : [ "moderator" ],
+  "owners" : [ "admin@example.org" ],
+  "admins" : [ "jane@example.org" ],
+  "members" : [ "john@example.org" ],
+  "outcasts" : [ "spammer@example.org" ],
+  "ownerGroups" : [ "Management" ],
+  "adminGroups" : [ "Moderators" ],
+  "memberGroups" : [ "Sales" ],
+  "outcastGroups" : [ "Banned" ],
+  "allowPM" : "anyone"
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | Room created. |  |
-| 403 | Room creation is not permitted. | `ErrorResponse` |
-| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` |
-| 409 | Room already exists, or another conflict occurred while creating the room. | `ErrorResponse` |
+| 403 | Room creation is not permitted. | [ErrorResponse](#errorresponse) |
+| 404 | MUC service does not exist or is not accessible. | [ErrorResponse](#errorresponse) |
+| 409 | Room already exists, or another conflict occurred while creating the room. | [ErrorResponse](#errorresponse) |
 
 ## Create multiple chat rooms
 
@@ -718,14 +1096,113 @@ Create a number of new multi-user chat rooms.
 | servicename | query | no | The name of the MUC service in which to create the chat rooms. Example: `conference` | `conference` |
 | sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
 
-**Request body** (required): `MUCRoomEntities` (XML or JSON) - The MUC rooms that need to be created.
+**Request body** (required): [MUCRoomEntities](#mucroomentities) (XML or JSON) - The MUC rooms that need to be created.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<chatRooms>
+    <chatRoom>
+        <roomName>global</roomName>
+        <naturalName>Global Chat</naturalName>
+        <description>A room for everyone</description>
+        <password>s3cr3t</password>
+        <subject>Welcome!</subject>
+        <creationDate>2026-01-31T12:34:56.789Z</creationDate>
+        <modificationDate>2026-01-31T12:34:56.789Z</modificationDate>
+        <maxUsers>30</maxUsers>
+        <persistent>true</persistent>
+        <publicRoom>true</publicRoom>
+        <registrationEnabled>false</registrationEnabled>
+        <canAnyoneDiscoverJID>false</canAnyoneDiscoverJID>
+        <canOccupantsChangeSubject>false</canOccupantsChangeSubject>
+        <canOccupantsInvite>false</canOccupantsInvite>
+        <canChangeNickname>true</canChangeNickname>
+        <logEnabled>true</logEnabled>
+        <loginRestrictedToNickname>false</loginRestrictedToNickname>
+        <membersOnly>false</membersOnly>
+        <moderated>false</moderated>
+        <broadcastPresenceRoles>
+            <broadcastPresenceRole>moderator</broadcastPresenceRole>
+        </broadcastPresenceRoles>
+        <owners>
+            <owner>admin@example.org</owner>
+        </owners>
+        <admins>
+            <admin>jane@example.org</admin>
+        </admins>
+        <members>
+            <member>john@example.org</member>
+        </members>
+        <outcasts>
+            <outcast>spammer@example.org</outcast>
+        </outcasts>
+        <ownerGroups>
+            <ownerGroup>Management</ownerGroup>
+        </ownerGroups>
+        <adminGroups>
+            <adminGroup>Moderators</adminGroup>
+        </adminGroups>
+        <memberGroups>
+            <memberGroup>Sales</memberGroup>
+        </memberGroups>
+        <outcastGroups>
+            <outcastGroup>Banned</outcastGroup>
+        </outcastGroups>
+        <allowPM>anyone</allowPM>
+    </chatRoom>
+</chatRooms>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "chatRooms" : [ {
+    "roomName" : "global",
+    "naturalName" : "Global Chat",
+    "description" : "A room for everyone",
+    "password" : "s3cr3t",
+    "subject" : "Welcome!",
+    "creationDate" : 1769862896789,
+    "modificationDate" : 1769862896789,
+    "maxUsers" : 30,
+    "persistent" : true,
+    "publicRoom" : true,
+    "registrationEnabled" : false,
+    "canAnyoneDiscoverJID" : false,
+    "canOccupantsChangeSubject" : false,
+    "canOccupantsInvite" : false,
+    "canChangeNickname" : true,
+    "logEnabled" : true,
+    "loginRestrictedToNickname" : false,
+    "membersOnly" : false,
+    "moderated" : false,
+    "broadcastPresenceRoles" : [ "moderator" ],
+    "owners" : [ "admin@example.org" ],
+    "admins" : [ "jane@example.org" ],
+    "members" : [ "john@example.org" ],
+    "outcasts" : [ "spammer@example.org" ],
+    "ownerGroups" : [ "Management" ],
+    "adminGroups" : [ "Moderators" ],
+    "memberGroups" : [ "Sales" ],
+    "outcastGroups" : [ "Banned" ],
+    "allowPM" : "anyone"
+  } ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | Request has been processed. Results are reported in the response. | `RoomCreationResultEntities` (XML or JSON) |
-| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 200 | Request has been processed. Results are reported in the response. | [RoomCreationResultEntities](#roomcreationresultentities) (XML or JSON) |
+| 404 | MUC service does not exist or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Get chat room
 
@@ -745,8 +1222,8 @@ Get information of a specific multi-user chat room.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The chat room. | `MUCRoomEntity` (XML or JSON) |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 200 | The chat room. | [MUCRoomEntity](#mucroomentity) (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Update chat room
 
@@ -762,16 +1239,111 @@ Updates an existing multi-user chat room.
 | servicename | query | no | The name of the MUC service in which to update a chat room. Example: `conference` | `conference` |
 | sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
 
-**Request body** (required): `MUCRoomEntity` (XML or JSON) - The new MUC room definition that needs to overwrite the old definition.
+**Request body** (required): [MUCRoomEntity](#mucroomentity) (XML or JSON) - The new MUC room definition that needs to overwrite the old definition.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<chatRoom>
+    <roomName>global</roomName>
+    <naturalName>Global Chat</naturalName>
+    <description>A room for everyone</description>
+    <password>s3cr3t</password>
+    <subject>Welcome!</subject>
+    <creationDate>2026-01-31T12:34:56.789Z</creationDate>
+    <modificationDate>2026-01-31T12:34:56.789Z</modificationDate>
+    <maxUsers>30</maxUsers>
+    <persistent>true</persistent>
+    <publicRoom>true</publicRoom>
+    <registrationEnabled>false</registrationEnabled>
+    <canAnyoneDiscoverJID>false</canAnyoneDiscoverJID>
+    <canOccupantsChangeSubject>false</canOccupantsChangeSubject>
+    <canOccupantsInvite>false</canOccupantsInvite>
+    <canChangeNickname>true</canChangeNickname>
+    <logEnabled>true</logEnabled>
+    <loginRestrictedToNickname>false</loginRestrictedToNickname>
+    <membersOnly>false</membersOnly>
+    <moderated>false</moderated>
+    <broadcastPresenceRoles>
+        <broadcastPresenceRole>moderator</broadcastPresenceRole>
+    </broadcastPresenceRoles>
+    <owners>
+        <owner>admin@example.org</owner>
+    </owners>
+    <admins>
+        <admin>jane@example.org</admin>
+    </admins>
+    <members>
+        <member>john@example.org</member>
+    </members>
+    <outcasts>
+        <outcast>spammer@example.org</outcast>
+    </outcasts>
+    <ownerGroups>
+        <ownerGroup>Management</ownerGroup>
+    </ownerGroups>
+    <adminGroups>
+        <adminGroup>Moderators</adminGroup>
+    </adminGroups>
+    <memberGroups>
+        <memberGroup>Sales</memberGroup>
+    </memberGroups>
+    <outcastGroups>
+        <outcastGroup>Banned</outcastGroup>
+    </outcastGroups>
+    <allowPM>anyone</allowPM>
+</chatRoom>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "roomName" : "global",
+  "naturalName" : "Global Chat",
+  "description" : "A room for everyone",
+  "password" : "s3cr3t",
+  "subject" : "Welcome!",
+  "creationDate" : 1769862896789,
+  "modificationDate" : 1769862896789,
+  "maxUsers" : 30,
+  "persistent" : true,
+  "publicRoom" : true,
+  "registrationEnabled" : false,
+  "canAnyoneDiscoverJID" : false,
+  "canOccupantsChangeSubject" : false,
+  "canOccupantsInvite" : false,
+  "canChangeNickname" : true,
+  "logEnabled" : true,
+  "loginRestrictedToNickname" : false,
+  "membersOnly" : false,
+  "moderated" : false,
+  "broadcastPresenceRoles" : [ "moderator" ],
+  "owners" : [ "admin@example.org" ],
+  "admins" : [ "jane@example.org" ],
+  "members" : [ "john@example.org" ],
+  "outcasts" : [ "spammer@example.org" ],
+  "ownerGroups" : [ "Management" ],
+  "adminGroups" : [ "Moderators" ],
+  "memberGroups" : [ "Sales" ],
+  "outcastGroups" : [ "Banned" ],
+  "allowPM" : "anyone"
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Room updated. |  |
-| 403 | Room update/create is not permitted. | `ErrorResponse` |
-| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` |
-| 409 | This update causes a conflict, possibly with another existing room. | `ErrorResponse` |
+| 403 | Room update/create is not permitted. | [ErrorResponse](#errorresponse) |
+| 404 | MUC service does not exist or is not accessible. | [ErrorResponse](#errorresponse) |
+| 409 | This update causes a conflict, possibly with another existing room. | [ErrorResponse](#errorresponse) |
 
 ## Delete chat room
 
@@ -791,7 +1363,7 @@ Removes an existing multi-user chat room.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Room deleted. |  |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Get room history
 
@@ -810,8 +1382,8 @@ Get messages that have been exchanged in a specific multi-user chat room.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The chat room message history. | `MUCRoomMessageEntities` (XML or JSON) |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 200 | The chat room message history. | [MUCRoomMessageEntities](#mucroommessageentities) (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Invite a collection of users and/or groups
 
@@ -826,15 +1398,40 @@ Invites a collection of users and/or groups to join a specific multi-user chat r
 | roomName | path | yes | The name of the chat room to which to invite users and/or groups. Example: `lobby` |  |
 | servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
 
-**Request body** (required): `MUCInvitationsEntity` (XML or JSON) - The invitation message to send and whom to send it to.
+**Request body** (required): [MUCInvitationsEntity](#mucinvitationsentity) (XML or JSON) - The invitation message to send and whom to send it to.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<mucInvitations>
+    <reason>Come join this cool room please!</reason>
+    <jidsToInvite>
+        <jid>john@example.org</jid>
+    </jidsToInvite>
+</mucInvitations>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "reason" : "Come join this cool room please!",
+  "jidsToInvite" : [ "john@example.org" ]
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Invitation sent. |  |
-| 403 | Not allowed to invite a user or group to this room. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 403 | Not allowed to invite a user or group to this room. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Invite user or group
 
@@ -850,15 +1447,36 @@ Invites a user or group to join a specific multi-user chat room.
 | jid | path | yes | The entity to invite into the room: the JID of a user or group, or the name of a local user or group. When a group is invited, all of its members are invited. Example: `john@example.org` |  |
 | servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
 
-**Request body** (required): `MUCInvitationEntity` (XML or JSON) - The invitation message to send and whom to send it to.
+**Request body** (required): [MUCInvitationEntity](#mucinvitationentity) (XML or JSON) - The invitation message to send and whom to send it to.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<mucInvitation>
+    <reason>Come join this cool room please!</reason>
+</mucInvitation>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "reason" : "Come join this cool room please!"
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Invitation sent. |  |
-| 403 | Not allowed to invite a user to this room. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 403 | Not allowed to invite a user to this room. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Get room occupants
 
@@ -877,8 +1495,8 @@ Get all occupants of a specific multi-user chat room.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The chat room occupants. | `OccupantEntities` (XML or JSON) |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 200 | The chat room occupants. | [OccupantEntities](#occupantentities) (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Get room participants
 
@@ -897,8 +1515,8 @@ Get all participants of a specific multi-user chat room.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The chat room participants. | `ParticipantEntities` (XML or JSON) |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 200 | The chat room participants. | [ParticipantEntities](#participantentities) (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Get room affiliations
 
@@ -919,8 +1537,8 @@ Retrieves a list of JIDs for all users that have a particular affiliation with a
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Affiliated user list retrieved. | unspecified (XML or JSON) |
-| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` (XML or JSON) |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+| 400 | Provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Add room affiliations
 
@@ -937,16 +1555,16 @@ Affiliates multiple users to a particular multi-user chat room (without removing
 | affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
 | sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
 
-**Request body** (required): `AffiliatedEntities` (XML or JSON) - The list of users to affiliate to the room.
+**Request body** (required): [AffiliatedEntities](#affiliatedentities) (XML or JSON) - The list of users to affiliate to the room.
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | Users have been affiliated to the room. |  |
-| 400 | Provided values cannot be parsed as JIDs, or provided 'affiliations' value is invalid. | `ErrorResponse` |
-| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 400 | Provided values cannot be parsed as JIDs, or provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) |
+| 403 | Not allowed to perform this affiliation change. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Replace room affiliations
 
@@ -963,16 +1581,16 @@ Replaces the list of users in a multi-user chat room with a specific affiliation
 | affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
 | sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
 
-**Request body** (required): `AffiliatedEntities` (XML or JSON) - The new list of users with this particular affiliation.
+**Request body** (required): [AffiliatedEntities](#affiliatedentities) (XML or JSON) - The new list of users with this particular affiliation.
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | Affiliations of the room have been replaced. |  |
-| 400 | Provided values cannot be parsed as JIDs, or provided 'affiliations' value is invalid. | `ErrorResponse` |
-| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 400 | Provided values cannot be parsed as JIDs, or provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) |
+| 403 | Not allowed to perform this affiliation change. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Add group room affiliations
 
@@ -995,9 +1613,9 @@ Affiliate all members of an Openfire user group to a multi-user chat room. Note 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | Affiliations added to the room. |  |
-| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
-| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 400 | Provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) |
+| 403 | Not allowed to perform this affiliation change. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Remove group room affiliations
 
@@ -1019,10 +1637,10 @@ Removes affiliation for all members of an Openfire user group from a multi-user 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Affiliations removed from the room. |  |
-| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
-| 403 | Not allowed to remove this affiliation. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
-| 409 | Applying this affiliation change would cause a room conflict. | `ErrorResponse` |
+| 400 | Provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) |
+| 403 | Not allowed to remove this affiliation. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
+| 409 | Applying this affiliation change would cause a room conflict. | [ErrorResponse](#errorresponse) |
 
 ## Add room affiliation
 
@@ -1045,9 +1663,9 @@ Affiliates a single user to a multi-user chat room. Note that a user can only ha
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | User has been affiliated to the room. |  |
-| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
-| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 400 | Provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) |
+| 403 | Not allowed to perform this affiliation change. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
 
 ## Remove room affiliation
 
@@ -1069,10 +1687,10 @@ Removes an affiliation of a user to a multi-user chat room.
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | Affiliation removed from the room. |  |
-| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
-| 403 | Not allowed to remove this affiliation. | `ErrorResponse` |
-| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
-| 409 | Applying this affiliation change would cause a room conflict. | `ErrorResponse` |
+| 400 | Provided 'affiliations' value is invalid. | [ErrorResponse](#errorresponse) |
+| 403 | Not allowed to remove this affiliation. | [ErrorResponse](#errorresponse) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | [ErrorResponse](#errorresponse) |
+| 409 | Applying this affiliation change would cause a room conflict. | [ErrorResponse](#errorresponse) |
 
 # Client Sessions
 
@@ -1088,7 +1706,7 @@ Retrieve all live client sessions.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The client sessions currently active in Openfire. | `SessionEntities` (XML or JSON) |
+| 200 | The client sessions currently active in Openfire. | [SessionEntities](#sessionentities) (XML or JSON) |
 
 ## Get user sessions
 
@@ -1106,7 +1724,7 @@ Retrieve all live client sessions for a particular user.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The client sessions for one particular user that are currently active in Openfire. | `SessionEntities` (XML or JSON) |
+| 200 | The client sessions for one particular user that are currently active in Openfire. | [SessionEntities](#sessionentities) (XML or JSON) |
 
 ## Kick user sessions
 
@@ -1136,7 +1754,28 @@ Sending (chat) messages to users.
 
 Sends a message to all users that are currently online.
 
-**Request body** (required): `MessageEntity` (XML or JSON) - The message that is to be broadcast.
+**Request body** (required): [MessageEntity](#messageentity) (XML or JSON) - The message that is to be broadcast.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<message>
+    <body>The server will be restarted in 5 minutes.</body>
+</message>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "body" : "The server will be restarted in 5 minutes."
+}
+```
+
+</details>
 
 **Responses**
 
@@ -1165,7 +1804,7 @@ Gets a count of messages that haven't been delivered to the user yet.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | A message count. | `MsgArchiveEntity` (XML or JSON) |
+| 200 | A message count. | [MsgArchiveEntity](#msgarchiveentity) (XML or JSON) |
 
 # Security Audit Log
 
@@ -1191,8 +1830,8 @@ Retrieve entries from the security audit log.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The requested log entries. | `SecurityAuditLogs` (XML or JSON) |
-| 403 | The audit log is not readable (configured to be write-only). | `ErrorResponse` (XML or JSON) |
+| 200 | The requested log entries. | [SecurityAuditLogs](#securityauditlogs) (XML or JSON) |
+| 403 | The audit log is not readable (configured to be write-only). | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 # Statistics
 
@@ -1208,7 +1847,7 @@ Retrieve statistics on the number of client sessions.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The requested statistics. | `SessionsCount` (XML or JSON) |
+| 200 | The requested statistics. | [SessionsCount](#sessionscount) (XML or JSON) |
 
 # System
 
@@ -1263,7 +1902,7 @@ Get all Openfire system properties.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The system properties. | `SystemProperties` (XML or JSON) |
+| 200 | The system properties. | [SystemProperties](#systemproperties) (XML or JSON) |
 
 ## Create system property
 
@@ -1271,16 +1910,36 @@ Get all Openfire system properties.
 
 Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.
 
-**Request body** (required): `SystemProperty` (XML or JSON) - The system property to create.
+**Request body** (required): [SystemProperty](#systemproperty) (XML or JSON) - The system property to create.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<property key="xmpp.domain" value="example.org"/>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "key" : "xmpp.domain",
+  "value" : "example.org"
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 201 | The system property is created. |  |
-| 400 | No system property was provided, the system property has no value, or its name is not valid. The name must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. | `ErrorResponse` |
-| 403 | Prohibited to create this system property. | `ErrorResponse` |
-| 409 | The name of the system property differs only in case from the name of an existing system property. | `ErrorResponse` |
+| 400 | No system property was provided, the system property has no value, or its name is not valid. The name must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. | [ErrorResponse](#errorresponse) |
+| 403 | Prohibited to create this system property. | [ErrorResponse](#errorresponse) |
+| 409 | The name of the system property differs only in case from the name of an existing system property. | [ErrorResponse](#errorresponse) |
 
 ## Get system property
 
@@ -1298,9 +1957,9 @@ Get a specific Openfire system property.
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The requested system property. | `SystemProperty` (XML or JSON) |
-| 403 | Reading this system property is prohibited. | `ErrorResponse` (XML or JSON) |
-| 404 | The system property could not be found. | `ErrorResponse` (XML or JSON) |
+| 200 | The requested system property. | [SystemProperty](#systemproperty) (XML or JSON) |
+| 403 | Reading this system property is prohibited. | [ErrorResponse](#errorresponse) (XML or JSON) |
+| 404 | The system property could not be found. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Update system property
 
@@ -1314,17 +1973,37 @@ Updates an existing Openfire system property.
 |------|------------|----------|-------------|---------------|
 | propertyKey | path | yes | The name of the system property to update. Example: `foo.bar.xyz` |  |
 
-**Request body** (required): `SystemProperty` (XML or JSON) - The new system property definition that replaces an existing definition.
+**Request body** (required): [SystemProperty](#systemproperty) (XML or JSON) - The new system property definition that replaces an existing definition.
+
+<details>
+<summary>Example request bodies</summary>
+
+XML (`Content-Type: application/xml`):
+
+```xml
+<property key="xmpp.domain" value="example.org"/>
+```
+
+JSON (`Content-Type: application/json`):
+
+```json
+{
+  "key" : "xmpp.domain",
+  "value" : "example.org"
+}
+```
+
+</details>
 
 **Responses**
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The system property is updated. |  |
-| 400 | No system property was provided, the system property has no value, or it does not match the name in the URL. | `ErrorResponse` |
-| 403 | Prohibited to update this system property. | `ErrorResponse` |
-| 404 | The system property could not be found. | `ErrorResponse` |
-| 409 | The name of the system property differs only in case from the name of another existing system property. | `ErrorResponse` |
+| 400 | No system property was provided, the system property has no value, or it does not match the name in the URL. | [ErrorResponse](#errorresponse) |
+| 403 | Prohibited to update this system property. | [ErrorResponse](#errorresponse) |
+| 404 | The system property could not be found. | [ErrorResponse](#errorresponse) |
+| 409 | The name of the system property differs only in case from the name of another existing system property. | [ErrorResponse](#errorresponse) |
 
 ## Remove system property
 
@@ -1343,10 +2022,10 @@ Removes an existing Openfire system property, together with all of its child pro
 | Status | Description | Response body |
 |--------|-------------|---------------|
 | 200 | The system property and its child properties are deleted. |  |
-| 400 | The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. | `ErrorResponse` |
-| 403 | Prohibited to delete this system property, or one of its child properties. | `ErrorResponse` |
-| 404 | The system property could not be found. | `ErrorResponse` |
-| 409 | Deleting this system property could also delete unintended properties (other than this property and its child properties). This can happen, for example, when its name contains an underscore, which can match any character. | `ErrorResponse` |
+| 400 | The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. | [ErrorResponse](#errorresponse) |
+| 403 | Prohibited to delete this system property, or one of its child properties. | [ErrorResponse](#errorresponse) |
+| 404 | The system property could not be found. | [ErrorResponse](#errorresponse) |
+| 409 | Deleting this system property could also delete unintended properties (other than this property and its child properties). This can happen, for example, when its name contains an underscore, which can match any character. | [ErrorResponse](#errorresponse) |
 
 ## Perform all readiness checks
 
@@ -1435,7 +2114,7 @@ Get a list of all nodes of the cluster. Note that this endpoint can only return 
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | All cluster nodes. | `ClusterNodeEntities` (XML or JSON) |
+| 200 | All cluster nodes. | [ClusterNodeEntities](#clusternodeentities) (XML or JSON) |
 
 ## Get a specific cluster node
 
@@ -1453,8 +2132,8 @@ Get a specific node of the cluster. Note that this endpoint can only return data
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | The cluster node. | `ClusterNodeEntity` (XML or JSON) |
-| 404 | The provided NodeID does not identify an existing cluster node. | `ErrorResponse` (XML or JSON) |
+| 200 | The cluster node. | [ClusterNodeEntity](#clusternodeentity) (XML or JSON) |
+| 404 | The provided NodeID does not identify an existing cluster node. | [ErrorResponse](#errorresponse) (XML or JSON) |
 
 ## Get clustering status
 
@@ -1466,7 +2145,7 @@ Describes the point-in-time state of Openfire's clustering with other servers. T
 
 | Status | Description | Response body |
 |--------|-------------|---------------|
-| 200 | Status returned. | `ClusteringEntity` (XML or JSON) |
+| 200 | Status returned. | [ClusteringEntity](#clusteringentity) (XML or JSON) |
 
 <!-- END GENERATED ENDPOINTS -->
 
@@ -1475,121 +2154,486 @@ Openfire REST API provides XML and JSON as data format. The default data format 
 To get a JSON result, please add "**Accept: application/json**" to the request header.
 If you want to create a resource with JSON data format, please add "**Content-Type: application/json**".
 
+<!-- BEGIN GENERATED DATA TYPES: do not edit this section by hand. It is generated from the OpenAPI annotations in the source code by the Maven build. -->
+
 ## Data types
 
-### ClusterNode
+These are the data types that are used in the request and response bodies of the endpoints. The name of a field is the name that is used in JSON. When XML uses a different name, it is mentioned in the description of the field.
 
-| Parameter    | Optional | Description                                                                         |
-|--------------|----------|-------------------------------------------------------------------------------------|
-| hostName     | No       | The hostname and IP address of the server on which this cluster node is running.    |
-| nodeID       | No       | A unique identifier of this cluster node.                                           |
-| joinedTime   | No       | Timestamp when the node joined the cluster.                                         |
-| seniorMember | No       | Boolean value indicating if the node is currently the senior member of the cluster. |
+Date/time values are represented as an ISO-8601 formatted text in XML (for example: `2026-01-31T12:34:56.789Z`), and as the number of milliseconds since the Unix epoch in JSON (for example: `1769862896789`). In JSON request bodies, the ISO-8601 format can also be used.
 
-### User
+### AdminEntities
 
-| Parameter  | Optional | Description                                                                              |
-|------------|----------|------------------------------------------------------------------------------------------|
-| username   | No       | The username of the user                                                                 |
-| name       | Yes      | The name of the user                                                                     |
-| email      | Yes      | The email of the user                                                                    |
-| password   | No       | The password of the user                                                                 |
-| properties | Yes      | List of properties. Property is a key / value object. The key must to be per user unique |
+A list of entities that have an admin affiliation with a multi-user chat room.
 
-### RosterItem
-| Parameter        | Optional | Description                                                                                               |
-|------------------|----------|-----------------------------------------------------------------------------------------------------------|
-| jid              | No       | The JID of the roster item                                                                                |
-| nickname         | Yes      | The nickname for the user when used in this roster                                                        |
-| subscriptionType | Yes      | The subscription type <br> Possible numeric values are: -1 (remove), 0 (none), 1 (to), 2 (from), 3 (both) |
-| groups           | No       | A list of groups to organize roster entries under (e.g. friends, co-workers, etc.)                        |
+XML root element: `<admins>`
 
-### Chatroom
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| admins | array of string | no | The JIDs (or names of local users) of the entities. In XML, items are represented as `<admin>` elements. Example: `jane@example.org` |
 
-| Parameter                 | Optional | Description                                                                                                                                                                                                                                                                                                                                                      |
-|---------------------------|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| roomName                  | No       | The name/id of the room. Can only contains lowercase and alphanumeric characters.                                                                                                                                                                                                                                                                                |
-| naturalName               | No       | Also the name of the room, but can contains non alphanumeric characters. It's mainly used for users while discovering rooms hosted by the Multi-User Chat service.                                                                                                                                                                                               |
-| description               | No       | Description text of the room.                                                                                                                                                                                                                                                                                                                                    |
-| subject                   | Yes      | Subject of the room.                                                                                                                                                                                                                                                                                                                                             |
-| password                  | Yes      | The password that the user must provide to enter the room                                                                                                                                                                                                                                                                                                        |
-| creationDate              | Yes      | The date when the room was created. Will be automatically set by creation. Example: 2014-07-10T09:49:12.411+02:00                                                                                                                                                                                                                                                |
-| modificationDate          | Yes      | The last date when the room's configuration was modified. If the room's configuration  was never modified then the initial value will be the same as the creation date. Will be automatically set by update. Example: 2014-07-10T09:49:12.411+02:00                                                                                                              |
-| maxUsers                  | Yes      | the maximum number of occupants that can be simultaneously in the room. 0 means unlimited number of occupants.                                                                                                                                                                                                                                                   |
-| persistent                | Yes      | Can be "true" or "false". Persistent rooms are saved to the database to make their configurations persistent together with the affiliation of the users. Otherwise the room will be destroyed if the last occupant leave the room.                                                                                                                               |
-| publicRoom                | Yes      | Can be "true" or "false". True if the room is searchable and visible through service discovery.                                                                                                                                                                                                                                                                  |
-| registrationEnabled       | Yes      | Can be "true" or "false". True if users are allowed to register with the room. By default, room registration is enabled.                                                                                                                                                                                                                                         |
-| canAnyoneDiscoverJID      | Yes      | Can be "true" or "false". True if every presence packet will include the JID of every occupant.                                                                                                                                                                                                                                                                  |
-| canOccupantsChangeSubject | Yes      | Can be "true" or "false". True if participants are allowed to change the room's subject.                                                                                                                                                                                                                                                                         |
-| canOccupantsInvite        | Yes      | Can be "true" or "false". True if occupants can invite other users to the room. If the room does not require an invitation to enter (i.e. is not members-only) then any occupant can send invitations. On the other hand, if the room is members-only and occupants cannot send invitation then only the room owners and admins are allowed to send invitations. |
-| canChangeNickname         | Yes      | Can be "true" or "false". True if room occupants are allowed to change their nicknames in the room. By default, occupants are allowed to change their nicknames.                                                                                                                                                                                                 |
-| logEnabled                | Yes      | Can be "true" or "false". True if the room's conversation is being logged. If logging is activated the room conversation will be saved to the database every couple of minutes. The saving frequency is the same for all the rooms and can be configured by changing the property "xmpp.muc.tasks.log.timeout".                                                  |
-| loginRestrictedToNickname | Yes      | Can be "true" or "false". True if registered users can only join the room using their registered nickname. By default, registered users can join the room using any nickname.                                                                                                                                                                                    |
-| membersOnly               | Yes      | Can be "true" or "false". True if the room requires an invitation to enter. That is if the room is members-only.                                                                                                                                                                                                                                                 |
-| moderated                 | Yes      | Can be "true" or "false". True if the room in which only those with "voice" may send messages to all occupants.                                                                                                                                                                                                                                                  |
-| allowPM                   | Yes      | One of "anyone", "participants", "moderators" or "none". Controls who is allowed to send private messages to other occupants in the room.                                                                                                                                                                                                                        |
-| broadcastPresenceRoles    | Yes      | The list of roles of which presence will be broadcasted to the rest of the occupants.                                                                                                                                                                                                                                                                            |
-| owners                    | Yes      | A collection with the current list of owners. The collection contains the bareJID of the users with owner affiliation.                                                                                                                                                                                                                                           |
-| admins                    | Yes      | A collection with the current list of admins. The collection contains the bareJID of the users with admin affiliation.                                                                                                                                                                                                                                           |
-| members                   | Yes      | A collection with the current list of room members. The collection contains the bareJID of the users with member affiliation. If the room is not members-only then the list  will contain the users that registered with the room and therefore they may have reserved a nickname.                                                                               |
-| outcasts                  | Yes      | A collection with the current list of outcast users. An outcast user is not allowed to join the room again. The collection contains the bareJID of the users with outcast affiliation.                                                                                                                                                                           |
-| ownerGroups               | Yes      | A collection with the current list of groups with owner affiliation. The collection contains the name only.                                                                                                                                                                                                                                                      |
-| adminGroups               | Yes      | A collection with the current list of groups with admin affiliation. The collection contains the name only.                                                                                                                                                                                                                                                      |
-| memberGroups              | Yes      | A collection with the current list of groups with member affiliation. The collection contains the name only.                                                                                                                                                                                                                                                     |
-| outcastGroups             | Yes      | A collection with the current list of groups with outcast affiliation. The collection contains the name only.                                                                                                                                                                                                                                                    |
+### AffiliatedEntities
 
-### Group
+A list of entities that have a particular affiliation with a multi-user chat room. Depending on the affiliation, this is an AdminEntities, MemberEntities, OutcastEntities or OwnerEntities value.
 
-| Parameter   | Optional | Description                                    |
-|-------------|----------|------------------------------------------------|
-| name        | No       | The name of the group                          |
-| description | No       | The description of the group                   |
-| admins      | Yes      | A collection with current admins of the group  |
-| members     | Yes      | A collection with current members of the group |
+### ClusterNodeEntities
 
-### System Property
+A list of the nodes in an Openfire cluster.
 
-| Parameter | Optional | Description                      |
-|-----------|----------|----------------------------------|
-| key       | No       | The name of the system property  |
-| value     | No       | The value of the system property |
+XML root element: `<clusterNodes>`
 
-### Session
-| Parameter      | Optional | Description                                                                                     |
-|----------------|----------|-------------------------------------------------------------------------------------------------|
-| sessionId      | No       | Full JID of a user e.g. (testUser@testserver.de/SomeRessource)                                  |
-| username       | No       | The username associated with this session. Can be also "Anonymous".                             |
-| resource       | Yes      | Resource name                                                                                   |
-| node           | No       | Can be "Local" or "Remote"                                                                      |
-| sessionStatus  | No       | The current status of this session. Can be "Closed", "Connected", "Authenticated" or "Unknown". |
-| presenceStatus | No       | The status of this presence packet, a natural-language description of availability status.      |
-| priority       | No       | The priority of the session. The valid priority range is -128 through 128.                      |
-| hostAddress    | No       | The IP address string in textual presentation.                                                  |
-| hostName       | No       | The host name for this IP address.                                                              |
-| creationDate   | No       | The date the session was created.                                                               |
-| lastActionDate | No       | The time the session last had activity.                                                         |
-| secure         | No       | Is "true" if this connection is secure.                                                         |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| clusterNodes | array of [ClusterNodeEntity](#clusternodeentity) | no | The nodes of the cluster. In XML, items are represented as `<clusterNode>` elements. |
 
-### Sessions count
-| Parameter       | Optional | Description                                                                                                                              |
-|-----------------|----------|------------------------------------------------------------------------------------------------------------------------------------------|
-| clusterSessions | No       | Number of client sessions that are authenticated with the server. This includes anonymous and non-anoymous users from the whole cluster. |
-| localSessions   | No       | Number of client sessions that are authenticated with the server. This includes anonymous and non-anoymous users.                        |
+### ClusterNodeEntity
 
-### Security Audit Logs
-| Parameter | Optional | Description                                                         |
-|-----------|----------|---------------------------------------------------------------------|
-| logId     | No       | Unique ID of this log                                               |
-| username  | No       | The username of the user who performed this event                   |
-| timestamp | No       | The time stamp of when this event occurred                          |
-| summary   | No       | The summary, or short description of what transpired in the event   |
-| node      | No       | The node that triggered the event, usually a hostname or IP address |
-| details   | No       | Detailed information about what occurred in the event               |
+A node in an Openfire cluster.
 
-### Occupants
-| Parameter   | Optional | Description             |
-|-------------|----------|-------------------------|
-| jid         | No       | The JID of the MUC room |
-| userAddress | No       | The JID of the user     |
-| role        | No       | Role of the user        |
-| affiliation | No       | Affiliation of the user |
+XML root element: `<clusterNode>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| hostName | string | no | The host name and IP address of the server on which this cluster node is running. Example: `xmpp1.example.org (192.168.0.10)` |
+| nodeID | string | no | The unique identifier of this cluster node. Example: `a3f1c2d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d` |
+| joinedTime | date-time | no | The moment at which this node joined the cluster. |
+| seniorMember | boolean | no | Whether this node currently is the senior member of the cluster. Example: `true` |
+
+### ClusteringEntity
+
+The clustering status of an Openfire instance.
+
+XML root element: `<clustering>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| status | string | no | The clustering status of this Openfire instance. Allowed values: `SENIOR AND ONLY MEMBER`, `Senior member`, `Junior member`, `Starting up`, `Disabled`. Example: `Senior member` |
+
+### ErrorResponse
+
+A description of an error that occurred while processing a request.
+
+XML root element: `<error>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| resource | string | no | The resource (for example, a username or room name) that the error relates to. Example: `john` |
+| message | string | no | A description of the error. Example: `Could not get user` |
+| exception | string | no | The type of the error. Example: `UserNotFoundException` |
+
+### GroupEntities
+
+A list of Openfire user groups.
+
+XML root element: `<groups>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| groups | array of [GroupEntity](#groupentity) | no | The groups. In XML, items are represented as `<group>` elements. |
+
+### GroupEntity
+
+An Openfire user group.
+
+XML root element: `<group>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | yes | The name of the group. When updating a group, this must be equal to the group name in the path of the request. Example: `UserGroup1` |
+| description | string | no | The description of the group. Example: `My group of users` |
+| shared | boolean | no | Whether the group is shared: whether it automatically appears in the rosters of its members. Example: `false` |
+| admins | array of string | no | The admins of the group. When creating or updating a group, each admin can be identified by a username or a JID. Responses contain (bare) JIDs. In XML, items are represented as `<admin>` elements, wrapped in the `<admins>` element. Example: `jane.smith` |
+| members | array of string | no | The members of the group. When creating or updating a group, each member can be identified by a username or a JID. Responses contain (bare) JIDs. In XML, items are represented as `<member>` elements, wrapped in the `<members>` element. Example: `john.jones` |
+
+### MUCInvitationEntity
+
+An invitation to join a multi-user chat room.
+
+XML root element: `<mucInvitation>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| reason | string | no | The reason that is included in the invitation message(s). Example: `Come join this cool room please!` |
+
+### MUCInvitationsEntity
+
+An invitation for a collection of users and/or groups to join a multi-user chat room.
+
+XML root element: `<mucInvitations>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| reason | string | no | The reason that is included in the invitation message(s). Example: `Come join this cool room please!` |
+| jidsToInvite | array of string | no | The users and/or groups to invite into the room, each identified by the JID of a user or group, or by the name of a local user or group. In XML, items are represented as `<jid>` elements, wrapped in the `<jidsToInvite>` element. Example: `john@example.org` |
+
+### MUCRoomEntities
+
+A list of multi-user chat rooms.
+
+XML root element: `<chatRooms>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| chatRooms | array of [MUCRoomEntity](#mucroomentity) | no | The chat rooms. In XML, items are represented as `<chatRoom>` elements. |
+
+### MUCRoomEntity
+
+A multi-user chat room. When a room is created or updated, boolean values that are not provided are treated as 'false'.
+
+XML root element: `<chatRoom>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| roomName | string | yes | The name of the room, which is used as the local part of the room's JID. It is converted to lowercase. When updating a room, this must be equal to the room name in the path of the request. Example: `global` |
+| description | string | no | The description of the room. Example: `A room for everyone` |
+| password | string | no | The password that users must provide to enter the room. Example: `s3cr3t` |
+| subject | string | no | The subject (topic) of the room. Example: `Welcome!` |
+| naturalName | string | no | The human-readable name of the room, as shown to users that discover rooms on the chat service. Example: `Global Chat` |
+| maxUsers | integer | no | The maximum number of occupants that can be in the room at the same time. 0 means unlimited. Example: `30` |
+| creationDate | date-time | no | The moment at which the room was created. When creating a room without this value, the current time is used. |
+| modificationDate | date-time | no | The moment at which the configuration of the room was last modified. When creating or updating a room without this value, the current time is used. |
+| persistent | boolean | no | Whether the room is persistent. Persistent rooms are saved to the database, and are not destroyed when the last occupant leaves. Example: `true` |
+| publicRoom | boolean | no | Whether the room is public: searchable and visible through service discovery. Example: `true` |
+| registrationEnabled | boolean | no | Whether users are allowed to register with the room. Example: `false` |
+| canAnyoneDiscoverJID | boolean | no | Whether the real JID of every occupant is visible to every other occupant (a non-anonymous room). Example: `false` |
+| canOccupantsChangeSubject | boolean | no | Whether participants are allowed to change the subject of the room. Example: `false` |
+| canOccupantsInvite | boolean | no | Whether occupants can invite other users to the room. When the room is not members-only, anyone can send invitations regardless of this value. When the room is members-only and this is 'false', only owners and admins can send invitations. Example: `false` |
+| canChangeNickname | boolean | no | Whether occupants are allowed to change their nickname in the room. Example: `true` |
+| logEnabled | boolean | no | Whether the conversation in the room is logged (saved to the database). Example: `true` |
+| loginRestrictedToNickname | boolean | no | Whether registered users can only join the room using their registered nickname. Example: `false` |
+| membersOnly | boolean | no | Whether the room is members-only: users need to be a member (or be invited) to enter. Example: `false` |
+| moderated | boolean | no | Whether the room is moderated: only occupants with 'voice' can send messages to all occupants. Example: `false` |
+| allowPM | string | no | Defines who is allowed to send private messages to other occupants. Must be one of "anyone", "participants", "moderators" or "none". Example: `anyone` |
+| broadcastPresenceRoles | array of string | no | The roles of occupants of which presence is broadcast to the other occupants. Each is one of: 'moderator', 'participant', 'visitor'. In XML, items are represented as `<broadcastPresenceRole>` elements, wrapped in the `<broadcastPresenceRoles>` element. Example: `moderator` |
+| owners | array of string | no | The (bare) JIDs of the users that have an owner affiliation with the room. When creating a room without owners, the 'admin' user is made owner. In XML, items are represented as `<owner>` elements, wrapped in the `<owners>` element. Example: `admin@example.org` |
+| ownerGroups | array of string | no | The names of the user groups that have an owner affiliation with the room. In XML, items are represented as `<ownerGroup>` elements, wrapped in the `<ownerGroups>` element. Example: `Management` |
+| admins | array of string | no | The (bare) JIDs of the users that have an admin affiliation with the room. In XML, items are represented as `<admin>` elements, wrapped in the `<admins>` element. Example: `jane@example.org` |
+| adminGroups | array of string | no | The names of the user groups that have an admin affiliation with the room. In XML, items are represented as `<adminGroup>` elements, wrapped in the `<adminGroups>` element. Example: `Moderators` |
+| members | array of string | no | The (bare) JIDs of the users that have a member affiliation with the room. In XML, items are represented as `<member>` elements, wrapped in the `<members>` element. Example: `john@example.org` |
+| memberGroups | array of string | no | The names of the user groups that have a member affiliation with the room. In XML, items are represented as `<memberGroup>` elements, wrapped in the `<memberGroups>` element. Example: `Sales` |
+| outcasts | array of string | no | The (bare) JIDs of the users that have an outcast affiliation with the room: users that are banned from the room. In XML, items are represented as `<outcast>` elements, wrapped in the `<outcasts>` element. Example: `spammer@example.org` |
+| outcastGroups | array of string | no | The names of the user groups that have an outcast affiliation with the room. In XML, items are represented as `<outcastGroup>` elements, wrapped in the `<outcastGroups>` element. Example: `Banned` |
+
+### MUCRoomMessageEntities
+
+A list of messages from the history of a multi-user chat room.
+
+XML root element: `<messages>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| message | array of [MUCRoomMessageEntity](#mucroommessageentity) | no | The messages. In XML, items are represented as `<message>` elements. |
+
+### MUCRoomMessageEntity
+
+A message from the history of a multi-user chat room.
+
+XML root element: `<message>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| to | string | no | The JID of the addressee of the message. Example: `global@conference.example.org` |
+| from | string | no | The JID of the sender of the message: the room JID, followed by the nickname of the occupant. Example: `global@conference.example.org/john` |
+| type | string | no | The XMPP message type. Example: `groupchat` |
+| body | string | no | The text of the message. Example: `Hello, everyone!` |
+| delay_stamp | string | no | The moment at which the message was originally sent (XEP-0203 delayed delivery timestamp). Example: `2026-01-31T12:34:56.789Z` |
+| delay_from | string | no | The JID of the entity that delayed the delivery of the message (XEP-0203). Example: `global@conference.example.org` |
+
+### MUCServiceEntities
+
+A list of multi-user chat services.
+
+XML root element: `<chatServices>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| chatService | array of [MUCServiceEntity](#mucserviceentity) | no | The chat services. In XML, items are represented as `<chatService>` elements. |
+
+### MUCServiceEntity
+
+A multi-user chat service.
+
+XML root element: `<chatService>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| serviceName | string | yes | The name of the chat service, which is used as the subdomain of the service. Example: `conference` |
+| description | string | no | The description of the chat service. Example: `A public service` |
+| hidden | boolean | no | Whether the service is hidden from service discovery. Example: `false` |
+
+### MemberEntities
+
+A list of entities that have a member affiliation with a multi-user chat room.
+
+XML root element: `<members>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| members | array of string | no | The JIDs (or names of local users) of the entities. In XML, items are represented as `<member>` elements. Example: `john@example.org` |
+
+### MessageEntity
+
+A message.
+
+XML root element: `<message>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| body | string | yes | The text of the message. Example: `The server will be restarted in 5 minutes.` |
+
+### MsgArchiveEntity
+
+The number of unread messages of a user.
+
+XML root element: `<archive>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| jid | string | no | The JID of the user. Example: `john@example.org` |
+| count | integer | no | The number of unread messages. Example: `3` |
+
+### OccupantEntities
+
+A list of occupants of a multi-user chat room.
+
+XML root element: `<occupants>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| occupants | array of [OccupantEntity](#occupantentity) | no | The occupants. In XML, items are represented as `<occupant>` elements. |
+
+### OccupantEntity
+
+An occupant of a multi-user chat room.
+
+XML root element: `<occupant>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| jid | string | no | The occupant JID: the room JID, followed by the nickname of the occupant. Example: `global@conference.example.org/john` |
+| userAddress | string | no | The real (full) JID of the user. Example: `john@example.org/laptop` |
+| role | string | no | The role of the occupant in the room. One of: 'moderator', 'participant', 'visitor', 'none'. Example: `participant` |
+| affiliation | string | no | The affiliation of the occupant with the room. One of: 'owner', 'admin', 'member', 'outcast', 'none'. Example: `member` |
+
+### OutcastEntities
+
+A list of entities that have an outcast affiliation with a multi-user chat room: entities that are banned from the room.
+
+XML root element: `<outcasts>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| outcasts | array of string | no | The JIDs (or names of local users) of the entities. In XML, items are represented as `<outcast>` elements. Example: `spammer@example.org` |
+
+### OwnerEntities
+
+A list of entities that have an owner affiliation with a multi-user chat room.
+
+XML root element: `<owners>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| owners | array of string | no | The JIDs (or names of local users) of the entities. In XML, items are represented as `<owner>` elements. Example: `admin@example.org` |
+
+### ParticipantEntities
+
+A list of occupants of a multi-user chat room.
+
+XML root element: `<participants>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| participants | array of [ParticipantEntity](#participantentity) | no | The occupants. In XML, items are represented as `<participant>` elements. |
+
+### ParticipantEntity
+
+An occupant of a multi-user chat room.
+
+XML root element: `<participant>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| jid | string | no | The occupant JID: the room JID, followed by the nickname of the occupant. Example: `global@conference.example.org/john` |
+| role | string | no | The role of the occupant in the room. One of: 'moderator', 'participant', 'visitor', 'none'. Example: `participant` |
+| affiliation | string | no | The affiliation of the occupant with the room. One of: 'owner', 'admin', 'member', 'outcast', 'none'. Example: `member` |
+
+### RoomCreationResultEntities
+
+The results of the creation of multiple multi-user chat rooms, grouped by result type.
+
+XML root element: `<results>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| success | array of [RoomCreationResultEntity](#roomcreationresultentity) | no | The results of the rooms that were created successfully. In XML, the items are wrapped in the `<success>` element. |
+| failure | array of [RoomCreationResultEntity](#roomcreationresultentity) | no | The results of the rooms that could not be created. In XML, the items are wrapped in the `<failure>` element. |
+| other | array of [RoomCreationResultEntity](#roomcreationresultentity) | no | The results of a type other than success or failure. In XML, the items are wrapped in the `<other>` element. |
+
+### RoomCreationResultEntity
+
+The result of the creation of one multi-user chat room.
+
+XML root element: `<result>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| roomName | string | no | The name of the room that was to be created. Example: `open_chat` |
+| resultType | string | no | The result of creating the room. Allowed values: `Success`, `Failure`. Example: `Failure` |
+| message | string | no | A message that describes the result. Example: `Room already existed and therefore not created again` |
+
+### RosterEntities
+
+The roster (contact list) of a user.
+
+XML root element: `<roster>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| rosterItem | array of [RosterItemEntity](#rosteritementity) | no | The entries of the roster. In XML, items are represented as `<rosterItem>` elements. |
+
+### RosterItemEntity
+
+An entry in the roster (contact list) of a user.
+
+XML root element: `<rosterItem>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| jid | string | yes | The JID of the contact. Example: `jane@example.org` |
+| nickname | string | no | The name of the contact, as shown in this roster. Example: `Jane` |
+| subscriptionType | integer | no | The presence subscription state of the contact. One of: -1 (remove), 0 (none), 1 (to: the user receives presence updates of the contact), 2 (from: the contact receives presence updates of the user), 3 (both). Example: `3` |
+| groups | array of string | no | The roster groups (for example 'Friends' or 'Co-workers') that this contact is organized under. In XML, items are represented as `<group>` elements, wrapped in the `<groups>` element. Example: `Friends` |
+
+### SecurityAuditLog
+
+An entry of the security audit log.
+
+XML root element: `<log>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| logId | integer | no | The unique identifier of the log entry. Example: `42` |
+| username | string | no | The username of the user that performed the audited action. Example: `admin` |
+| timestamp | integer | no | The moment at which the audited action occurred, in seconds since the Unix epoch. Example: `1769862896` |
+| summary | string | no | A short description of the audited action. Example: `Created new user john` |
+| node | string | no | The node that triggered the audited action, usually a host name or IP address. Example: `xmpp1.example.org` |
+| details | string | no | Detailed information about the audited action. Example: `name = John Doe, email = john@example.org` |
+
+### SecurityAuditLogs
+
+A list of entries of the security audit log.
+
+XML root element: `<logs>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| logs | array of [SecurityAuditLog](#securityauditlog) | no | The log entries. In XML, items are represented as `<log>` elements. |
+
+### SessionEntities
+
+A list of client sessions.
+
+XML root element: `<sessions>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| sessions | array of [SessionEntity](#sessionentity) | no | The sessions. In XML, items are represented as `<session>` elements. |
+
+### SessionEntity
+
+A client session.
+
+XML root element: `<session>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| sessionId | string | no | The (full) JID of the session. Example: `john@example.org/laptop` |
+| username | string | no | The username of the user of the session, or 'Anonymous' for anonymous sessions. Example: `john` |
+| resource | string | no | The resource part of the JID of the session. Example: `laptop` |
+| node | string | no | Whether the session is connected to the cluster node that processes the request ('Local'), or to another cluster node ('Remote'). Example: `Local` |
+| sessionStatus | string | no | The status of the session. One of: 'Closed', 'Connected', 'Authenticated', 'Unknown'. Example: `Authenticated` |
+| presenceStatus | string | no | The availability of the user of the session. One of: 'Online', 'Away', 'Available to Chat', 'Do Not Disturb', 'Extended Away', 'Unknown/Not Recognized'. Example: `Online` |
+| presenceMessage | string | no | The (optional) natural-language description of the availability of the user of the session. Example: `In a meeting` |
+| priority | integer | no | The presence priority of the session, from -128 to 127. Example: `0` |
+| hostAddress | string | no | The IP address of the client. Example: `192.168.0.20` |
+| hostName | string | no | The host name of the client. Example: `laptop.example.org` |
+| creationDate | date-time | no | The moment at which the session was created. |
+| lastActionDate | date-time | no | The moment at which the session last had activity. |
+| secure | boolean | no | Whether the connection of the session is encrypted. Example: `true` |
+
+### SessionsCount
+
+The number of client sessions.
+
+XML root element: `<sessions>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| localSessions | integer | no | The number of authenticated client sessions (of both anonymous and non-anonymous users) on the cluster node that processes the request. Example: `12` |
+| clusterSessions | integer | no | The number of authenticated client sessions (of both anonymous and non-anonymous users) in the entire cluster. Example: `30` |
+
+### SystemProperties
+
+A list of Openfire system properties.
+
+XML root element: `<properties>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| property | array of [SystemProperty](#systemproperty) | no | The system properties. In XML, items are represented as `<property>` elements. |
+
+### SystemProperty
+
+An Openfire system property.
+
+XML root element: `<property>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| key | string | yes | The name of the system property. In XML, this is the `key` attribute. Example: `xmpp.domain` |
+| value | string | yes | The value of the system property. In XML, this is the `value` attribute. Example: `example.org` |
+
+### UserEntities
+
+A list of Openfire users.
+
+XML root element: `<users>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| users | array of [UserEntity](#userentity) | no | The users. In XML, items are represented as `<user>` elements. |
+
+### UserEntity
+
+An Openfire user.
+
+XML root element: `<user>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| username | string | no | The username of the user. Required when creating a user. When updating a user, providing a different username renames the user. Example: `john` |
+| name | string | no | The name of the user. Example: `John Doe` |
+| email | string | no | The email address of the user. Example: `john@example.org` |
+| password | string | no | The password of the user. Required when creating a user. Never included in responses. Example: `s3cr3t` |
+| properties | array of [UserProperty](#userproperty) | no | Custom properties of the user. Property keys are unique per user. When updating a user, all existing properties of the user are replaced by the provided properties: omitting this removes all properties of the user. In XML, the items are wrapped in the `<properties>` element. |
+
+### UserGroupsEntity
+
+A list of names of Openfire user groups.
+
+XML root element: `<groups>`
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| groupnames | array of string | no | The names of the groups. In XML, items are represented as `<groupname>` elements. Example: `Sales` |
+
+### UserProperty
+
+A custom property of an Openfire user.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| key | string | yes | The key (name) of the property. Unique per user. In XML, this is the `key` attribute. Example: `department` |
+| value | string | yes | The value of the property. In XML, this is the `value` attribute. Example: `Sales` |
+
+<!-- END GENERATED DATA TYPES -->

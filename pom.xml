@@ -47,7 +47,7 @@
                 <version>3.6.0</version> <!-- Override inherited 2.17 to enable JUnit 5 tests -->
             </plugin>
 
-            <!-- Generate the endpoint documentation in readme.md from the OpenAPI annotations, so that it can't get out of sync with the implementation. -->
+            <!-- Generate the documentation of endpoints and data types in readme.md from the OpenAPI annotations, so that it can't get out of sync with the implementation. -->
             <plugin>
                 <!-- Generate the OpenAPI specification from the annotations in the compiled classes. -->
                 <groupId>io.swagger.core.v3</groupId>
@@ -73,24 +73,26 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- Replace the endpoint documentation in readme.md with documentation generated from the OpenAPI specification. -->
+                <!-- Replace the documentation of endpoints and data types in readme.md with documentation generated from the OpenAPI specification. -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.6.4</version>
                 <executions>
                     <execution>
-                        <id>generate-readme-endpoints</id>
+                        <id>generate-readme-documentation</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
                             <executable>${java.home}/bin/java</executable>
+                            <!-- 'compile' includes the 'provided' dependencies (like Openfire), which provide the JAXB implementation that the generator uses. -->
+                            <classpathScope>compile</classpathScope>
                             <arguments>
                                 <argument>-Dslf4j.internal.verbosity=ERROR</argument>
                                 <argument>-classpath</argument>
                                 <classpath/>
-                                <argument>${project.basedir}/src/build/ReadmeEndpointsGenerator.java</argument>
+                                <argument>${project.basedir}/src/build/ReadmeGenerator.java</argument>
                                 <argument>${project.build.directory}/openapi/openapi.json</argument>
                                 <argument>${project.basedir}/readme.md</argument>
                             </arguments>

@@ -17,12 +17,15 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement(name = "occupants")
+@Schema(description = "A list of occupants of a multi-user chat room.")
 public class OccupantEntities {
     List<OccupantEntity> occupants;
 
@@ -35,6 +38,7 @@ public class OccupantEntities {
 
     @XmlElement(name = "occupant")
     @JsonProperty(value = "occupants")
+    @ArraySchema(arraySchema = @Schema(description = "The occupants."))
     public List<OccupantEntity> getOccupants() {
         return occupants;
     }
