@@ -1,10 +1,12 @@
 
+# TEST: There are no groups initially
 GET {{restapi_url}}/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups[not(child::node())]" exists # groups at the root, with no child nodes
 
+# TEST: A created group is listed, and can be retrieved
 POST {{restapi_url}}/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -24,7 +26,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET {{restapi_url}}/groups # check if the group was created
+GET {{restapi_url}}/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -37,6 +39,7 @@ HTTP 200
 xpath "/group[name='group1']" exists
 xpath "string(/group/description)" == "test-group"
 
+# TEST: Updating a group changes its description
 PUT {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -63,6 +66,7 @@ HTTP 200
 xpath "/group[name='group1']" exists
 xpath "string(/group/description)" == "test-group-updated"
 
+# TEST: Delete a group
 DELETE {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 HTTP 200

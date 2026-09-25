@@ -1,4 +1,4 @@
-# Broadcasting without any sessions to deliver to is fine.
+# TEST: Broadcast a message while there are no sessions to deliver it to
 POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -10,6 +10,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
+# TEST: Broadcasting a message with an empty body is rejected
 POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -23,6 +24,7 @@ HTTP 400
 [Asserts]
 xpath "string(/error/exception)" == "IllegalArgumentException"
 
+# TEST: Broadcasting a message without a body is rejected
 POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -35,6 +37,7 @@ HTTP 400
 xpath "string(/error/exception)" == "IllegalArgumentException"
 
 
+# TEST: A logged-in client receives a broadcast message
 # Log in anonymously over BOSH (XEP-0124/XEP-0206), to be able to receive the broadcast.
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
@@ -99,7 +102,6 @@ xpath "string(//*[local-name()='message']/@from)" == "example.org"
 xpath "string(//*[local-name()='message']/@type)" == "headline"
 xpath "string(//*[local-name()='message']/*[local-name()='body'])" == "Hello from the REST API"
 
-# Log out.
 POST {{bosh_url}}/http-bind/
 Content-Type: text/xml; charset=utf-8
 ```

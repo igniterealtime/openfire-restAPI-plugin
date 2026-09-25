@@ -56,12 +56,14 @@ Content-Type: application/xml
 ```
 HTTP 201
 
+# TEST: A new user is in no groups
 GET {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups/groupname" count == 0
 
+# TEST: Add a user to a single group, and to multiple groups
 POST {{restapi_url}}/users/geordi/groups/security
 Authorization: {{authkey}}
 HTTP 201
@@ -94,6 +96,7 @@ HTTP 200
 xpath "/group/members/member" count == 1
 xpath "string(/group/members/member)" == "geordi@example.org"
 
+# TEST: Remove a user from a single group
 DELETE {{restapi_url}}/users/geordi/groups/security
 Authorization: {{authkey}}
 HTTP 200
@@ -105,6 +108,7 @@ HTTP 200
 xpath "/groups/groupname" count == 2
 xpath "/groups[groupname='security']" not exists
 
+# TEST: Remove a user from multiple groups
 DELETE {{restapi_url}}/users/geordi/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -123,6 +127,7 @@ HTTP 200
 [Asserts]
 xpath "/groups/groupname" count == 0
 
+# TEST: Removing a user from a group that does not exist fails
 DELETE {{restapi_url}}/users/geordi/groups/nonexistent
 Authorization: {{authkey}}
 HTTP 404
@@ -130,6 +135,7 @@ HTTP 404
 xpath "string(/error/exception)" == "GroupNotFoundException"
 xpath "string(/error/resource)" == "nonexistent"
 
+# TEST: Getting the groups of a user that does not exist fails
 GET {{restapi_url}}/users/nonexistent/groups
 Authorization: {{authkey}}
 HTTP 404

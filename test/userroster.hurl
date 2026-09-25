@@ -1,3 +1,4 @@
+# TEST: Get the roster of a user from the demoboot configuration
 GET {{restapi_url}}/users/john/roster
 Authorization: {{authkey}}
 HTTP 200
@@ -22,12 +23,14 @@ Content-Type: application/xml
 ```
 HTTP 201
 
+# TEST: A new user has an empty roster
 GET {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/roster/rosterItem" count == 0
 
+# TEST: Add a roster entry
 POST {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -55,7 +58,7 @@ xpath "string(/roster/rosterItem/subscriptionType)" == "3"
 xpath "/roster/rosterItem/groups/group" count == 1
 xpath "string(/roster/rosterItem/groups/group)" == "Friends"
 
-# Adding an entry for a contact that is already on the roster is a conflict.
+# TEST: Adding an entry for a contact that is already on the roster is a conflict
 POST {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -69,7 +72,7 @@ HTTP 409
 [Asserts]
 xpath "string(/error/exception)" == "UserAlreadyExistsException"
 
-# A roster entry needs a JID.
+# TEST: Adding a roster entry without a JID is rejected
 POST {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -96,6 +99,7 @@ xpath "string(/error/exception)" == "IllegalArgumentException"
 # documented. Getting the roster of a user that does not exist returns 200 (rather than 404) too. Add tests for those
 # once UserServiceController#getUserRoster checks that the user exists.
 
+# TEST: Update a roster entry
 PUT {{restapi_url}}/users/data/roster/john@example.org
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -123,7 +127,7 @@ xpath "string(/roster/rosterItem/subscriptionType)" == "1"
 xpath "/roster/rosterItem/groups/group" count == 1
 xpath "string(/roster/rosterItem/groups/group)" == "Crew"
 
-# Updating an entry for a contact that is not on the roster fails.
+# TEST: Updating an entry for a contact that is not on the roster fails
 PUT {{restapi_url}}/users/data/roster/jane@example.org
 Authorization: {{authkey}}
 Content-Type: application/xml
@@ -139,6 +143,7 @@ HTTP 404
 xpath "string(/error/exception)" == "UserNotFoundException"
 xpath "string(/error/resource)" == "jane@example.org"
 
+# TEST: Delete a roster entry
 DELETE {{restapi_url}}/users/data/roster/john@example.org
 Authorization: {{authkey}}
 HTTP 200
@@ -149,6 +154,7 @@ HTTP 200
 [Asserts]
 xpath "/roster/rosterItem" count == 0
 
+# TEST: Deleting an entry that is not on the roster fails
 DELETE {{restapi_url}}/users/data/roster/john@example.org
 Authorization: {{authkey}}
 HTTP 404
@@ -156,6 +162,7 @@ HTTP 404
 xpath "string(/error/exception)" == "RosterItemNotFound"
 xpath "string(/error/resource)" == "john@example.org"
 
+# TEST: Deleting a roster entry of a user that does not exist fails
 DELETE {{restapi_url}}/users/nonexistent/roster/john@example.org
 Authorization: {{authkey}}
 HTTP 404

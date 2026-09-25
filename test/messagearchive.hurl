@@ -1,3 +1,4 @@
+# TEST: Get the unread message count for a user
 GET {{restapi_url}}/archive/messages/unread/john@example.org
 Authorization: {{authkey}}
 HTTP 200
