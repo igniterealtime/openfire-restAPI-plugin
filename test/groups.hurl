@@ -71,3 +71,37 @@ DELETE {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 HTTP 200
 
+# TEST: A group can be created without an admins element
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/288 is fixed.
+POST {{restapi_url}}/groups
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<group>
+	<name>group2</name>
+	<description>A group without an admins element</description>
+	<shared>false</shared>
+	<members>
+		<member>john</member>
+	</members>
+</group>
+```
+HTTP 201
+
+GET {{restapi_url}}/groups/group2
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/group/members/member" count == 1
+xpath "/group/admins/admin" count == 0
+
+DELETE {{restapi_url}}/groups/group2
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200

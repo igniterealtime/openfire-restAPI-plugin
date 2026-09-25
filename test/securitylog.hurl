@@ -11,7 +11,8 @@ xpath "/logs/log" count <= 1
 last_log_id: xpath "number(concat('0', /logs/log/logId))"
 
 
-# Openfire records a security audit event for every login to the admin console, so log in to create one.
+# Openfire records a security audit event for every login to the admin console, so log in to create one. (The REST API
+# does not record audit events of its own: https://github.com/igniterealtime/openfire-restAPI-plugin/issues/115)
 GET {{adminconsole_url}}/login.jsp
 HTTP 200
 [Captures]

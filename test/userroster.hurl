@@ -86,18 +86,111 @@ HTTP 400
 [Asserts]
 xpath "string(/error/exception)" == "IllegalArgumentException"
 
-# TODO: Adding a roster entry with an invalid subscriptionType (e.g. 9) returns 409 (UserAlreadyExistsException), and
-# the entry is created anyway, as UserServiceController#addRosterItem validates the subscription type only after
-# creating the roster item. Add a test expecting a 400 (and no new roster entry) once that is fixed.
+# TEST: Adding a roster entry with an invalid subscription type is rejected, and adds no entry
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/276 is fixed.
+POST {{restapi_url}}/users/data/roster
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<rosterItem>
+	<jid>jane@example.org</jid>
+	<subscriptionType>9</subscriptionType>
+</rosterItem>
+```
+HTTP 400
 
-# TODO: A JID without an '@' is taken to be a domain JID: adding a roster entry with <jid>john</jid> stores an entry
-# for the domain 'john', rather than for john@example.org (unlike group members, which resolve a username against the
-# local domain). An empty or unparsable JID causes a 500 rather than a 400. Add tests once the intended behaviour is
-# decided.
+GET {{restapi_url}}/users/data/roster
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/roster/rosterItem[jid='jane@example.org']" not exists
 
-# TODO: Adding a roster entry for a user that does not exist returns 201 (and stores the roster entry), where 404 is
-# documented. Getting the roster of a user that does not exist returns 200 (rather than 404) too. Add tests for those
-# once UserServiceController#getUserRoster checks that the user exists.
+# TEST: A roster entry JID without a domain is resolved against the local domain
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/277 is fixed.
+# (The issue also allows for rejecting such a JID with a 400 instead, in which case this test needs to change.)
+POST {{restapi_url}}/users/data/roster
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<rosterItem>
+	<jid>jane</jid>
+</rosterItem>
+```
+HTTP 201
+
+GET {{restapi_url}}/users/data/roster
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/roster/rosterItem[jid='jane@example.org']" exists
+xpath "/roster/rosterItem[jid='jane']" not exists
+
+DELETE {{restapi_url}}/users/data/roster/jane@example.org
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+
+# TEST: Adding a roster entry with an empty or invalid JID is rejected
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/278 is fixed.
+POST {{restapi_url}}/users/data/roster
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<rosterItem>
+	<jid></jid>
+</rosterItem>
+```
+HTTP 400
+
+POST {{restapi_url}}/users/data/roster
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<rosterItem>
+	<jid>not a@valid@jid</jid>
+</rosterItem>
+```
+HTTP 400
+
+# TEST: Adding a roster entry for a user that does not exist fails
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/274 is fixed.
+POST {{restapi_url}}/users/nonexistent/roster
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<rosterItem>
+	<jid>john@example.org</jid>
+</rosterItem>
+```
+HTTP 404
+
+# TEST: Getting the roster of a user that does not exist fails
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/275 is fixed.
+GET {{restapi_url}}/users/nonexistent/roster
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 404
 
 # TEST: Update a roster entry
 PUT {{restapi_url}}/users/data/roster/john@example.org

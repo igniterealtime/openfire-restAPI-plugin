@@ -44,8 +44,51 @@ xpath "/chatRoom/members/member" count == 1
 xpath "string(/chatRoom/members/member)" == "jane@example.org"
 xpath "/chatRoom/creationDate" exists
 
-# TODO: Creating a chat room that already exists returns 201 (the bulk endpoint reports 'Success'), and replaces the
-# existing room's configuration and affiliations, where 409 is documented. Add a test once that is fixed.
+# TEST: Creating a chat room that already exists is a conflict, and leaves the room unchanged
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/140 is fixed.
+POST {{restapi_url}}/chatrooms
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<chatRoom>
+	<roomName>lobby</roomName>
+	<naturalName>Replaced</naturalName>
+	<description>Replaced</description>
+</chatRoom>
+```
+HTTP 409
+
+POST {{restapi_url}}/chatrooms/bulk
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<chatRooms>
+	<chatRoom>
+		<roomName>lobby</roomName>
+		<naturalName>Replaced</naturalName>
+		<description>Replaced</description>
+	</chatRoom>
+</chatRooms>
+```
+HTTP 200
+[Asserts]
+xpath "/results/failure/result[roomName='lobby']" exists
+
+GET {{restapi_url}}/chatrooms/lobby
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "string(/chatRoom/naturalName)" == "The Lobby"
+xpath "string(/chatRoom/owners/owner)" == "john@example.org"
+xpath "string(/chatRoom/members/member)" == "jane@example.org"
 
 # TEST: Only public chat rooms are listed, unless all rooms are asked for
 POST {{restapi_url}}/chatrooms
@@ -104,9 +147,16 @@ HTTP 200
 [Asserts]
 xpath "/chatRooms/chatRoom" count == 0
 
-# TODO: Searching for a term that is not a valid JID node (e.g. 'Back Room', with a space) fails with a 500, as the
-# term is nodeprep'ed to match room names, even though natural names can contain such characters. Add a test once
-# that is fixed.
+# TEST: Search for chat rooms by a natural name that is not a valid JID node
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/284 is fixed.
+GET {{restapi_url}}/chatrooms?type=all&search=Back%20Room
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/chatRooms/chatRoom" count == 1
+xpath "string(/chatRooms/chatRoom/roomName)" == "backroom"
 
 # TEST: Listing the chat rooms of a service that does not exist fails
 GET {{restapi_url}}/chatrooms?servicename=nonexistent
@@ -163,8 +213,29 @@ xpath "string(/chatRoom/naturalName)" == "The Grand Lobby"
 xpath "string(/chatRoom/description)" == "Where everyone meets, now bigger"
 xpath "string(/chatRoom/maxUsers)" == "50"
 
-# TODO: Updating a chat room that does not exist returns 200 and creates the room. Add a test once it is decided
-# whether that should be a 404 instead.
+# TEST: Updating a chat room that does not exist fails
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/283 is fixed.
+# (The issue also allows for documenting that this creates the room, in which case this test needs to change.)
+PUT {{restapi_url}}/chatrooms/nonexistent
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<chatRoom>
+	<roomName>nonexistent</roomName>
+	<naturalName>Created by an update</naturalName>
+	<description>A room that did not exist</description>
+</chatRoom>
+```
+HTTP 404
+
+GET {{restapi_url}}/chatrooms/nonexistent
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 404
 
 # TEST: A new chat room has no participants, occupants or history
 GET {{restapi_url}}/chatrooms/lobby/participants
@@ -319,9 +390,6 @@ xpath "//*[local-name()='invite']" count == 1
 xpath "string(//*[local-name()='message'][*[local-name()='x']/*[local-name()='invite']]/@from)" == "lobby@conference.example.org"
 xpath "string(//*[local-name()='invite']/*[local-name()='reason'])" == "Please join us"
 
-# TODO: Inviting a user without a request body (the reason) fails with a 500 (a NullPointerException), rather than
-# sending an invitation without a reason, or returning a 400. Add a test once that is fixed.
-
 # TEST: Invite a collection of users to a chat room
 POST {{restapi_url}}/chatrooms/lobby/invite
 Authorization: {{authkey}}
@@ -354,6 +422,20 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
+
+# TEST: Inviting to a chat room without a request body is rejected
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/285 is fixed.
+POST {{restapi_url}}/chatrooms/lobby/invite/jane@example.org
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 400
+
+POST {{restapi_url}}/chatrooms/lobby/invite
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 400
 
 # TEST: Create multiple chat rooms at once
 POST {{restapi_url}}/chatrooms/bulk

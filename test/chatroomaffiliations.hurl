@@ -178,17 +178,114 @@ xpath "string(/error/resource)" == "nonexistent"
 
 # TEST: An affiliation type that does not exist is not found
 # The API documents a 400 for this, but the URL does not match any endpoint, as the affiliation type is part of the
-# path.
+# path. See https://github.com/igniterealtime/openfire-restAPI-plugin/issues/267
 GET {{restapi_url}}/chatrooms/ops/visitors
 Authorization: {{authkey}}
 HTTP 404
 
-# TODO: Replacing (PUT) or adding (POST) a collection of affiliations cannot be done, as the request body is
-# deserialized to the abstract AffiliatedEntities class: XML requests are rejected with a 415, and JSON requests with a
-# 400. Add tests once that is fixed.
+# TEST: Replace the affiliations of a type with a collection
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/163 is fixed.
+PUT {{restapi_url}}/chatrooms/ops/members
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<members>
+	<member>jane@example.org</member>
+	<member>mallory@example.org</member>
+</members>
+```
+HTTP 201
 
-# TODO: Affiliating the members of a group that does not exist returns 201, and affiliates a user with the group's name
-# (e.g. nonexistent@example.org) instead. Add a test expecting a 404 once that is fixed.
+GET {{restapi_url}}/chatrooms/ops/members
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/members/member" count == 2
+
+PUT {{restapi_url}}/chatrooms/ops/members
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<members>
+	<member>jane@example.org</member>
+</members>
+```
+HTTP 201
+
+GET {{restapi_url}}/chatrooms/ops/members
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/members/member" count == 1
+xpath "string(/members/member)" == "jane@example.org"
+
+DELETE {{restapi_url}}/chatrooms/ops/members/jane@example.org
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+
+# TEST: Add a collection of affiliations
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/163 is fixed.
+POST {{restapi_url}}/chatrooms/ops/outcasts
+Authorization: {{authkey}}
+Content-Type: application/xml
+[Options]
+skip: true
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<outcasts>
+	<outcast>eve@example.org</outcast>
+	<outcast>mallory@example.org</outcast>
+</outcasts>
+```
+HTTP 201
+
+GET {{restapi_url}}/chatrooms/ops/outcasts
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/outcasts/outcast" count == 2
+
+DELETE {{restapi_url}}/chatrooms/ops/outcasts/eve@example.org
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+
+DELETE {{restapi_url}}/chatrooms/ops/outcasts/mallory@example.org
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+
+# TEST: Affiliating the members of a group that does not exist fails
+# Disabled until https://github.com/igniterealtime/openfire-restAPI-plugin/issues/286 is fixed.
+POST {{restapi_url}}/chatrooms/ops/members/group/nonexistent
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 404
+
+GET {{restapi_url}}/chatrooms/ops/members
+Authorization: {{authkey}}
+[Options]
+skip: true
+HTTP 200
+[Asserts]
+xpath "/members[member='nonexistent@example.org']" not exists
 
 
 DELETE {{restapi_url}}/chatrooms/ops
