@@ -36,6 +36,7 @@ import javax.annotation.PostConstruct;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 
 @Path("restapi/v1/users/{username}/roster")
 @Tag(name = "Users", description = "Managing Openfire users.")
@@ -147,5 +148,32 @@ public class UserRosterService {
                     ExceptionType.USER_ALREADY_EXISTS_EXCEPTION, Response.Status.CONFLICT, e);
         }
         return Response.status(Response.Status.OK).build();
+    }
+
+
+    @PATCH()
+    @Operation( summary = "Synchronize roster entries",
+        description = "Apply changes to the existing roster items, Insert non-existing entries")
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public Response syncRoster(
+        @Parameter(description = "The username of the user for which the update a roster entry.", required = true) @PathParam("username") String username,
+        @RequestBody(description = "The definition of the roster entries that are to be synched (added / updated).", required = true) RosterEntities entities)
+        throws ServiceException{
+
+        Object ret;
+        try {
+            ret = plugin.syncRosterEntities(username, entities);
+        } catch (UserNotFoundException e) {
+            throw new ServiceException(COULD_NOT_UPDATE_THE_ROSTER, "", ExceptionType.USER_NOT_FOUND_EXCEPTION,
+                Response.Status.NOT_FOUND, e);
+        } catch (SharedGroupException e) {
+            throw new ServiceException(COULD_NOT_UPDATE_THE_ROSTER, "", ExceptionType.SHARED_GROUP_EXCEPTION,
+                Response.Status.BAD_REQUEST, e);
+        } catch (UserAlreadyExistsException e) {
+            throw new ServiceException(COULD_NOT_UPDATE_THE_ROSTER, "",
+                ExceptionType.USER_ALREADY_EXISTS_EXCEPTION, Response.Status.CONFLICT, e);
+        }
+
+        return Response.ok(ret).build();
     }
 }
