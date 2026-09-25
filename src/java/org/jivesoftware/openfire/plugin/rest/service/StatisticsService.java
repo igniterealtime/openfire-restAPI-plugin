@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.StatisticsController;
 import org.jivesoftware.openfire.plugin.rest.entity.SessionsCount;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -45,9 +46,11 @@ public class StatisticsService {
     @GET
     @Path("/sessions")
     @Operation( summary = "Get client session counts",
-        description = "Retrieve statistics on the amount of client sessions.",
+        description = "Retrieve statistics on the number of client sessions.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The requested statistics.", content = @Content(schema = @Schema(implementation = SessionsCount.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public SessionsCount getCCS() throws ServiceException {

@@ -18,9 +18,12 @@ package org.jivesoftware.openfire.plugin.rest.service;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.UserServiceController;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -47,7 +50,9 @@ public class UserLockoutService {
         description = "Lockout / ban the user from the chat server. The user will be kicked if the user is online.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The user was locked out."),
-            @ApiResponse(responseCode = "404", description = "No user of with this username exists.")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "No user with this username exists.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response disableUser(
             @Parameter(description = "The username of the user that is to be locked out.", required = true) @PathParam("username") String username)
@@ -63,7 +68,9 @@ public class UserLockoutService {
         description = "Removes a previously applied lockout / ban of a user.",
         responses = {
             @ApiResponse(responseCode = "200", description = "User is unlocked."),
-            @ApiResponse(responseCode = "404", description = "No user of with this username exists.")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "No user with this username exists.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response enableUser(
            @Parameter(description = "The username of the user for which the lockout is to be undone.", required = true) @PathParam("username") String username)

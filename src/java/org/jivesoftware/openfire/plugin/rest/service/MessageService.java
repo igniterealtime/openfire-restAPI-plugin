@@ -17,11 +17,14 @@
 package org.jivesoftware.openfire.plugin.rest.service;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.MessageController;
 import org.jivesoftware.openfire.plugin.rest.entity.MessageEntity;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -49,6 +52,8 @@ public class MessageService {
         responses = {
             @ApiResponse(responseCode = "201", description = "Message is sent."),
             @ApiResponse(responseCode = "400", description = "The message content is empty or missing."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response sendBroadcastMessage(@RequestBody(description = "The message that is to be broadcast.", required = true) MessageEntity messageEntity)

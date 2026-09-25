@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.UserServiceController;
 import org.jivesoftware.openfire.plugin.rest.entity.UserGroupsEntity;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -48,10 +49,13 @@ public class UserGroupService {
         description = "Retrieve names of all groups that a particular user is in.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The names of the groups that the user is in.", content = @Content(schema = @Schema(implementation = UserGroupsEntity.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "No user with that username was found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public UserGroupsEntity getUserGroups(
-            @Parameter(description = "The username for user for which to return group names.", required = true) @PathParam("username") String username)
+            @Parameter(description = "The username of the user for which to return group names.", required = true) @PathParam("username") String username)
         throws ServiceException
     {
         return new UserGroupsEntity(plugin.getUserGroups(username));
@@ -62,7 +66,9 @@ public class UserGroupService {
         description = "Add a particular user to a collection of groups. When a group that is provided does not exist, it will be automatically created if possible.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The user was added to all groups."),
-            @ApiResponse(responseCode = "400", description = "When the username cannot be parsed into a JID.")
+            @ApiResponse(responseCode = "400", description = "The username cannot be parsed into a JID.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response addUserToGroups(
@@ -77,10 +83,12 @@ public class UserGroupService {
     @POST
     @Path("/{groupName}")
     @Operation( summary = "Add user to group",
-        description = "Add a particular user to a particular group. When the group that does not exist, it will be automatically created if possible.",
+        description = "Add a particular user to a particular group. When the group does not exist, it will be automatically created if possible.",
         responses = {
-            @ApiResponse(responseCode = "201", description = "The user was added to the groups."),
-            @ApiResponse(responseCode = "400", description = "When the username cannot be parsed into a JID.")
+            @ApiResponse(responseCode = "201", description = "The user was added to the group."),
+            @ApiResponse(responseCode = "400", description = "The username cannot be parsed into a JID.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response addUserToGroup(
             @Parameter(description = "The username of the user that is to be added to a group.", required = true) @PathParam("username") String username,
@@ -97,7 +105,9 @@ public class UserGroupService {
         description = "Removes a user from a group.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The user was taken out of the group."),
-            @ApiResponse(responseCode = "404", description = "The group could not be found."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "The group could not be found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response deleteUserFromGroup(
             @Parameter(description = "The username of the user that is to be removed from a group.", required = true) @PathParam("username") String username,
@@ -112,12 +122,14 @@ public class UserGroupService {
     @Operation( summary = "Delete user from groups",
         description = "Removes a user from a collection of groups.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "The user was taken out of the group."),
-            @ApiResponse(responseCode = "404", description = "One or more groups could not be found."),
+            @ApiResponse(responseCode = "200", description = "The user was taken out of the groups."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "One or more groups could not be found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response deleteUserFromGroups(
-            @Parameter(description = "The username of the user that is to be removed from a group.", required = true) @PathParam("username") String username,
+            @Parameter(description = "The username of the user that is to be removed from groups.", required = true) @PathParam("username") String username,
             @RequestBody(description = "A collection of names for groups from which the user is to be removed.", required = true) UserGroupsEntity userGroupsEntity)
         throws ServiceException
     {

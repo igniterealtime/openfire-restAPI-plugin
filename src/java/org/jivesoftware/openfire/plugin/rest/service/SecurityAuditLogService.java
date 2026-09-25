@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.SecurityAuditLogController;
 import org.jivesoftware.openfire.plugin.rest.entity.SecurityAuditLogs;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -46,7 +47,9 @@ public class SecurityAuditLogService {
         description = "Retrieve entries from the security audit log.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The requested log entries.", content = @Content(schema = @Schema(implementation = SecurityAuditLogs.class))),
-            @ApiResponse(responseCode = "403", description = "The audit log is not readable (configured to be write-only).")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "403", description = "The audit log is not readable (configured to be write-only).", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
 	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public SecurityAuditLogs getSecurityAuditLogs(

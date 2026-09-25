@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.GroupController;
 import org.jivesoftware.openfire.plugin.rest.entity.GroupEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.GroupEntity;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -34,7 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("restapi/v1/groups")
-@Tag(name="User Group", description = "Managing Openfire user groupings.")
+@Tag(name="User Group", description = "Managing Openfire user groups.")
 public class GroupService {
 
     private GroupController groupController;
@@ -48,7 +49,9 @@ public class GroupService {
     @Operation( summary = "Get groups",
                 description = "Get a list of all user groups.",
                 responses = {
-                    @ApiResponse(responseCode = "200", description = "All groups", content = @Content(schema = @Schema(implementation = GroupEntities.class)))
+                    @ApiResponse(responseCode = "200", description = "All groups.", content = @Content(schema = @Schema(implementation = GroupEntities.class))),
+                    @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+                    @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
                 })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public GroupEntities getGroups() throws ServiceException
@@ -61,8 +64,10 @@ public class GroupService {
         description = "Create a new user group.",
         responses = {
             @ApiResponse(responseCode = "201", description = "Group created."),
-            @ApiResponse(responseCode = "400", description = "Group or group name missing, or invalid syntax for a property."),
-            @ApiResponse(responseCode = "409", description = "Group already exists.")
+            @ApiResponse(responseCode = "400", description = "Group or group name missing, or invalid syntax for a property.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "409", description = "Group already exists.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public Response createGroup(
@@ -79,7 +84,9 @@ public class GroupService {
         description = "Get one specific user group by name.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The group.", content = @Content(schema = @Schema(implementation = GroupEntity.class))),
-            @ApiResponse(responseCode = "404", description = "Group with this name not found.")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "Group with this name not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public GroupEntity getGroup(@Parameter(description = "The name of the group that needs to be fetched.", example = "Colleagues", required = true) @PathParam("groupName") String groupName)
@@ -94,11 +101,13 @@ public class GroupService {
         description = "Updates / overwrites an existing user group. Note that the name of the group cannot be changed.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Group updated."),
-            @ApiResponse(responseCode = "400", description = "Group or group name missing, or name does not match existing group, or invalid syntax for a property."),
-            @ApiResponse(responseCode = "404", description = "Group with this name not found."),
+            @ApiResponse(responseCode = "400", description = "Group or group name missing, or name does not match existing group, or invalid syntax for a property.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "Group with this name not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public Response updateGroup(@Parameter(description = "The name of the group that needs to be fetched.", example = "Colleagues", required = true) @PathParam("groupName") String groupName,
+    public Response updateGroup(@Parameter(description = "The name of the group that needs to be updated.", example = "Colleagues", required = true) @PathParam("groupName") String groupName,
                                 @RequestBody(description = "The new group definition that needs to overwrite the old definition.", required = true) GroupEntity groupEntity )
         throws ServiceException
     {
@@ -112,7 +121,9 @@ public class GroupService {
         description = "Removes an existing user group.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Group deleted."),
-            @ApiResponse(responseCode = "400", description = "Group not found.")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "Group with this name not found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response deleteGroup(@Parameter(description = "The name of the group that needs to be removed.", example = "Colleagues", required = true) @PathParam("groupName") String groupName)
         throws ServiceException
