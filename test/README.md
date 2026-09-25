@@ -2,7 +2,20 @@
 
 The tests contained in this folder are written in Hurl (see [docs](https://hurl.dev/docs/manual.html)).
 
-Install Hurl with instructions as per the documentation.
+Install Hurl with instructions as per the documentation, and run the tests from the root of the repository:
+
+```bash
+hurl --test --variables-file test/test.env --jobs 1 test/*.hurl
+```
+
+Alternatively, run Hurl from its container image, as CI does (`--network host` lets the container reach Openfire on
+`localhost`):
+
+```bash
+docker run --rm --network host --user "$(id -u):$(id -g)" --volume "$PWD:$PWD" --workdir "$PWD" \
+  ghcr.io/orange-opensource/hurl:8.0.1 \
+  --test --variables-file test/test.env --jobs 1 test/*.hurl
+```
 
 Configure the Rest API:
 
