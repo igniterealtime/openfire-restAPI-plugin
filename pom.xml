@@ -101,14 +101,15 @@
                 </executions>
             </plugin>
 
-            <!-- Generate readme.html from readme.md, so that the two can't get out of sync. -->
+            <!-- Generate readme.html from readme.md, so that the two can't get out of sync. This is done in the 'prepare-package'
+                 phase, after readme.md has been updated with the generated documentation (in the 'process-classes' phase). -->
             <plugin>
                 <!-- Isolate readme.md, to prevent other (untracked) markdown files in the project root from being rendered and packaged. -->
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>copy-readme-markdown</id>
-                        <phase>generate-sources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -134,7 +135,7 @@
                 <executions>
                     <execution>
                         <id>generate-readme-html</id>
-                        <phase>generate-resources</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
