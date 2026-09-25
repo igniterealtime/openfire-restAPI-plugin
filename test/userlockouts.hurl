@@ -1,5 +1,5 @@
 # Lockouts are tested on a dedicated user, which is removed at the end.
-POST http://localhost:9090/plugins/restapi/v1/users
+POST {{restapi_url}}/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -52,19 +52,19 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/sessions/worf
+GET {{restapi_url}}/sessions/worf
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/sessions/session" count == 1
 
-POST http://localhost:9090/plugins/restapi/v1/lockouts/worf
+POST {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 201
 
 # Sessions are closed asynchronously, so allow for some delay.
 # Locking out a user closes its sessions.
-GET http://localhost:9090/plugins/restapi/v1/sessions/worf
+GET {{restapi_url}}/sessions/worf
 Authorization: {{authkey}}
 [Options]
 retry: 10
@@ -85,7 +85,7 @@ retry-interval: 100ms
 HTTP 404
 
 # Locking out a user that is already locked out is fine.
-POST http://localhost:9090/plugins/restapi/v1/lockouts/worf
+POST {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 201
 
@@ -116,12 +116,12 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
-DELETE http://localhost:9090/plugins/restapi/v1/lockouts/worf
+DELETE {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 200
 
 # Unlocking a user that is not locked out is fine.
-DELETE http://localhost:9090/plugins/restapi/v1/lockouts/worf
+DELETE {{restapi_url}}/lockouts/worf
 Authorization: {{authkey}}
 HTTP 200
 
@@ -173,14 +173,14 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
-POST http://localhost:9090/plugins/restapi/v1/lockouts/nonexistent
+POST {{restapi_url}}/lockouts/nonexistent
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]
 xpath "string(/error/exception)" == "UserNotFoundException"
 xpath "string(/error/resource)" == "nonexistent"
 
-DELETE http://localhost:9090/plugins/restapi/v1/lockouts/nonexistent
+DELETE {{restapi_url}}/lockouts/nonexistent
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]
@@ -188,6 +188,6 @@ xpath "string(/error/exception)" == "UserNotFoundException"
 xpath "string(/error/resource)" == "nonexistent"
 
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/worf
+DELETE {{restapi_url}}/users/worf
 Authorization: {{authkey}}
 HTTP 200

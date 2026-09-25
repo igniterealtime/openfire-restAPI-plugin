@@ -1,36 +1,36 @@
-GET http://localhost:9090/plugins/restapi/v1/system/liveness
+GET {{restapi_url}}/system/liveness
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/liveness/deadlock
+GET {{restapi_url}}/system/liveness/deadlock
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/liveness/properties
+GET {{restapi_url}}/system/liveness/properties
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/readiness
+GET {{restapi_url}}/system/readiness
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/readiness/cluster
+GET {{restapi_url}}/system/readiness/cluster
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/readiness/connections
+GET {{restapi_url}}/system/readiness/connections
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/readiness/plugins
+GET {{restapi_url}}/system/readiness/plugins
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/readiness/server
+GET {{restapi_url}}/system/readiness/server
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties
+GET {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -44,7 +44,7 @@ xpath "/properties/property[starts-with(@key, 'plugin.restapi.')]" not exists
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/242
 # abstractGroupProvider.shared.recursive is registered through Openfire's SystemProperty API with a default value.
 # It used to 404 when queried individually, as that lookup checked JiveGlobals only.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/abstractGroupProvider.shared.recursive
+GET {{restapi_url}}/system/properties/abstractGroupProvider.shared.recursive
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -54,13 +54,13 @@ xpath "string(/property/@value)" == "false"
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/242
 # adminConsole.servlet-request-authenticator is registered through Openfire's SystemProperty API without a default value.
 # It used to 404 when queried individually, as that lookup checked JiveGlobals only.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/adminConsole.servlet-request-authenticator
+GET {{restapi_url}}/system/properties/adminConsole.servlet-request-authenticator
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/property" count == 1
 
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -69,7 +69,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+GET {{restapi_url}}/system/properties/test.key
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -77,7 +77,7 @@ xpath "/property" count == 1
 xpath "string(/property/@key)" == "test.key"
 xpath "string(/property/@value)" == "test-value"
 
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+PUT {{restapi_url}}/system/properties/test.key
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -86,13 +86,13 @@ Content-Type: application/xml
 ```
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+GET {{restapi_url}}/system/properties/test.key
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "string(/property/@value)" == "new-value"
 
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/wrong.key
+PUT {{restapi_url}}/system/properties/wrong.key
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -101,7 +101,7 @@ Content-Type: application/xml
 ```
 HTTP 404
 
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+PUT {{restapi_url}}/system/properties/test.key
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -110,23 +110,23 @@ Content-Type: application/xml
 ```
 HTTP 400
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+DELETE {{restapi_url}}/system/properties/test.key
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.key
+GET {{restapi_url}}/system/properties/test.key
 Authorization: {{authkey}}
 HTTP 404
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.enabled
+GET {{restapi_url}}/system/properties/plugin.restapi.enabled
 Authorization: {{authkey}}
 HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.enabled
+PUT {{restapi_url}}/system/properties/plugin.restapi.enabled
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -137,20 +137,20 @@ HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.enabled
+DELETE {{restapi_url}}/system/properties/plugin.restapi.enabled
 Authorization: {{authkey}}
 HTTP 403
 
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.httpAuth
+GET {{restapi_url}}/system/properties/plugin.restapi.httpAuth
 Authorization: {{authkey}}
 HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.httpAuth
+PUT {{restapi_url}}/system/properties/plugin.restapi.httpAuth
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -161,20 +161,20 @@ HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.httpAuth
+DELETE {{restapi_url}}/system/properties/plugin.restapi.httpAuth
 Authorization: {{authkey}}
 HTTP 403
 
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.customAuthFilter
+GET {{restapi_url}}/system/properties/plugin.restapi.customAuthFilter
 Authorization: {{authkey}}
 HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.customAuthFilter
+PUT {{restapi_url}}/system/properties/plugin.restapi.customAuthFilter
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -185,20 +185,20 @@ HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.customAuthFilter
+DELETE {{restapi_url}}/system/properties/plugin.restapi.customAuthFilter
 Authorization: {{authkey}}
 HTTP 403
 
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.secret
+GET {{restapi_url}}/system/properties/plugin.restapi.secret
 Authorization: {{authkey}}
 HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.secret
+PUT {{restapi_url}}/system/properties/plugin.restapi.secret
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -209,20 +209,20 @@ HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.secret
+DELETE {{restapi_url}}/system/properties/plugin.restapi.secret
 Authorization: {{authkey}}
 HTTP 403
 
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.serviceLoggingEnabled
+GET {{restapi_url}}/system/properties/plugin.restapi.serviceLoggingEnabled
 Authorization: {{authkey}}
 HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.serviceLoggingEnabled
+PUT {{restapi_url}}/system/properties/plugin.restapi.serviceLoggingEnabled
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -233,20 +233,20 @@ HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.serviceLoggingEnabled
+DELETE {{restapi_url}}/system/properties/plugin.restapi.serviceLoggingEnabled
 Authorization: {{authkey}}
 HTTP 403
 
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
+GET {{restapi_url}}/system/properties/plugin.restapi.allowedIPs
 Authorization: {{authkey}}
 HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
+PUT {{restapi_url}}/system/properties/plugin.restapi.allowedIPs
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -257,7 +257,7 @@ HTTP 403
 
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # The REST API plugin should not allow users to access properties used to control the plugin's functionality.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi.allowedIPs
+DELETE {{restapi_url}}/system/properties/plugin.restapi.allowedIPs
 Authorization: {{authkey}}
 HTTP 403
 
@@ -265,13 +265,13 @@ HTTP 403
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/244
 # Openfire deletes a property together with all of its child properties. Deleting the parent of the plugin's own
 # properties (which exist in this setup) should therefore not be allowed either.
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/plugin.restapi
+DELETE {{restapi_url}}/system/properties/plugin.restapi
 Authorization: {{authkey}}
 HTTP 403
 
 
 # Deleting a property also deletes its child properties.
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -280,7 +280,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -289,11 +289,11 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.parent
+DELETE {{restapi_url}}/system/properties/test.parent
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.parent.child
+GET {{restapi_url}}/system/properties/test.parent.child
 Authorization: {{authkey}}
 HTTP 404
 
@@ -301,7 +301,7 @@ HTTP 404
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/259
 # Openfire deletes a property using SQL LIKE, in which an underscore matches any character. Deleting a property should
 # be refused when that would also delete a property other than the property itself and its child properties.
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -310,7 +310,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -319,19 +319,19 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.foo_bar
+DELETE {{restapi_url}}/system/properties/test.foo_bar
 Authorization: {{authkey}}
 HTTP 409
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.fooXbar.child
+GET {{restapi_url}}/system/properties/test.fooXbar.child
 Authorization: {{authkey}}
 HTTP 200
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.fooXbar.child
+DELETE {{restapi_url}}/system/properties/test.fooXbar.child
 Authorization: {{authkey}}
 HTTP 200
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.foo_bar
+DELETE {{restapi_url}}/system/properties/test.foo_bar
 Authorization: {{authkey}}
 HTTP 200
 
@@ -339,13 +339,13 @@ HTTP 200
 # https://github.com/igniterealtime/openfire-restAPI-plugin/issues/259
 # Openfire itself uses apostrophes in property keys (e.g. for the caches of MUC services), which should be usable in
 # the URL path.
-GET http://localhost:9090/plugins/restapi/v1/system/properties/cache.MUCService'conference'Rooms.size
+GET {{restapi_url}}/system/properties/cache.MUCService'conference'Rooms.size
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "string(/property/@key)" == "cache.MUCService'conference'Rooms.size"
 
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -354,17 +354,17 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
+GET {{restapi_url}}/system/properties/test.MUCService'room'Rooms.size
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "string(/property/@value)" == "42"
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
+DELETE {{restapi_url}}/system/properties/test.MUCService'room'Rooms.size
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.MUCService'room'Rooms.size
+GET {{restapi_url}}/system/properties/test.MUCService'room'Rooms.size
 Authorization: {{authkey}}
 HTTP 404
 
@@ -372,7 +372,7 @@ HTTP 404
 # Openfire treats setting a property to a null value as deleting it, together with all of its child properties.
 # Creating or updating a property without a value should therefore be rejected, as it would otherwise bypass the
 # checks that prevent (forbidden) child properties from being deleted.
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -381,7 +381,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -390,7 +390,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -399,7 +399,7 @@ Content-Type: application/xml
 ```
 HTTP 400
 
-PUT http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent
+PUT {{restapi_url}}/system/properties/test.nullparent
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -408,25 +408,25 @@ Content-Type: application/xml
 ```
 HTTP 400
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent
+GET {{restapi_url}}/system/properties/test.nullparent
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "string(/property/@value)" == "parent-value"
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent.child
+GET {{restapi_url}}/system/properties/test.nullparent.child
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "string(/property/@value)" == "child-value"
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.nullparent
+DELETE {{restapi_url}}/system/properties/test.nullparent
 Authorization: {{authkey}}
 HTTP 200
 
 # The parent of the plugin's own properties may not be 'created' without a value (as that would delete the plugin's
 # configuration) either.
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -436,7 +436,7 @@ Content-Type: application/xml
 HTTP 400
 
 # An empty value is a value (rather than a deletion), and should be stored as such.
-POST http://localhost:9090/plugins/restapi/v1/system/properties
+POST {{restapi_url}}/system/properties
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -445,12 +445,12 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/system/properties/test.emptyvalue
+GET {{restapi_url}}/system/properties/test.emptyvalue
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "string(/property/@value)" == ""
 
-DELETE http://localhost:9090/plugins/restapi/v1/system/properties/test.emptyvalue
+DELETE {{restapi_url}}/system/properties/test.emptyvalue
 Authorization: {{authkey}}
 HTTP 200

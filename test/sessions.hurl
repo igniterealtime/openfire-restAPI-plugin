@@ -1,11 +1,11 @@
-GET http://localhost:9090/plugins/restapi/v1/sessions
+GET {{restapi_url}}/sessions
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/sessions" exists
 xpath "/sessions[not(child::node())]" count == 1 # sessions at the root, with no child nodes
 
-GET http://localhost:9090/plugins/restapi/v1/sessions/john
+GET {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -14,7 +14,7 @@ xpath "/sessions/session" count == 0
 
 # Openfire does not check whether the user exists: a user that does not exist simply has no sessions. The API documents
 # no other response than 200 for this endpoint.
-GET http://localhost:9090/plugins/restapi/v1/sessions/nonexistent
+GET {{restapi_url}}/sessions/nonexistent
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -66,13 +66,13 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/sessions
+GET {{restapi_url}}/sessions
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/sessions/session[sessionId='john@example.org/hurl']" exists
 
-GET http://localhost:9090/plugins/restapi/v1/sessions/john
+GET {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -88,19 +88,19 @@ xpath "/sessions/session/hostAddress" exists
 xpath "/sessions/session/creationDate" exists
 xpath "/sessions/session/lastActionDate" exists
 
-GET http://localhost:9090/plugins/restapi/v1/sessions/jane
+GET {{restapi_url}}/sessions/jane
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/sessions/session" count == 0
 
 # Kick the session.
-DELETE http://localhost:9090/plugins/restapi/v1/sessions/john
+DELETE {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200
 
 # Sessions are closed asynchronously, so allow for some delay.
-GET http://localhost:9090/plugins/restapi/v1/sessions/john
+GET {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 [Options]
 retry: 10
@@ -121,6 +121,6 @@ retry-interval: 100ms
 HTTP 404
 
 # Kicking the sessions of a user without sessions is fine.
-DELETE http://localhost:9090/plugins/restapi/v1/sessions/john
+DELETE {{restapi_url}}/sessions/john
 Authorization: {{authkey}}
 HTTP 200

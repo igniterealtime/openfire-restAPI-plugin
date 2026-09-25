@@ -1,4 +1,4 @@
-GET http://localhost:9090/plugins/restapi/v1/archive/messages/unread/john@example.org
+GET {{restapi_url}}/archive/messages/unread/john@example.org
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]

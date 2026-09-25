@@ -1,11 +1,11 @@
 
-GET http://localhost:9090/plugins/restapi/v1/groups
+GET {{restapi_url}}/groups
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups[not(child::node())]" exists # groups at the root, with no child nodes
 
-POST http://localhost:9090/plugins/restapi/v1/groups
+POST {{restapi_url}}/groups
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -24,20 +24,20 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/groups # check if the group was created
+GET {{restapi_url}}/groups # check if the group was created
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/groups/group[name='group1']" exists
 
-GET http://localhost:9090/plugins/restapi/v1/groups/group1
+GET {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/group[name='group1']" exists
 xpath "string(/group/description)" == "test-group"
 
-PUT http://localhost:9090/plugins/restapi/v1/groups/group1
+PUT {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -56,14 +56,14 @@ Content-Type: application/xml
 ```
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/groups/group1
+GET {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/group[name='group1']" exists
 xpath "string(/group/description)" == "test-group-updated"
 
-DELETE http://localhost:9090/plugins/restapi/v1/groups/group1
+DELETE {{restapi_url}}/groups/group1
 Authorization: {{authkey}}
 HTTP 200
 

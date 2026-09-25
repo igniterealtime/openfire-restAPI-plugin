@@ -1,3 +1,3 @@
-GET http://localhost:9090/plugins/restapi/v1/chatrooms
+GET {{restapi_url}}/chatrooms
 Authorization: {{authkey}}
 HTTP 200

@@ -1,5 +1,5 @@
 # Broadcasting without any sessions to deliver to is fine.
-POST http://localhost:9090/plugins/restapi/v1/messages/users
+POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -10,7 +10,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-POST http://localhost:9090/plugins/restapi/v1/messages/users
+POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -23,7 +23,7 @@ HTTP 400
 [Asserts]
 xpath "string(/error/exception)" == "IllegalArgumentException"
 
-POST http://localhost:9090/plugins/restapi/v1/messages/users
+POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -75,7 +75,7 @@ Content-Type: text/xml; charset=utf-8
 ```
 HTTP 200
 
-POST http://localhost:9090/plugins/restapi/v1/messages/users
+POST {{restapi_url}}/messages/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```

@@ -1,4 +1,4 @@
-GET http://localhost:9090/plugins/restapi/v1/users/john/roster
+GET {{restapi_url}}/users/john/roster
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -10,7 +10,7 @@ xpath "/roster/rosterItem/groups" exists
 
 
 # Roster changes are tested on a dedicated user, which is removed at the end.
-POST http://localhost:9090/plugins/restapi/v1/users
+POST {{restapi_url}}/users
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -22,13 +22,13 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/users/data/roster
+GET {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/roster/rosterItem" count == 0
 
-POST http://localhost:9090/plugins/restapi/v1/users/data/roster
+POST {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -44,7 +44,7 @@ Content-Type: application/xml
 ```
 HTTP 201
 
-GET http://localhost:9090/plugins/restapi/v1/users/data/roster
+GET {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -56,7 +56,7 @@ xpath "/roster/rosterItem/groups/group" count == 1
 xpath "string(/roster/rosterItem/groups/group)" == "Friends"
 
 # Adding an entry for a contact that is already on the roster is a conflict.
-POST http://localhost:9090/plugins/restapi/v1/users/data/roster
+POST {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -70,7 +70,7 @@ HTTP 409
 xpath "string(/error/exception)" == "UserAlreadyExistsException"
 
 # A roster entry needs a JID.
-POST http://localhost:9090/plugins/restapi/v1/users/data/roster
+POST {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -96,7 +96,7 @@ xpath "string(/error/exception)" == "IllegalArgumentException"
 # documented. Getting the roster of a user that does not exist returns 200 (rather than 404) too. Add tests for those
 # once UserServiceController#getUserRoster checks that the user exists.
 
-PUT http://localhost:9090/plugins/restapi/v1/users/data/roster/john@example.org
+PUT {{restapi_url}}/users/data/roster/john@example.org
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -112,7 +112,7 @@ Content-Type: application/xml
 ```
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/users/data/roster
+GET {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
@@ -124,7 +124,7 @@ xpath "/roster/rosterItem/groups/group" count == 1
 xpath "string(/roster/rosterItem/groups/group)" == "Crew"
 
 # Updating an entry for a contact that is not on the roster fails.
-PUT http://localhost:9090/plugins/restapi/v1/users/data/roster/jane@example.org
+PUT {{restapi_url}}/users/data/roster/jane@example.org
 Authorization: {{authkey}}
 Content-Type: application/xml
 ```
@@ -139,30 +139,30 @@ HTTP 404
 xpath "string(/error/exception)" == "UserNotFoundException"
 xpath "string(/error/resource)" == "jane@example.org"
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/data/roster/john@example.org
+DELETE {{restapi_url}}/users/data/roster/john@example.org
 Authorization: {{authkey}}
 HTTP 200
 
-GET http://localhost:9090/plugins/restapi/v1/users/data/roster
+GET {{restapi_url}}/users/data/roster
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/roster/rosterItem" count == 0
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/data/roster/john@example.org
+DELETE {{restapi_url}}/users/data/roster/john@example.org
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]
 xpath "string(/error/exception)" == "RosterItemNotFound"
 xpath "string(/error/resource)" == "john@example.org"
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/nonexistent/roster/john@example.org
+DELETE {{restapi_url}}/users/nonexistent/roster/john@example.org
 Authorization: {{authkey}}
 HTTP 404
 [Asserts]
 xpath "string(/error/exception)" == "UserNotFoundException"
 xpath "string(/error/resource)" == "nonexistent"
 
-DELETE http://localhost:9090/plugins/restapi/v1/users/data
+DELETE {{restapi_url}}/users/data
 Authorization: {{authkey}}
 HTTP 200
