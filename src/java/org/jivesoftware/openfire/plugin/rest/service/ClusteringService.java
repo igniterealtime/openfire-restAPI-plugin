@@ -53,7 +53,7 @@ public class ClusteringService {
     @GET
     @Path("/status")
     @Operation( summary = "Get clustering status",
-        description = "Describes the point-in-time state of Openfire's clustering with other servers.",
+        description = "Describes the point-in-time state of Openfire's clustering with other servers. The status is one of: 'SENIOR AND ONLY MEMBER', 'Senior member', 'Junior member', 'Starting up' or 'Disabled'.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Status returned.", content = @Content(schema = @Schema(implementation = ClusteringEntity.class))),
             @ApiResponse(responseCode = "401", description = "Web service authentication failed."),

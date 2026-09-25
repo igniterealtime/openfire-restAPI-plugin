@@ -15,6 +15,8 @@
  */
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -30,6 +32,7 @@ public class ClusteringEntity {
     }
 
     @XmlElement()
+    @Schema(description = "The clustering status of this Openfire instance.", allowableValues = {"SENIOR AND ONLY MEMBER", "Senior member", "Junior member", "Starting up", "Disabled"}, example = "Senior member")
     public String getStatus(){
         return status;
     }

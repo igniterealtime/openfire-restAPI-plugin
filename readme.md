@@ -132,1980 +132,1343 @@ Be aware of the following:
   client's address.
 - Changes to the `adminConsole.forwarded.*` properties take effect only after the admin console has been restarted.
 
-# User related REST Endpoints
+<!-- BEGIN GENERATED ENDPOINTS: do not edit this section by hand. It is generated from the OpenAPI annotations in the source code by the Maven build. -->
 
-## Retrieve users
-Endpoint to get all or filtered users
-> **GET** /users
+# REST Endpoints
 
-**Payload:** none
+The paths of all endpoints below are relative to the root of the Openfire admin console, for example `http://example.org:9090`.
 
-**Return value:** Users
+In addition to the responses that are documented for each endpoint, every endpoint can respond with:
 
-### Possible parameters
+- `401`: Web service authentication failed.
+- `500`: Unexpected, generic error condition.
 
-| Parameter     | Parameter Type | Description                                                                                                  | Default value |
-|---------------|----------------|--------------------------------------------------------------------------------------------------------------|---------------|
-| search        | @QueryParam    | Search/Filter by username. <br> This act like the wildcard search %String%                                   |               |
-| propertyKey   | @QueryParam    | Filter by user propertyKey.                                                                                  |               |
-| propertyValue | @QueryParam    | Filter by user propertyKey and propertyValue. <br>**Note:** It can only be used within propertyKey parameter |               |
+Interactive documentation of these endpoints is available in the Openfire admin console, via the link on the REST API settings page (Server > Server Settings > REST API).
 
-### Examples
+# Users
 
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
+Managing Openfire users.
 
->**GET** http://example.org:9090/plugins/restapi/v1/users
+## Get users
 
->**GET** http://example.org:9090/plugins/restapi/v1/users?search=testuser
+> **GET** /plugins/restapi/v1/users
 
->**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname
+Retrieve all users defined in Openfire (with optional filtering).
 
->**GET** http://example.org:9090/plugins/restapi/v1/users?propertyKey=keyname&propertyValue=keyvalue
+**Parameters**
 
-If you want to get a JSON format result, please add "**Accept: application/json**" to the **Header**.
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| search | query | no | Search/Filter by username. This acts like the wildcard search %String%. |  |
+| propertyKey | query | no | Filter by a user property name. |  |
+| propertyValue | query | no | Filter by user property value. Note: This can only be used in combination with a property name parameter. |  |
 
-## Retrieve a user 
-Endpoint to get information over a specific user
-> **GET** /users/{username}
+**Responses**
 
-**Payload:** none
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | A list of Openfire users. | `UserEntities` (XML or JSON) |
 
-**Return value:** User
+## Create user
 
-### Possible parameters
+> **POST** /plugins/restapi/v1/users
 
-| Parameter | Parameter Type | Description      | Default value |
-|-----------|----------------|------------------|---------------|
-| username	 | 	@Path         | 	Exact username	 |               |
+Add a new user to Openfire.
 
-### Examples
+**Request body** (required): `UserEntity` (XML or JSON) - The definition of the user to create.
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/users/testuser
+**Responses**
 
-## Create a user
-Endpoint to create a new user
-> **POST** /users
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | The user was created. |  |
+| 400 | No user definition, username or password was provided. | `ErrorResponse` |
+| 409 | A user with this username already exists. | `ErrorResponse` |
 
-**Payload:** User
-**Return value:** HTTP status 201 (Created)
+## Get user
 
-### Examples
-#### XML Examples
+> **GET** /plugins/restapi/v1/users/{username}
 
+Retrieve a user that is defined in Openfire.
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type: application/**xml**
->
->**POST** http://example.org:9090/plugins/restapi/v1/users
+**Parameters**
 
-**Payload Example 1 (required parameters):**
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user to return. |  |
 
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<user>
-    <username>test3</username>
-    <password>p4ssword</password>
-</user>
-```
+**Responses**
 
-**Payload Example 2 (available parameters):**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<user>
-    <username>testuser</username>
-    <password>p4ssword</password>
-    <name>Test User</name>
-    <email>test@localhost.de</email>
-    <properties>
-        <property key="keyname" value="value"/>
-        <property key="anotherkey" value="value"/>
-    </properties>
-</user>
-```
-#### JSON Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type: application/**json**
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/users
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The Openfire user. | `UserEntity` (XML or JSON) |
+| 404 | No user with that username was found. | `ErrorResponse` (XML or JSON) |
 
-**Payload Example 1 (required parameters):**
-```json
-{
-    "username": "admin",
-    "password": "p4ssword"
-}
-```
+## Update user
 
-**Payload Example 2 (available parameters):**
-```json
-{
-    "username": "admin",
-    "password": "p4ssword",
-    "name": "Administrator",
-    "email": "admin@example.com",
-    "properties": {
-        "property": [
-            {
-                "@key": "console.rows_per_page",
-                "@value": "user-summary=8"
-            },
-            {
-                "@key": "console.order",
-                "@value": "session-summary=1"
-            }
-        ]
-    }
-}
-```
+> **PUT** /plugins/restapi/v1/users/{username}
 
-**REST API Version 1.3.0 and later - Payload Example 3 (available parameters):**
-```json
-{
-    "users": [
-        {
-            "username": "admin",
-            "name": "Administrator",
-            "email": "admin@example.com",
-            "password": "p4ssword",
-            "properties": [
-                {
-                    "key": "console.order",
-                    "value": "session-summary=0"
-                }
-            ]
-        },
-        {
-            "username": "test",
-            "name": "Test",
-            "password": "p4ssword"
-        }
-    ]
-}
-```
+Update an existing user in Openfire.
 
-## Delete a user
-Endpoint to delete a user
-> **DELETE** /users/{username}
+**Parameters**
 
-**Payload:** none
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user to update. |  |
 
-**Return value:** HTTP status 200 (OK)
+**Request body** (required): `UserEntity` (XML or JSON) - The updated definition of the user.
 
-### Possible parameters
+**Responses**
 
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | @Path 	         | Exact username |               |
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The user was updated. |  |
+| 404 | No user with that username was found. | `ErrorResponse` |
+| 409 | The user is to be renamed, but a user with the new username already exists. | `ErrorResponse` |
 
-### Examples
+## Delete user
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser
+> **DELETE** /plugins/restapi/v1/users/{username}
 
-## Update a user
-Endpoint to update / rename a user
-> **PUT** /users/{username}
+Remove an existing user from Openfire.
 
-**Payload:** User
+**Parameters**
 
-**Return value:** HTTP status 200 (OK)
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user to remove. |  |
 
-### Possible parameters
+**Responses**
 
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The user was removed. |  |
+| 404 | No user with that username was found. | `ErrorResponse` |
 
-### Examples
-#### XML Example
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/users/testuser
+## Get user's groups
 
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<user>
-    <username>testuser</username>
-    <name>Test User edit</name>
-    <email>test@edit.de</email>
-    <properties>
-        <property key="keyname" value="value"/>
-    </properties>
-</user>
-```
-#### Rename Example
+> **GET** /plugins/restapi/v1/users/{username}/groups
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/users/oldUsername
+Retrieve names of all groups that a particular user is in.
 
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<user>
-    <username>newUsername</username>
-    <name>Test User edit</name>
-    <email>test@edit.de</email>
-    <properties>
-        <property key="keyname" value="value"/>
-    </properties>
-</user>
-```
+**Parameters**
 
-#### JSON Example
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/json
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/users/testuser
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to return group names. |  |
 
-**Payload:**
-```json
-{
-    "username": "testuser",
-    "name": "Test User edit",
-    "email": "test@edit.de",
-    "properties": {
-        "property": {
-            "@key": "keyname",
-            "@value": "value"
-        }
-    }
-}
-```
+**Responses**
 
-**REST API Version 1.3.0 and later - Payload Example 2 (available parameters):**
-```json
-{
-    "username": "testuser",
-    "name": "Test User edit",
-    "email": "test@edit.de",
-    "properties": [
-        {
-            "key": "keyname",
-            "value": "value"
-        }
-    ]
-}
-```
-
-## Retrieve all user groups 
-Endpoint to get group names of a specific user
-> **GET** /users/{username}/groups
-
-**Payload:** none
-
-**Return value:** Groups
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The names of the groups that the user is in. | `UserGroupsEntity` (XML or JSON) |
+| 404 | No user with that username was found. | `ErrorResponse` (XML or JSON) |
 
 ## Add user to groups
-Endpoint to add user to a groups
-> **POST** /users/{username}/groups
 
-**Payload:** Groups
+> **POST** /plugins/restapi/v1/users/{username}/groups
 
-**Return value:** HTTP status 201 (Created)
+Add a particular user to a collection of groups. When a group that is provided does not exist, it will be automatically created if possible.
 
-### Possible parameters
+**Parameters**
 
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user that is to be added to groups. |  |
 
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
+**Request body** (required): `UserGroupsEntity` (XML or JSON) - A collection of names for groups that the user is to be added to.
 
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
+**Responses**
 
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<groups>
-    <groupname>Admins</groupname>
-    <groupname>Support</groupname>
-</groups>
-```
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | The user was added to all groups. |  |
+| 400 | The username cannot be parsed into a JID. | `ErrorResponse` |
+
+## Delete user from groups
+
+> **DELETE** /plugins/restapi/v1/users/{username}/groups
+
+Removes a user from a collection of groups.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user that is to be removed from groups. |  |
+
+**Request body** (required): `UserGroupsEntity` (XML or JSON) - A collection of names for groups from which the user is to be removed.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The user was taken out of the groups. |  |
+| 404 | One or more groups could not be found. | `ErrorResponse` |
 
 ## Add user to group
-Endpoint to add user to a group
-> **POST** /users/{username}/groups/{groupName}
 
-**Payload:** none
+> **POST** /plugins/restapi/v1/users/{username}/groups/{groupName}
 
-**Return value:** HTTP status 201 (Created)
+Add a particular user to a particular group. When the group does not exist, it will be automatically created if possible.
 
-### Possible parameters
+**Parameters**
 
-| Parameter | 	Parameter Type | Description      | Default value |
-|-----------|-----------------|------------------|---------------|
-| username  | 	@Path	         | Exact username   |               |
-| groupName | 	@Path	         | Exact group name |               |
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user that is to be added to a group. |  |
+| groupName | path | yes | The name of the group that the user is to be added to. |  |
 
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/groups/testGroup
+**Responses**
 
-## Delete a user from a groups
-Endpoint to remove a user from a groups
->**DELETE** /users/{username}/groups
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | The user was added to the group. |  |
+| 400 | The username cannot be parsed into a JID. | `ErrorResponse` |
 
-**Payload:** Groups
+## Delete user from group
 
-**Return value:** HTTP status 200 (OK)
+> **DELETE** /plugins/restapi/v1/users/{username}/groups/{groupName}
 
-### Possible parameters
+Removes a user from a group.
 
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
+**Parameters**
 
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/groups
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user that is to be removed from a group. |  |
+| groupName | path | yes | The name of the group that the user is to be removed from. |  |
 
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<groups>
-    <groupname>Admins</groupname>
-    <groupname>Support</groupname>
-</groups>
-```
+**Responses**
 
-## Delete a user from a group
-Endpoint to remove a user from a group
->**DELETE** /users/{username}/groups/{groupName}
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The user was taken out of the group. |  |
+| 404 | The group could not be found. | `ErrorResponse` |
 
-**Payload:** none
+## Retrieve user roster
 
-**Return value:** HTTP status 200 (OK)
+> **GET** /plugins/restapi/v1/users/{username}/roster
 
-### Possible parameters
+Get a list of all roster entries (buddies / contact list) of a particular user.
 
+**Parameters**
 
-| Parameter | 	Parameter Type | Description      | Default value |
-|-----------|-----------------|------------------|---------------|
-| username  | 	@Path	         | Exact username   |               |
-| groupName | 	@Path	         | Exact group name |               |
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to retrieve the roster entries. |  |
 
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/groups/testGroup
+**Responses**
 
-## Lockout a user
-Endpoint to lockout / ban the user from the chat server. The user will be kicked if the user is online.
->**POST** /lockouts/{username}
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | All roster entries. | `RosterEntities` (XML or JSON) |
+| 404 | No user with this username exists. | `ErrorResponse` (XML or JSON) |
 
-**Payload:** none
+## Create roster entry
 
-**Return value:** HTTP status 201 (Created)
+> **POST** /plugins/restapi/v1/users/{username}/roster
 
-### Possible parameters
+Add a roster entry to the roster (buddies / contact list) of a particular user.
 
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
+**Parameters**
 
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/lockouts/testuser
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to add a roster entry. |  |
 
-## Unlock a user 
-Endpoint to unlock / unban the user
->**DELETE** /lockouts/{username}
+**Request body** (required): `RosterItemEntity` (XML or JSON) - The definition of the roster entry that is to be added.
 
-**Payload:** none
+**Responses**
 
-**Return value:** HTTP status 200 (OK)
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | The entry was added to the roster. |  |
+| 400 | A roster entry cannot be added to a 'shared group' (try removing group names from the roster entry and try again). | `ErrorResponse` |
+| 404 | No user with this username exists. | `ErrorResponse` |
+| 409 | A roster entry already exists for the provided contact JID. | `ErrorResponse` |
 
-### Possible parameters
+## Update roster entry
 
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
+> **PUT** /plugins/restapi/v1/users/{username}/roster/{rosterJid}
 
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/lockouts/testuser
+Changes a roster entry on the roster (buddies / contact list) of a particular user.
 
-## Retrieve user roster 
-Endpoint to get roster entries (buddies) from a specific user
->**GET** /users/{username}/roster
+**Parameters**
 
-**Payload:** none
-
-**Return value:** Roster
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/users/testuser/roster
-
-## Create a user roster entry 
-Endpoint to add a new roster entry to a user
->**POST** /users/{username}/roster
-
-**Payload:** RosterItem
-
-**Return value:** HTTP status 201 (Created)
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/roster
-
-**Payload:**
-Payload Example 1 (required parameters):
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<rosterItem>
-	<jid>peter@pan.de</jid>
-</rosterItem>
-```
-Payload Example 2 (available parameters):
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<rosterItem>
-	<jid>peter@pan1.de</jid>
-	<nickname>Peter1</nickname>
-	<subscriptionType>3</subscriptionType>
-	<groups>
-		<group>Friends</group>
-	</groups>
-</rosterItem>
-```
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to update a roster entry. |  |
+| rosterJid | path | yes | The JID of the entry/contact to update. |  |
 
-## Delete a user roster entry 
-Endpoint to remove a roster entry from a user
->**DELETE** /users/{username}/roster/{jid}
-
-**Payload:** none
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description            | Default value |
-|-----------|-----------------|------------------------|---------------|
-| username  | 	@Path	         | Exact username         |               |
-| jid       | 	@Path	         | JID of the roster item |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/roster/peter@pan.de
-
-## Update a user roster entry  
-Endpoint to update a roster entry
->**PUT** /users/{username}/roster/{jid}
-
-**Payload:** RosterItem
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description            | Default value |
-|-----------|-----------------|------------------------|---------------|
-| username  | 	@Path	         | Exact username         |               |
-| jid       | 	@Path	         | JID of the roster item |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/users/testuser/roster/peter@pan.de
-
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<rosterItem>
-	<jid>peter@pan.de</jid>
-	<nickname>Peter Pan</nickname>
-	<subscriptionType>0</subscriptionType>
-	<groups>
-		<group>Support</group>
-	</groups>
-</rosterItem>
-```
-
-## Retrieve user's vcard
-Endpoint to get the vCard of a particular user
-> **GET** /users/{username}/vcard
-
-**Payload:** none
-
-**Return value:** vCard XML data
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/users/testuser/vcard
-
-## Add or update user's vCard
-Endpoint to add or replace a vCard of a particular user.
-> **PUT** /users/{username}/vcard
-
-**Payload:** vCard XML data
-
-**Return value:** HTTP status 200 (Created)
-
-### Possible parameters
-
-
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type application/xml
->
->**POST** http://example.org:9090/plugins/restapi/v1/users/testuser/vcard
-
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<vCard xmlns="vcard-temp">
-    <N>
-        <FAMILY>Doe</FAMILY>
-        <GIVEN>Janice</GIVEN>
-        <MIDDLE>Francis</MIDDLE>
-    </N>
-    <ORG>
-        <ORGNAME/>
-        <ORGUNIT/>
-    </ORG>
-    <NICKNAME>Jane</NICKNAME>
-    <FN>Janice Francis Doe</FN>
-    <TITLE/>
-    <URL/>
-    <EMAIL>
-        <HOME/>
-        <INTERNET/>
-        <PREF/>
-        <USERID>j.doe@example.org</USERID>
-    </EMAIL>
-    <TEL>
-        <WORK/>
-        <VOICE/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <WORK/>
-        <PAGER/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <WORK/>
-        <FAX/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <WORK/>
-        <CELL/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <HOME/>
-        <VOICE/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <HOME/>
-        <PAGER/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <HOME/>
-        <FAX/>
-        <NUMBER/>
-    </TEL>
-    <TEL>
-        <HOME/>
-        <CELL/>
-        <NUMBER/>
-    </TEL>
-    <ADR>
-        <WORK/>
-        <LOCALITY/>
-        <CTRY/>
-        <STREET/>
-        <PCODE/>
-        <REGION/>
-    </ADR>
-    <ADR>
-        <HOME/>
-        <LOCALITY/>
-        <CTRY/>
-        <STREET/>
-        <PCODE/>
-        <REGION/>
-    </ADR>
-</vCard>
-```
-
-## Delete user's vcard
-Endpoint to remove the vCard of a particular user
-> **DELETE** /users/{username}/vcard
-
-**Payload:** none
-
-**Return value:** none
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description    | Default value |
-|-----------|-----------------|----------------|---------------|
-| username  | 	@Path	         | Exact username |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**DELETE** http://example.org:9090/plugins/restapi/v1/users/testuser/vcard
-
-# Chat room related REST Endpoints
-
-## Retrieve all chat services
-
-Endpoint to get all chat services
->**GET** /chatservices
-
-**Payload:** none
-
-**Return value:** Chat services
-
-**Possible parameters:** none
-
-### Examples
-
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/chatservices
-
-## Create a chat service
-Endpoint to create a new chat service.
->**POST** /chatservices
-
-**Payload:** Chatservice
-
-**Return value:** HTTP status 201 (Created)
-
-**Possible parameters:** none
-
-### XML Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type: application/xml
->
->**POST** http://example.org:9090/plugins/restapi/v1/chatservices
-
-**Payload Example (available parameters):**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<chatService>
-    <serviceName>new-chat-service-name</serviceName>
-    <description>A mightily fine service</description>
-    <hidden>false</hidden>
-</chatService>
-```
-
-### JSON Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type: application/json
->
->**POST** http://example.org:9090/plugins/restapi/v1/chatservices
-
-**Payload Example (available parameters):**
-```json
-{
-	"serviceName": "new-chat-service-name",
-	"description": "A mightily fine service",
-	"hidden": false
-}
-```
-
-## Retrieve all chat rooms 
-Endpoint to get all chat rooms
->**GET** /chatrooms
-
-**Payload:** none
-
-**Return value:** Chatrooms
-
-### Possible parameters
-
-| Parameter    | Parameter Type | Description                                                                   | Default value |
-|--------------|----------------|-------------------------------------------------------------------------------|---------------|
-| servicename	 | @QueryParam	   | The name of the Group Chat Service                                            | conference    |
-| type         | @QueryParam    | **public:** Only as List Room in Directory set rooms <br> **all:** All rooms. | public        |
-| search       | @QueryParam    | Search/Filter by room name. <br> This act like the wildcard search %String%   |               |
-
-### Examples
-
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?type=all&servicename=privateconf
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms?search=test
-
-## Retrieve a chat room
-Endpoint to get information over specific chat room
->**GET** /chatrooms<span>/{roomName}
-
-**Payload:** none
-
-**Return value:** Chatroom
-
-### Possible parameters
-
-| Parameter   | Parameter Type | Description                        | Default value |
-|-------------|----------------|------------------------------------|---------------|
-| roomname    | 	@Path         | 	Exact room name	                  |               |
-| servicename | 	@QueryParam	  | The name of the Group Chat Service | 	conference   |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/test?servicename=privateconf
-
-## Retrieve chat room participants 
-Endpoint to get all participants with a role of specified room.
->**GET** /chatrooms/{roomName}/participants
-
-**Payload:** none
-
-**Return value:** Participants
-
-### Possible parameters
-
-| Parameter   | Parameter Type	 | Description	                       | Default value |
-|-------------|-----------------|------------------------------------|---------------|
-| roomname    | @Path           | Exact room name                    |               |
-| servicename | @QueryParam     | The name of the Group Chat Service | conference    |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/room1/participants
-
-## Retrieve chat room occupants
-Endpoint to get all occupants (all roles / affiliations) of a specified room.
->**GET** /chatrooms/{roomName}/occupants
-
-**Payload:** none
-
-**Return value:** Occupants
-
-### Possible parameters
-
-| Parameter   | Parameter Type	 | Description	                       | Default value |
-|-------------|-----------------|------------------------------------|---------------|
-| roomname    | @Path           | Exact room name                    |               |
-| servicename | @QueryParam     | The name of the Group Chat Service | conference    |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/room1/occupants
-
-## Retrieve chat room message history
-Endpoint to get the chat message history of a specified room.
-
->**GET** /chatrooms/{roomName}/chathistory
-
-**Payload:** none  
-
-**Return value:** Chat History
-
-### Possible parameters
-
-| Parameter   | Parameter Type	 | Description	                       | Default value |
-|-------------|-----------------|------------------------------------|---------------|
-| roomname    | @Path           | Exact room name                    |               |
-| servicename | @QueryParam     | The name of the Group Chat Service | conference    |
-
-## Create a chat room
-Endpoint to create a new chat room.
->**POST** /chatrooms
-
-**Payload:** Chatroom
-
-**Return value:** HTTP status 201 (Created)
-
-### Possible parameters
-
-| Parameter       | Parameter Type	 | Description                                     | Default value |
-|-----------------|-----------------|-------------------------------------------------|---------------|
-| servicename     | @QueryParam     | 	The name of the Group Chat Service             | conference    |
-| sendInvitations | @QueryParam     | Whether to send invitations to affiliated users | false         |
-
-### XML Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type: application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms
-
-**Payload Example 1 (required parameters):**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<chatRoom>
-    <naturalName>global-1</naturalName>
-    <roomName>global</roomName>
-    <description>Global Chat Room</description>
-</chatRoom>
-```
-
-**Payload Example 2 (available parameters):**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<chatRoom>
-    <roomName>global</roomName>
-    <naturalName>global-2</naturalName>
-    <description>Global Chat Room</description>
-    <subject>global-2 Subject</subject>
-    <creationDate>2014-02-12T15:52:37.592+01:00</creationDate>
-    <modificationDate>2014-09-12T15:35:54.702+02:00</modificationDate>
-    <maxUsers>0</maxUsers>
-    <persistent>true</persistent>
-    <publicRoom>true</publicRoom>
-    <registrationEnabled>false</registrationEnabled>
-    <canAnyoneDiscoverJID>false</canAnyoneDiscoverJID>
-    <canOccupantsChangeSubject>false</canOccupantsChangeSubject>
-    <canOccupantsInvite>false</canOccupantsInvite>
-    <canChangeNickname>false</canChangeNickname>
-    <logEnabled>true</logEnabled>
-    <loginRestrictedToNickname>false</loginRestrictedToNickname>
-    <membersOnly>false</membersOnly>
-    <moderated>false</moderated>
-    <allowPM>anyone</allowPM>
-    <broadcastPresenceRoles>
-        <broadcastPresenceRole>moderator</broadcastPresenceRole>
-        <broadcastPresenceRole>participant</broadcastPresenceRole>
-        <broadcastPresenceRole>visitor</broadcastPresenceRole>
-    </broadcastPresenceRoles>
-    <owners>
-        <owner>owner@localhost</owner>
-    </owners>
-    <admins>
-        <admin>admin@localhost</admin>
-    </admins>
-    <members>
-        <member>member2@localhost</member>
-        <member>member1@localhost</member>
-    </members>
-    <outcasts>
-        <outcast>outcast1@localhost</outcast>
-    </outcasts>
-</chatRoom>
-```
-
-### JSON Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type: application/json
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms
-
-**Payload Example 1 (required parameters):**
-```json
-{
-	"roomName": "global",
-	"naturalName": "global-2",
-	"description": "Global chat room"
-}
-```
-
-**Payload Example 2 (available parameters):**
-```json
-{
-    "roomName": "global-1",
-    "naturalName": "global-1_test_hello",
-    "description": "Global chat room",
-    "subject": "Global chat room subject",
-    "creationDate": "2012-10-18T16:55:12.803+02:00",
-    "modificationDate": "2014-07-10T09:49:12.411+02:00",
-    "maxUsers": "0",
-    "persistent": "true",
-    "publicRoom": "true",
-    "registrationEnabled": "false",
-    "canAnyoneDiscoverJID": "true",
-    "canOccupantsChangeSubject": "false",
-    "canOccupantsInvite": "false",
-    "canChangeNickname": "false",
-    "logEnabled": "true",
-    "loginRestrictedToNickname": "true",
-    "membersOnly": "false",
-    "moderated": "false",
-    "allowPM": "anyone",
-    "broadcastPresenceRoles": {
-        "broadcastPresenceRole": [
-            "moderator",
-            "participant",
-            "visitor"
-        ]
-    },
-    "owners": {
-        "owner": "owner@localhost"
-    },
-    "admins": {
-        "admin": [
-            "admin@localhost",
-            "admin2@localhost"
-        ]
-    },
-    "members": {
-        "member": [
-            "member@localhost",
-            "member2@localhost"
-        ]
-    },
-    "outcasts": {
-        "outcast": [
-            "outcast@localhost",
-            "outcast2@localhost"
-        ]
-    }
-}
-```
-
-**REST API Version 1.3.0 and later - Payload Example 2 (available parameters):**
-```json
-{
-    "roomName": "global-1",
-    "naturalName": "global-1_test_hello",
-    "description": "Global chat room",
-    "subject": "Global chat room subject",
-    "creationDate": "2012-10-18T16:55:12.803+02:00",
-    "modificationDate": "2014-07-10T09:49:12.411+02:00",
-    "maxUsers": "0",
-    "persistent": "true",
-    "publicRoom": "true",
-    "registrationEnabled": "false",
-    "canAnyoneDiscoverJID": "true",
-    "canOccupantsChangeSubject": "false",
-    "canOccupantsInvite": "false",
-    "canChangeNickname": "false",
-    "logEnabled": "true",
-    "loginRestrictedToNickname": "true",
-    "membersOnly": "false",
-    "moderated": "false",
-    "allowPM": "anyone",
-    "broadcastPresenceRoles": [
-        "moderator",
-        "participant",
-        "visitor"
-    ],
-    "owners": [
-       "owner@localhost"
-    ],
-    "admins": [
-       "admin@localhost"
-    ],
-    "members": [
-        "member@localhost"
-    ],
-    "outcasts": [
-        "outcast@localhost"
-    ]
-}
-```
-
-
-
-
-
-
-
-## Create multiple chat room
-Endpoint to create multiple new chat rooms at once.
->**POST** /chatrooms/bulk
-
-**Payload:** Chatrooms
-
-**Return value:** Result list, ordered by successes and failures
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<results>
-    <success>
-        <result>
-            <roomName>room1</roomName>
-            <resultType>Success</resultType>
-            <message>Room was successfully created</message>
-        </result>
-        <result>
-            <roomName>room2</roomName>
-            <resultType>Success</resultType>
-            <message>Room was successfully created</message>
-        </result>
-    </success>
-    <failure/>
-    <other/>
-</results>
-```
-
-```json
-{
-    "success": [
-        {
-            "roomName": "room1",
-            "resultType": "Success",
-            "message": "Room was successfully created"
-        },
-        {
-            "roomName": "room2",
-            "resultType": "Success",
-            "message": "Room was successfully created"
-        }
-    ],
-    "failure": [],
-    "other": []
-}
-```
-### Possible parameters
-
-| Parameter       | Parameter Type	 | Description                                           | Default value |
-|-----------------|-----------------|-------------------------------------------------------|---------------|
-| servicename     | @QueryParam     | 	The name of the Group Chat Service                   | conference    |
-| sendInvitations | @QueryParam     | Whether to send invitations to newly affiliated users | false         |
-
-### XML Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type: application/xml
->
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/bulk
-
-**Payload Example:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<chatRooms>
-    <chatRoom>
-        <roomName>room1</roomName>
-        <description>description1</description>
-    </chatRoom>
-    <chatRoom>
-        <roomName>room2</roomName>
-        <description>description1</description>
-    </chatRoom>
-</chatRooms>
-```
-
-For more examples, with more parameters, see the [create a chat room](#create-a-chat-room) endpoint.
-
-### JSON Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type: application/json
->
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms
-
-**Payload Example 1 (required parameters):**
-```json
-{
-    "chatRooms": [
-        { "roomName": "room1", "description": "description1" },
-        { "roomName": "room2", "description": "description2" }
-    ]
-}
-```
-
-For more examples, with more parameters, see the [create a chat room](#create-a-chat-room) endpoint.
-
-
-
-
-
-
-
-
-
-## Delete a chat room 
-Endpoint to delete a chat room.
->**DELETE** /chatrooms/{roomName}
-
-**Payload:** none
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter   | 	Parameter Type | Description                        | Default value |
-|-------------|-----------------|------------------------------------|---------------|
-| roomname    | @Path 	         | Exact room name                    |               |
-| servicename | @QueryParam     | The name of the Group Chat Service | conference    |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/testroom
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/testroom?servicename=privateconf
-
-## Update a chat room 
-Endpoint to update a chat room.
->**PUT** /chatrooms/{roomName}
-
-**Payload:** Chatroom
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter       | Parameter Type | Description                                           | Default value |
-|-----------------|----------------|-------------------------------------------------------|---------------|
-| roomname        | @Path          | Exact room name                                       |               |
-| servicename     | @QueryParam    | The name of the Group Chat Service                    | conference    |
-| sendInvitations | @QueryParam    | Whether to send invitations to newly affiliated users | false         |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/chatrooms/global
-
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<chatRoom>
-    <roomName>global</roomName>
-    <naturalName>global-2</naturalName>
-    <description>Global Chat Room edit</description>
-    <subject>New subject</subject>
-    <password>test</password>
-    <creationDate>2014-02-12T15:52:37.592+01:00</creationDate>
-    <modificationDate>2014-09-12T14:20:56.286+02:00</modificationDate>
-    <maxUsers>0</maxUsers>
-    <persistent>true</persistent>
-    <publicRoom>true</publicRoom>
-    <registrationEnabled>false</registrationEnabled>
-    <canAnyoneDiscoverJID>false</canAnyoneDiscoverJID>
-    <canOccupantsChangeSubject>false</canOccupantsChangeSubject>
-    <canOccupantsInvite>false</canOccupantsInvite>
-    <canChangeNickname>false</canChangeNickname>
-    <logEnabled>true</logEnabled>
-    <loginRestrictedToNickname>false</loginRestrictedToNickname>
-    <membersOnly>false</membersOnly>
-    <moderated>false</moderated>
-    <allowPM>anyone</allowPM>
-    <broadcastPresenceRoles/>
-    <owners>
-        <owner>owner@localhost</owner>
-    </owners>
-    <admins>
-        <admin>admin@localhost</admin>
-    </admins>
-    <members>
-        <member>member2@localhost</member>
-        <member>member1@localhost</member>
-    </members>
-    <outcasts>
-        <outcast>outcast1@localhost</outcast>
-    </outcasts>
-</chatRoom>
-```
-
-## Invite user or user group to a chat Room
-
-Endpoint to invite a user or a user group to a room.
-> **Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
-> **Header:** Content-Type: application/xml
-> 
-> **POST** http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite/{name}
-
-**Payload Example:**
-
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<mucInvitation>
-    <reason>Hello, come to this room, it is nice</reason>
-</mucInvitation>
-```
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-| Parameter | 	Parameter Type | Description                                                   | Default value |
-|-----------|-----------------|---------------------------------------------------------------|---------------|
-| roomname  | 	@Path	         | Exact room name                                               |               |
-| name      | @Path	          | The local username or group name or the user JID or group JID |               |
-
-## Invite multiple users and/or user groups to a chat Room
-
-Endpoint to invite multiple users and/or user groups to a room. Works both with JIDs and (user/group) names.
-> **Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
-> **Header:** Content-Type: application/xml
->
-> **POST** http://localhost:9090/plugins/restapi/v1/chatrooms/{roomName}/invite
-
-**Payload Example:**
-
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<mucInvitation>
-    <reason>Hello, come to this room, it is nice</reason>
-    <jidsToInvite>
-        <jid>jane@example.org</jid>
-        <jid>ADNMQP8=@example.org/695c6ae413c00446733d926ccadefd8b</jid>
-        <jid>john</jid>
-        <jid>SomeGroupName</jid>
-    </jidsToInvite>
-</mucInvitation>
-```
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-| Parameter | 	Parameter Type | Description                                                   | Default value |
-|-----------|-----------------|---------------------------------------------------------------|---------------|
-| roomname  | 	@Path	         | Exact room name                                               |               |
-
-##  Get all users with a particular affiliation in a chat room
-Retrieves a list of JIDs for all users with the specified affiliation in a multi-user chat room.
-
->**GET** /chatrooms/{roomName}/{affiliation}
-
-**Payload:** none
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter   | 	Parameter Type | Description                                                                                | Default value |
-|-------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname    | 	@Path	         | Exact room name                                                                            |               |
-| affiliation | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type application/xml
->
->**GET** http://example.org:9090/plugins/restapi/v1/chatrooms/global/member
-
-**Return payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<members>
-    <member>member2@localhost</member>
-    <member>member1@localhost</member>
-</members>
-```
-
-##  Add user with affiliation to chat room
-Endpoint to add a new user with affiliation to a room.
->**POST** /chatrooms/{roomName}/{affiliation}/{name}
-
-**Payload:** none
-
-**Return value:** HTTP status 201 (Created)
-
-### Possible parameters
-
-| Parameter       | 	Parameter Type | Description                                                                                | Default value |
-|-----------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname        | 	@Path	         | Exact room name                                                                            |               |
-| name            | 	@Path	         | The local username or the user JID                                                         |               |
-| affiliation     | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename     | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
-| sendInvitations | @QueryParam     | Whether to send invitation to the newly affiliated user                                    | false         |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser?sendInvitations=true
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf
-
-##  Replace all users with a affiliation in a chat room
-Endpoint to replace all users with a particular affiliation in a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.
->**PUT** /chatrooms/{roomName}/{affiliation}
-
-**Payload:** list of affiliations
-
-**Return value:** HTTP status 201 (Created)
-
-### Possible parameters
-
-| Parameter       | 	Parameter Type | Description                                                                                | Default value |
-|-----------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname        | 	@Path	         | Exact room name                                                                            |               |
-| affiliation     | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename     | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
-| sendInvitations | @QueryParam     | Whether to send invitation to newly affiliated users                                       | false         |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type application/xml
->
->**PUT** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members
-> 
-**Request Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<members>
-    <member>member2@localhost</member>
-    <member>member1@localhost</member>
-</members>
-```
-
-##  Add multiple users with a affiliation to a chat room
-Endpoint to add multiple users with an affiliation to a multi-user chat room. Note that a user can only have one type of affiliation with a room. By adding a user using a particular affiliation, any other pre-existing affiliation is removed.
->**PUT** /chatrooms/{roomName}/{affiliation}
-
-**Payload:** list of affiliations
-
-**Return value:** HTTP status 201 (Created)
-
-### Possible parameters
-
-| Parameter       | 	Parameter Type | Description                                                                               | Default value |
-|-----------------|-----------------|-------------------------------------------------------------------------------------------|---------------|
-| roomname        | 	@Path	         | Exact room name                                                                           |               |
-| affiliation     | 	@Path	         | Available affiliation: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename     | 	@QueryParam	   | The name of the Group Chat Service                                                        | conference    |
-| sendInvitations | @QueryParam     | Whether to send invitations to newly affiliated users                                     | false         |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**Header:** Content-Type application/xml
->
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members
->
-**Request Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<members>
-    <member>member2@localhost</member>
-    <member>member1@localhost</member>
-</members>
-```
-
-##  Add group with affiliation to chat room
-Endpoint to add a new group with affiliation to a room.
->**POST** /chatrooms/{roomName}/{affiliation}/group/{name}
-
-**Payload:** none
-
-**Return value:** HTTP status 201 (Created)
-
-### Possible parameters
-
-| Parameter       | Parameter Type | Description                                                                                | Default value |
-|-----------------|----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname        | @Path          | Exact room name                                                                            |               |
-| name            | @Path          | The group name                                                                             |               |
-| affiliation     | @Path          | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename     | @QueryParam    | The name of the Group Chat Service                                                         | conference    |
-| sendInvitations | @QueryParam    | Whether to send invitations to the users in the newly affiliated groups                    | false         |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
->
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testGroup
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/group/testGroup
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/group/testGroup
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/group/testGroup
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/group/testUser?servicename=privateconf
-
-
-## Delete a user from a chat room 
-Endpoint to remove a room user affiliation.
->**DELETE** /chatrooms/{roomName}/{affiliations}/{name}
-
-**Payload:** none
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter    | 	Parameter Type | Description                                                                                | Default value |
-|--------------|-----------------|--------------------------------------------------------------------------------------------|---------------|
-| roomname     | 	@Path	         | Exact room name                                                                            |               |
-| name         | 	@Path	         | The local username or the user JID                                                         |               |
-| affiliations | 	@Path	         | Available affiliations: <br>**owners**  <br> **admins** <br> **members** <br> **outcasts** |               |
-| servicename  | 	@QueryParam	   | The name of the Group Chat Service                                                         | conference    |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser@openfire.com
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/admins/testUser
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/members/testUser
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/outcasts/testUser
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/chatrooms/global/owners/testUser?servicename=privateconf
-
-# System related REST Endpoints
-
-## Retrieve all system properties 
-Endpoint to get all system properties
->**GET** /system/properties
-
-**Payload:** none
-
-**Return value:** System properties
- 
-### Examples
-
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/system/properties
-
-## Retrieve system property 
-Endpoint to get information over specific system property
->**GET** /system/properties/{propertyName}
-
-**Payload:** none
-
-**Return value:** System property
-
-### Possible parameters
-
-| Parameter    | 	Parameter Type | Description                 | Default value |
-|--------------|-----------------|-----------------------------|---------------|
-| propertyName | @Path 	         | The name of system property |               |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/system/properties/xmpp.domain
-
-## Create a system property 
-Endpoint to create a system property. Note that the name of the property must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.
->**POST** system/properties
-
-**Payload:** System Property
-
-**Return value:** HTTP status 201 (Created)
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type: application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/system/properties
-
-**Payload Example:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<property key="propertyName" value="propertyValue"/>
-```
-
-## Delete a system property
-Endpoint to delete a system property, together with all of its child properties (properties of which the name starts with the name of this property, followed by a dot). Note that the name of the property must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. A deletion that could also delete other properties (for example, because the name contains an underscore, which can match any character) is rejected.
->**DELETE** /system/properties/{propertyName}
-
-**Payload:** none
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter    | 	Parameter Type | Description                 | Default value |
-|--------------|-----------------|-----------------------------|---------------|
-| propertyName | @Path 	         | The name of system property |               |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/system/properties/propertyName
-
-## Update a system property
-Endpoint to update / overwrite a system property
->**PUT** /system/properties/{propertyName}
-
-**Payload:** System property
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter    | 	Parameter Type | Description                 | Default value |
-|--------------|-----------------|-----------------------------|---------------|
-| propertyName | @Path 	         | The name of system property |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/system/properties/propertyName
-
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<property key="propertyName" value="anotherValue"/>
-```
-
-## Retrieve concurrent sessions
-Endpoint to get count of concurrent sessions
->**GET** /system/statistics/sessions
-
-**Payload:** none
-
-**Return value:** Sessions count
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/system/statistics/sessions
-
-## Check the 'liveness' state (using all checks)
+**Request body** (required): `RosterItemEntity` (XML or JSON) - The updated definition of the roster entry.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The roster entry was updated. |  |
+| 400 | A roster entry cannot be added with a 'shared group'. | `ErrorResponse` |
+| 404 | No user with this username exists. | `ErrorResponse` |
+| 409 | A roster entry already exists for the provided contact JID. | `ErrorResponse` |
+
+## Remove roster entry
+
+> **DELETE** /plugins/restapi/v1/users/{username}/roster/{rosterJid}
+
+Removes one of the roster entries (contacts) of a particular user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to remove a roster entry. |  |
+| rosterJid | path | yes | The JID of the entry/contact to remove. |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The entry was removed from the roster. |  |
+| 400 | A roster entry cannot be removed from a 'shared group'. | `ErrorResponse` |
+| 404 | No user with this username exists, or its roster did not contain this entry. | `ErrorResponse` |
+
+## Get user's vCard
+
+> **GET** /plugins/restapi/v1/users/{username}/vcard
+
+Retrieves the vCard for a particular user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to return the vCard. |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The vCard of the user. |  |
+| 204 | No vCard found. |  |
+
+## Update vCard
+
+> **PUT** /plugins/restapi/v1/users/{username}/vcard
+
+Creates or changes a vCard of a particular user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to update the vCard. |  |
+
+**Request body** (required): string (XML) - The updated definition of the vCard.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The vCard was updated/created. |  |
+| 400 | Provided data could not be parsed. | `ErrorResponse` |
+| 409 | Cannot change vCard, as Openfire is configured to have read-only vCards. | `ErrorResponse` |
+
+## Delete vCard
+
+> **DELETE** /plugins/restapi/v1/users/{username}/vcard
+
+Removes a vCard of a particular user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which to delete the vCard. |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The vCard was deleted. |  |
+| 409 | Cannot delete vCard, as Openfire is configured to have read-only vCards. | `ErrorResponse` |
+
+## Lock user out
+
+> **POST** /plugins/restapi/v1/lockouts/{username}
+
+Lockout / ban the user from the chat server. The user will be kicked if the user is online.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user that is to be locked out. |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | The user was locked out. |  |
+| 404 | No user with this username exists. | `ErrorResponse` |
+
+## Unlock user
+
+> **DELETE** /plugins/restapi/v1/lockouts/{username}
+
+Removes a previously applied lockout / ban of a user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The username of the user for which the lockout is to be undone. |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | User is unlocked. |  |
+| 404 | No user with this username exists. | `ErrorResponse` |
+
+# User Group
+
+Managing Openfire user groups.
+
+## Get groups
+
+> **GET** /plugins/restapi/v1/groups
+
+Get a list of all user groups.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | All groups. | `GroupEntities` (XML or JSON) |
+
+## Create group
+
+> **POST** /plugins/restapi/v1/groups
+
+Create a new user group.
+
+**Request body** (required): `GroupEntity` (XML or JSON) - The group that needs to be created.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Group created. |  |
+| 400 | Group or group name missing, or invalid syntax for a property. | `ErrorResponse` |
+| 409 | Group already exists. | `ErrorResponse` |
+
+## Get group
+
+> **GET** /plugins/restapi/v1/groups/{groupName}
+
+Get one specific user group by name.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| groupName | path | yes | The name of the group that needs to be fetched. Example: `Colleagues` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The group. | `GroupEntity` (XML or JSON) |
+| 404 | Group with this name not found. | `ErrorResponse` (XML or JSON) |
+
+## Update group
+
+> **PUT** /plugins/restapi/v1/groups/{groupName}
+
+Updates / overwrites an existing user group. Note that the name of the group cannot be changed.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| groupName | path | yes | The name of the group that needs to be updated. Example: `Colleagues` |  |
+
+**Request body** (required): `GroupEntity` (XML or JSON) - The new group definition that needs to overwrite the old definition.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Group updated. |  |
+| 400 | Group or group name missing, or name does not match existing group, or invalid syntax for a property. | `ErrorResponse` |
+| 404 | Group with this name not found. | `ErrorResponse` |
+
+## Delete group
+
+> **DELETE** /plugins/restapi/v1/groups/{groupName}
+
+Removes an existing user group.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| groupName | path | yes | The name of the group that needs to be removed. Example: `Colleagues` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Group deleted. |  |
+| 404 | Group with this name not found. | `ErrorResponse` |
+
+# Chat service
+
+Managing multi-user chat services.
+
+## Get chat services
+
+> **GET** /plugins/restapi/v1/chatservices
+
+Get a list of all multi-user chat services.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | All chat services. | `MUCServiceEntities` (XML or JSON) |
+
+## Create chat service
+
+> **POST** /plugins/restapi/v1/chatservices
+
+Create a new multi-user chat service.
+
+**Request body** (required): `MUCServiceEntity` (XML or JSON) - The MUC service that needs to be created.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Service created. |  |
+| 403 | Service creation is not permitted. | `ErrorResponse` |
+| 409 | Service already exists, or another conflict occurred while creating the service. | `ErrorResponse` |
+
+# Chat room
+
+Managing multi-user chat rooms.
+
+## Get chat rooms
+
+> **GET** /plugins/restapi/v1/chatrooms
+
+Get a list of all multi-user chat rooms of a particular chat room service.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service for which to return all chat rooms. Example: `conference` | `conference` |
+| type | query | no | Room type-based filter: 'all' or 'public'. | `public` |
+| search | query | no | Search/Filter by room name.<br>This acts like the wildcard search %String% Example: `conference` |  |
+| expandGroups | query | no | For all groups defined in owners, admins, members and outcasts, list individual members instead of the group name. | `false` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | All chat rooms. | `MUCRoomEntities` (XML or JSON) |
+| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Create chat room
+
+> **POST** /plugins/restapi/v1/chatrooms
+
+Create a new multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service in which to create a chat room. Example: `conference` | `conference` |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Request body** (required): `MUCRoomEntity` (XML or JSON) - The MUC room that needs to be created.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Room created. |  |
+| 403 | Room creation is not permitted. | `ErrorResponse` |
+| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` |
+| 409 | Room already exists, or another conflict occurred while creating the room. | `ErrorResponse` |
+
+## Create multiple chat rooms
+
+> **POST** /plugins/restapi/v1/chatrooms/bulk
+
+Create a number of new multi-user chat rooms.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service in which to create the chat rooms. Example: `conference` | `conference` |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Request body** (required): `MUCRoomEntities` (XML or JSON) - The MUC rooms that need to be created.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Request has been processed. Results are reported in the response. | `RoomCreationResultEntities` (XML or JSON) |
+| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Get chat room
+
+> **GET** /plugins/restapi/v1/chatrooms/{roomName}
+
+Get information of a specific multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the MUC room to return. Example: `lobby` |  |
+| servicename | query | no | The name of the MUC service for which to return a chat room. Example: `conference` | `conference` |
+| expandGroups | query | no | For all groups defined in owners, admins, members and outcasts, list individual members instead of the group name. | `false` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The chat room. | `MUCRoomEntity` (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Update chat room
+
+> **PUT** /plugins/restapi/v1/chatrooms/{roomName}
+
+Updates an existing multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the chat room that needs to be updated. Example: `lobby` |  |
+| servicename | query | no | The name of the MUC service in which to update a chat room. Example: `conference` | `conference` |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Request body** (required): `MUCRoomEntity` (XML or JSON) - The new MUC room definition that needs to overwrite the old definition.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Room updated. |  |
+| 403 | Room update/create is not permitted. | `ErrorResponse` |
+| 404 | MUC service does not exist or is not accessible. | `ErrorResponse` |
+| 409 | This update causes a conflict, possibly with another existing room. | `ErrorResponse` |
+
+## Delete chat room
+
+> **DELETE** /plugins/restapi/v1/chatrooms/{roomName}
+
+Removes an existing multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the MUC room to delete. Example: `lobby` |  |
+| servicename | query | no | The name of the MUC service from which to delete a chat room. Example: `conference` | `conference` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Room deleted. |  |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Get room history
+
+> **GET** /plugins/restapi/v1/chatrooms/{roomName}/chathistory
+
+Get messages that have been exchanged in a specific multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the chat room for which to return message history. Example: `lobby` |  |
+| servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The chat room message history. | `MUCRoomMessageEntities` (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Invite a collection of users and/or groups
+
+> **POST** /plugins/restapi/v1/chatrooms/{roomName}/invite
+
+Invites a collection of users and/or groups to join a specific multi-user chat room. Each entity can be identified by the JID of a user or group, or by the name of a local user or group. When a group is invited, all of its members are invited.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the chat room to which to invite users and/or groups. Example: `lobby` |  |
+| servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
+
+**Request body** (required): `MUCInvitationsEntity` (XML or JSON) - The invitation message to send and whom to send it to.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Invitation sent. |  |
+| 403 | Not allowed to invite a user or group to this room. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Invite user or group
+
+> **POST** /plugins/restapi/v1/chatrooms/{roomName}/invite/{jid}
+
+Invites a user or group to join a specific multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the chat room to which to invite a user or group. Example: `lobby` |  |
+| jid | path | yes | The entity to invite into the room: the JID of a user or group, or the name of a local user or group. When a group is invited, all of its members are invited. Example: `john@example.org` |  |
+| servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
+
+**Request body** (required): `MUCInvitationEntity` (XML or JSON) - The invitation message to send and whom to send it to.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Invitation sent. |  |
+| 403 | Not allowed to invite a user to this room. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Get room occupants
+
+> **GET** /plugins/restapi/v1/chatrooms/{roomName}/occupants
+
+Get all occupants of a specific multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the chat room for which to return occupants. Example: `lobby` |  |
+| servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The chat room occupants. | `OccupantEntities` (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Get room participants
+
+> **GET** /plugins/restapi/v1/chatrooms/{roomName}/participants
+
+Get all participants of a specific multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| roomName | path | yes | The name of the chat room for which to return participants. Example: `lobby` |  |
+| servicename | query | no | The name of the chat room's MUC service. Example: `conference` | `conference` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The chat room participants. | `ParticipantEntities` (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Get room affiliations
+
+> **GET** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}
+
+Retrieves a list of JIDs for all users that have a particular affiliation with a multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| roomName | path | yes | The name of the MUC room for which to return affiliations. Example: `lobby` |  |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Affiliated user list retrieved. | unspecified (XML or JSON) |
+| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` (XML or JSON) |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` (XML or JSON) |
+
+## Add room affiliations
+
+> **POST** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}
+
+Affiliates multiple users to a particular multi-user chat room (without removing existing affiliated users of that type). Note that a user can only have one type of affiliation with a room. By affiliating a user to a room, any other pre-existing affiliation for that user is removed.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| roomName | path | yes | The name of the MUC room to which users are to be affiliated. Example: `lobby` |  |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Request body** (required): `AffiliatedEntities` (XML or JSON) - The list of users to affiliate to the room.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Users have been affiliated to the room. |  |
+| 400 | Provided values cannot be parsed as JIDs, or provided 'affiliations' value is invalid. | `ErrorResponse` |
+| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Replace room affiliations
+
+> **PUT** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}
+
+Replaces the list of users in a multi-user chat room with a specific affiliation with a new list of users. Note that a user can only have one type of affiliation with a room. By affiliating a user to a room, any other pre-existing affiliation for that user is removed.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| roomName | path | yes | The name of the MUC room of which affiliations are to be replaced. Example: `lobby` |  |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Request body** (required): `AffiliatedEntities` (XML or JSON) - The new list of users with this particular affiliation.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Affiliations of the room have been replaced. |  |
+| 400 | Provided values cannot be parsed as JIDs, or provided 'affiliations' value is invalid. | `ErrorResponse` |
+| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Add group room affiliations
+
+> **POST** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}/group/{groupname}
+
+Affiliate all members of an Openfire user group to a multi-user chat room. Note that a user can only have one type of affiliation with a room. By affiliating a user to a room, any other pre-existing affiliation for that user is removed.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| groupname | path | yes | The name of the user group from which all members will be affiliated to the room. Example: `Operators` |  |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+| roomName | path | yes | The name of the MUC room to which affiliations are to be added. Example: `lobby` |  |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Affiliations added to the room. |  |
+| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
+| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Remove group room affiliations
+
+> **DELETE** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}/group/{groupname}
+
+Removes affiliation for all members of an Openfire user group from a multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| groupname | path | yes | The name of the user group from which all members will get their room affiliation removed. Example: `Operators` |  |
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+| roomName | path | yes | The name of the MUC room from which affiliations are to be removed. Example: `lobby` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Affiliations removed from the room. |  |
+| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
+| 403 | Not allowed to remove this affiliation. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 409 | Applying this affiliation change would cause a room conflict. | `ErrorResponse` |
+
+## Add room affiliation
+
+> **POST** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}/{jid}
+
+Affiliates a single user to a multi-user chat room. Note that a user can only have one type of affiliation with a room. By affiliating a user to a room, any other pre-existing affiliation for that user is removed.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| jid | path | yes | The entity that is to be affiliated: a (bare) JID, or the name of a local user. Example: `john@example.org` |  |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+| roomName | path | yes | The name of the MUC room to which an affiliation is to be added. Example: `lobby` |  |
+| sendInvitations | query | no | Whether to send invitations to newly affiliated users. Example: `true` | `false` |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | User has been affiliated to the room. |  |
+| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
+| 403 | Not allowed to perform this affiliation change. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+
+## Remove room affiliation
+
+> **DELETE** /plugins/restapi/v1/chatrooms/{roomName}/{affiliation}/{jid}
+
+Removes an affiliation of a user to a multi-user chat room.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| jid | path | yes | The entity for which the room affiliation is to be removed: a (bare) JID, or the name of a local user. Example: `john@example.org` |  |
+| servicename | query | no | The name of the MUC service that the MUC room is part of. Example: `conference` | `conference` |
+| affiliation | path | yes | The type of affiliation. One of: 'admins', 'members', 'outcasts', 'owners'. Example: `members` |  |
+| roomName | path | yes | The name of the MUC room from which an affiliation is to be removed. Example: `lobby` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Affiliation removed from the room. |  |
+| 400 | Provided 'affiliations' value is invalid. | `ErrorResponse` |
+| 403 | Not allowed to remove this affiliation. | `ErrorResponse` |
+| 404 | The chat room (or its service) can not be found or is not accessible. | `ErrorResponse` |
+| 409 | Applying this affiliation change would cause a room conflict. | `ErrorResponse` |
+
+# Client Sessions
+
+Managing live client sessions.
+
+## Get all sessions
+
+> **GET** /plugins/restapi/v1/sessions
+
+Retrieve all live client sessions.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The client sessions currently active in Openfire. | `SessionEntities` (XML or JSON) |
+
+## Get user sessions
+
+> **GET** /plugins/restapi/v1/sessions/{username}
+
+Retrieve all live client sessions for a particular user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The name of a user for which to return client sessions. Example: `johndoe` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The client sessions for one particular user that are currently active in Openfire. | `SessionEntities` (XML or JSON) |
+
+## Kick user sessions
+
+> **DELETE** /plugins/restapi/v1/sessions/{username}
+
+Close/disconnect all live client sessions for a particular user.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | path | yes | The name of a user for which to drop all client sessions. Example: `johndoe` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The client sessions for one particular user have been closed. |  |
+
+# Message
+
+Sending (chat) messages to users.
+
+## Broadcast
+
+> **POST** /plugins/restapi/v1/messages/users
+
+Sends a message to all users that are currently online.
+
+**Request body** (required): `MessageEntity` (XML or JSON) - The message that is to be broadcast.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | Message is sent. |  |
+| 400 | The message content is empty or missing. |  |
+
+# Message Archive
+
+Server-sided storage of chat messages.
+
+## Unread message count
+
+> **GET** /plugins/restapi/v1/archive/messages/unread/{jid}
+
+Gets a count of messages that haven't been delivered to the user yet.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| jid | path | yes | The (bare) JID of the user for which the unread message count needs to be fetched. Example: `john@example.org` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | A message count. | `MsgArchiveEntity` (XML or JSON) |
+
+# Security Audit Log
+
+Inspecting the security audit log.
+
+## Get log entries
+
+> **GET** /plugins/restapi/v1/logs/security
+
+Retrieve entries from the security audit log.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| username | query | no | The name of a user for which to filter events. Example: `admin` |  |
+| offset | query | no | Number of log entries to skip. Example: `0` |  |
+| limit | query | no | Number of log entries to retrieve. Example: `100` | `100` |
+| startTime | query | no | Oldest timestamp of range of logs to retrieve. 0 for 'forever'. |  |
+| endTime | query | no | Most recent timestamp of range of logs to retrieve. 0 for 'now'. |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The requested log entries. | `SecurityAuditLogs` (XML or JSON) |
+| 403 | The audit log is not readable (configured to be write-only). | `ErrorResponse` (XML or JSON) |
+
+# Statistics
+
+Inspecting Openfire statistics.
+
+## Get client session counts
+
+> **GET** /plugins/restapi/v1/system/statistics/sessions
+
+Retrieve statistics on the number of client sessions.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The requested statistics. | `SessionsCount` (XML or JSON) |
+
+# System
+
+Managing Openfire system configuration.
+
+## Perform all liveness checks
+
+> **GET** /plugins/restapi/v1/system/liveness
+
 Detects if Openfire has reached a state that it cannot recover from, except for with a restart, based on every liveness check that it has implemented.
 
->**GET** /system/liveness
+**Responses**
 
-**Payload:** none
-
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is live. |  |
+| 503 | At least one liveness check failed: the system is determined to not be alive. |  |
 
 ## Perform 'deadlock' liveness check
+
+> **GET** /plugins/restapi/v1/system/liveness/deadlock
+
 Detects if Openfire has reached a state that it cannot recover from because of a deadlock.
->**GET** /system/liveness/deadlock
 
-**Payload:** none
+**Responses**
 
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is live. |  |
+| 503 | A deadlock is detected. |  |
 
 ## Perform 'properties' liveness check
+
+> **GET** /plugins/restapi/v1/system/liveness/properties
+
 Detects if Openfire has reached a state that it cannot recover from because a system property change requires a restart to take effect.
->**GET** /system/liveness/properties
 
-**Payload:** none
+**Responses**
 
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is live. |  |
+| 503 | One or more system property changes that require a server restart have been detected. |  |
 
-## Check the 'readiness' state (using all checks)
+## Get system properties
+
+> **GET** /plugins/restapi/v1/system/properties
+
+Get all Openfire system properties.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system properties. | `SystemProperties` (XML or JSON) |
+
+## Create system property
+
+> **POST** /plugins/restapi/v1/system/properties
+
+Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.
+
+**Request body** (required): `SystemProperty` (XML or JSON) - The system property to create.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 201 | The system property is created. |  |
+| 400 | No system property was provided, the system property has no value, or its name is not valid. The name must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. | `ErrorResponse` |
+| 403 | Prohibited to create this system property. | `ErrorResponse` |
+| 409 | The name of the system property differs only in case from the name of an existing system property. | `ErrorResponse` |
+
+## Get system property
+
+> **GET** /plugins/restapi/v1/system/properties/{propertyKey}
+
+Get a specific Openfire system property.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| propertyKey | path | yes | The name of the system property to return. Example: `foo.bar.xyz` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The requested system property. | `SystemProperty` (XML or JSON) |
+| 403 | Reading this system property is prohibited. | `ErrorResponse` (XML or JSON) |
+| 404 | The system property could not be found. | `ErrorResponse` (XML or JSON) |
+
+## Update system property
+
+> **PUT** /plugins/restapi/v1/system/properties/{propertyKey}
+
+Updates an existing Openfire system property.
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| propertyKey | path | yes | The name of the system property to update. Example: `foo.bar.xyz` |  |
+
+**Request body** (required): `SystemProperty` (XML or JSON) - The new system property definition that replaces an existing definition.
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system property is updated. |  |
+| 400 | No system property was provided, the system property has no value, or it does not match the name in the URL. | `ErrorResponse` |
+| 403 | Prohibited to update this system property. | `ErrorResponse` |
+| 404 | The system property could not be found. | `ErrorResponse` |
+| 409 | The name of the system property differs only in case from the name of another existing system property. | `ErrorResponse` |
+
+## Remove system property
+
+> **DELETE** /plugins/restapi/v1/system/properties/{propertyKey}
+
+Removes an existing Openfire system property, together with all of its child properties (properties of which the name starts with the name of this property, followed by a dot).
+
+**Parameters**
+
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| propertyKey | path | yes | The name of the system property to delete. Example: `foo.bar.xyz` |  |
+
+**Responses**
+
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system property and its child properties are deleted. |  |
+| 400 | The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens. | `ErrorResponse` |
+| 403 | Prohibited to delete this system property, or one of its child properties. | `ErrorResponse` |
+| 404 | The system property could not be found. | `ErrorResponse` |
+| 409 | Deleting this system property could also delete unintended properties (other than this property and its child properties). This can happen, for example, when its name contains an underscore, which can match any character. | `ErrorResponse` |
+
+## Perform all readiness checks
+
+> **GET** /plugins/restapi/v1/system/readiness
+
 Detects if Openfire is in a state where it is ready to process traffic, based on every readiness check that it has implemented.
->**GET** /system/readiness
 
-**Payload:** none
+**Responses**
 
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
-
-## Perform 'server' readiness check
-Detects if Openfire's core service has been started.
->**GET** /system/readiness/server
-
-**Payload:** none
-
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is ready. |  |
+| 503 | At least one readiness check failed: the system is determined to not be able to process traffic. |  |
 
 ## Perform 'cluster' readiness check
+
+> **GET** /plugins/restapi/v1/system/readiness/cluster
+
 Detects if the cluster functionality has finished starting (or is disabled).
->**GET** /system/readiness/cluster
 
-**Payload:** none
+**Responses**
 
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
-
-## Perform 'plugins' readiness check
-Detects if Openfire has finished starting its plugins.
->**GET** /system/readiness/plugins
-
-**Payload:** none
-
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is ready. |  |
+| 503 | Clustering functionality is enabled, but has not finished starting up yet. |  |
 
 ## Perform 'connections' readiness check
+
+> **GET** /plugins/restapi/v1/system/readiness/connections
+
 Detects if Openfire is ready to accept connection requests.
->**GET** /system/readiness/connections
 
-**Payload:** none
+**Parameters**
 
-**Return value**: HTTP status 200 (OK). Any HTTP status outside the range 200-399 indicates failure.
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| connectionType | query | no | Optional. Use to limit the check to one particular connection type. One of: SOCKET_S2S, SOCKET_C2S, BOSH_C2S, WEBADMIN, COMPONENT, CONNECTION_MANAGER. Example: `SOCKET_C2S` |  |
+| encrypted | query | no | Check the encrypted (true) or unencrypted (false) variant of the connection type. Only used in combination with 'connectionType', as without it, all types and both encrypted and unencrypted are checked. |  |
 
-### Possible parameters
+**Responses**
 
-| Parameter      | Parameter Type | Description                                                                                                                                                                                                | Default value |
-|----------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
-| connectionType | @Path          | Optional. Use to limit the check to one particular connection type. One of: SOCKET_S2S, SOCKET_C2S, BOSH_C2S, WEBADMIN, COMPONENT, CONNECTION_MANAGER                                                      |               |
-| encypted       | @Path          | Check the encrypted (true) or unencrypted (false) variant of the connection type. Only used in combination with 'connectionType', as without it, all types and both encrypted and unencrypted are checked. |               |
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is ready. |  |
+| 400 | The provided connectionType value is invalid. |  |
+| 503 | Openfire currently does not accept (all) connections. |  |
 
-# Group related REST Endpoints
+## Perform 'plugins' readiness check
 
-## Retrieve all groups 
-Endpoint to get all groups
->**GET** /groups
+> **GET** /plugins/restapi/v1/system/readiness/plugins
 
-**Payload:** none
+Detects if Openfire has finished starting its plugins.
 
-**Return value:** Groups
- 
-### Examples
+**Responses**
 
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/groups
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is ready. |  |
+| 503 | Plugins have not all been started yet. |  |
 
-## Retrieve a group 
-Endpoint to get information over specific group
->**GET** /groups/{groupName}
+## Perform 'server started' readiness check
 
-**Payload:** none
+> **GET** /plugins/restapi/v1/system/readiness/server
 
-**Return value:** Group
+Detects if Openfire's core service has been started.
 
-### Possible parameters
+**Responses**
 
-| Parameter | 	Parameter Type | Description           | Default value |
-|-----------|-----------------|-----------------------|---------------|
-| groupName | @Path 	         | The name of the group |               |
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The system is ready. |  |
+| 503 | The Openfire service has not finished starting up yet. |  |
 
-### Examples
+# Clustering
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/groups/moderators
+Reporting the status of Openfire clustering.
 
-## Create a group 
-Endpoint to create a new group
->**POST** /groups
+## Get all cluster nodes
 
-**Payload:** Group
+> **GET** /plugins/restapi/v1/clustering/nodes
 
-**Return value:** HTTP status 201 (Created)
+Get a list of all nodes of the cluster. Note that this endpoint can only return data for remote nodes when the instance of Openfire that processes this query has successfully joined the cluster.
 
-### Examples
+**Responses**
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type: application/xml
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/groups
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | All cluster nodes. | `ClusterNodeEntities` (XML or JSON) |
 
-**Payload Example:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<group>
-	<name>GroupName</name>
-	<description>Some description</description>
-	<isshared>false</isshared>
-</group>
-```
+## Get a specific cluster node
 
-## Delete a group
-Endpoint to delete a group
->**DELETE** /groups/{groupName}
+> **GET** /plugins/restapi/v1/clustering/nodes/{nodeId}
 
-**Payload:** none
+Get a specific node of the cluster. Note that this endpoint can only return data for remote nodes when the instance of Openfire that processes this query has successfully joined the cluster.
 
-**Return value:** HTTP status 200 (OK)
+**Parameters**
 
-### Possible parameters
+| Name | Located in | Required | Description | Default value |
+|------|------------|----------|-------------|---------------|
+| nodeId | path | yes | The nodeID value for a particular node. Example: `52a89928-66f7-45fd-9bb8-096de07400ac` |  |
 
-| Parameter | 	Parameter Type | Description           | Default value |
-|-----------|-----------------|-----------------------|---------------|
-| groupName | @Path 	         | The name of the group |               |
+**Responses**
 
-### Examples
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | The cluster node. | `ClusterNodeEntity` (XML or JSON) |
+| 404 | The provided NodeID does not identify an existing cluster node. | `ErrorResponse` (XML or JSON) |
 
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**DELETE** http://example.org:9090/plugins/restapi/v1/groups/groupToDelete
+## Get clustering status
 
-## Update a group
-Endpoint to update / overwrite a group
->**PUT** /groups/{groupName}
+> **GET** /plugins/restapi/v1/clustering/status
 
-**Payload:** Group
+Describes the point-in-time state of Openfire's clustering with other servers. The status is one of: 'SENIOR AND ONLY MEMBER', 'Senior member', 'Junior member', 'Starting up' or 'Disabled'.
 
-**Return value:** HTTP status 200 (OK)
+**Responses**
 
-### Possible parameters
+| Status | Description | Response body |
+|--------|-------------|---------------|
+| 200 | Status returned. | `ClusteringEntity` (XML or JSON) |
 
-| Parameter | 	Parameter Type | Description           | Default value |
-|-----------|-----------------|-----------------------|---------------|
-| groupName | @Path 	         | The name of the group |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**Header:** Content-Type application/xml
-> 
->**PUT** http://example.org:9090/plugins/restapi/v1/groups/groupNameToUpdate
-
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<group>
-	<name>groupNameToUpdate</name>
-	<description>New description</description>
-    <isshared>false</isshared>
-</group>
-```
-
-# Session related REST Endpoints
-
-## Retrieve all user session
-Endpoint to get all user sessions
->**GET** /sessions
-
-**Payload:** none
-
-**Return value:** Sessions
- 
-### Examples
-
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/sessions
-
-## Retrieve the user sessions
-Endpoint to get sessions from a user
->**GET** /sessions/{username}
-
-**Payload:** none
-
-**Return value:** Sessions
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description              | Default value |
-|-----------|-----------------|--------------------------|---------------|
-| username  | @Path 	         | The username of the user |               |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/sessions/testuser
-
-## Close all user sessions
-Endpoint to close/kick sessions from a user
->**DELETE** /sessions/{username}
-
-**Payload:** none
-
-**Return value:** HTTP status 200 (OK)
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description              | Default value |
-|-----------|-----------------|--------------------------|---------------|
-| username  | @Path 	         | The username of the user |               |
-
-### Examples
-
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**DELETE** http://example.org:9090/plugins/restapi/v1/sessions/testuser
-
-# Message related REST Endpoints
-
-## Send a broadcast message
-Endpoint to send a broadcast/server message to all online users
->**POST** /messages/users
-
-**Payload:** Message
-
-**Return value:** HTTP status 201 (Created)
- 
-### Examples
-
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**POST** http://example.org:9090/plugins/restapi/v1/messages/users
-
-**Payload:**
-```xml
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<message>
-	<body>Your message</body>
-</message>
-```
-# Security Audit related REST Endpoints
-
-## Retrieve the Security audit logs
-Endpoint to get security audit logs
->**GET** /logs/security
-
-**Payload:** none
-
-**Return value:** Security Audit Logs
-
-### Possible parameters
-
-| Parameter | Parameter Type | Description                                        | Default value |
-|-----------|----------------|----------------------------------------------------|---------------|
-| username  | @QueryParam    | Username of user to look up                        |               |
-| startTime | @QueryParam    | Oldest timestamp of range of logs to retrieve      |               |
-| endTime   | @QueryParam    | Most recent timestamp of range of logs to retrieve | 0 (until now) |
-| offset    | @QueryParam    | Number of logs to skip                             |               |
-| limit     | @QueryParam    | Number of logs to retrieve                         |               |
-
-### Examples
-
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
-> 
->**GET** http://example.org:9090/plugins/restapi/v1/logs/security
-
-# Clustering related REST Endpoints
-
-## Retrieve information for all cluster nodes.
-Endpoint to get information for all nodes in the cluster. Note that this endpoint can only return data for remote nodes
-when the instance of Openfire that processes this query has successfully joined the cluster.
-
->**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes
-
-**Payload:** none
-
-**Return value:** ClusterNodes
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes
->
-
-## Retrieve information for a specific cluster node.
-Endpoint to get information for a specific cluster node. Note that this endpoint can only return data for remote nodes
-when the instance of Openfire that processes this query has successfully joined the cluster.
-
->**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes/{nodeId}
-
-**Payload:** none
-
-**Return value:** ClusterNode
-
-### Possible parameters
-
-| Parameter | 	Parameter Type | Description  | Default value |
-|-----------|-----------------|--------------|---------------|
-| nodeId    | 	@Path	         | Exact NodeID |               |
-
-### Examples
->**Header:** Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/clustering/nodes/52a89928-66f7-45fd-9bb8-096de07400ac
-> 
-
-## Retrieve the Clustering status
-Endpoint to get description of clustering status
->**GET** /clustering/status
-
-**Payload:** none
-
-**Return value:** String describing the clustering status of this Openfire instance
-
-### Examples
->**Header**: Authorization: Basic YWRtaW46MTIzNDU=
->
->**GET** http://example.org:9090/plugins/restapi/v1/clustering/status
-
-### Possible Responses
-
-* SENIOR AND ONLY MEMBER
-* Senior member
-* Junior member
-* Starting up
-* Disabled
+<!-- END GENERATED ENDPOINTS -->
 
 # Data format
 Openfire REST API provides XML and JSON as data format. The default data format is XML.

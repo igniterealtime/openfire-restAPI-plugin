@@ -47,6 +47,58 @@
                 <version>3.6.0</version> <!-- Override inherited 2.17 to enable JUnit 5 tests -->
             </plugin>
 
+            <!-- Generate the endpoint documentation in readme.md from the OpenAPI annotations, so that it can't get out of sync with the implementation. -->
+            <plugin>
+                <!-- Generate the OpenAPI specification from the annotations in the compiled classes. -->
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+                <version>${swagger.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-openapi-spec</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>resolve</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputPath>${project.build.directory}/openapi</outputPath>
+                    <outputFileName>openapi</outputFileName>
+                    <outputFormat>JSON</outputFormat>
+                    <prettyPrint>true</prettyPrint>
+                    <resourcePackages>
+                        <package>org.jivesoftware.openfire.plugin.rest.service</package>
+                    </resourcePackages>
+                </configuration>
+            </plugin>
+            <plugin>
+                <!-- Replace the endpoint documentation in readme.md with documentation generated from the OpenAPI specification. -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.6.4</version>
+                <executions>
+                    <execution>
+                        <id>generate-readme-endpoints</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>${java.home}/bin/java</executable>
+                            <arguments>
+                                <argument>-Dslf4j.internal.verbosity=ERROR</argument>
+                                <argument>-classpath</argument>
+                                <classpath/>
+                                <argument>${project.basedir}/src/build/ReadmeEndpointsGenerator.java</argument>
+                                <argument>${project.build.directory}/openapi/openapi.json</argument>
+                                <argument>${project.basedir}/readme.md</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Generate readme.html from readme.md, so that the two can't get out of sync. -->
             <plugin>
                 <!-- Isolate readme.md, to prevent other (untracked) markdown files in the project root from being rendered and packaged. -->
