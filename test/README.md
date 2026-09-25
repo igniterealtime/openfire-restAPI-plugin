@@ -24,7 +24,8 @@ Configure the Rest API:
 * Set `adminConsole.access.allow-wildcards-in-excludes` to true
 
 test.env defines where the tests find Openfire: `restapi_url` (the base URL of the REST API, including its version),
-`adminconsole_url` and `bosh_url`, as well as the shared secret (`authkey`).
+`adminconsole_url` and `bosh_url`, as well as the shared secret (`authkey`) and the credentials of an admin user
+(`admin_username` and `admin_password`), which are used to log in to the admin console.
 
 Some tests create XMPP client sessions by logging in over BOSH (Openfire's HTTP binding, which listens on port 7070 by
 default). The BOSH endpoint is configured by the `bosh_url` variable in test.env; when Openfire runs in a container, make

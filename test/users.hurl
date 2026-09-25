@@ -4,7 +4,7 @@ Authorization: {{authkey}}
 HTTP 200
 [Asserts]
 xpath "/users/user" count == 3
-xpath "/users/user[username='admin']" exists
+xpath "/users/user[username='{{admin_username}}']" exists
 xpath "/users/user[username='jane']" exists
 xpath "/users/user[username='john']" exists
 xpath "/users/user[name='John Doe']" exists
