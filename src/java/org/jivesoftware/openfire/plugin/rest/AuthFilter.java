@@ -84,17 +84,10 @@ public class AuthFilter implements ContainerRequestFilter {
         }
 
         if (!RESTServicePlugin.ALLOWED_IPS.getValue().isEmpty()) {
-            // Get client's IP address
-            String ipAddress = httpRequest.getHeader("x-forwarded-for");
-            if (ipAddress == null) {
-                ipAddress = httpRequest.getHeader("X_FORWARDED_FOR");
-                if (ipAddress == null) {
-                    ipAddress = httpRequest.getHeader("X-Forward-For");
-                    if (ipAddress == null) {
-                        ipAddress = httpRequest.getRemoteAddr();
-                    }
-                }
-            }
+            // Get client's IP address. Do not inspect headers like 'X-Forwarded-For' here: these can be spoofed by the client.
+            // When Openfire is configured to be accessed through a reverse proxy, its web server already replaces the remote
+            // address with the value from such headers, but only for requests from proxies that are configured to be trusted.
+            final String ipAddress = httpRequest.getRemoteAddr();
             if (!RESTServicePlugin.ALLOWED_IPS.getValue().contains(ipAddress)) {
                 LOG.warn("REST API rejected service for IP address: " + ipAddress);
                 throw new WebApplicationException(Status.UNAUTHORIZED);

@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.rest;
 
 import org.jivesoftware.admin.AuthCheckFilter;
+import org.jivesoftware.openfire.container.AdminConsolePlugin;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.plugin.rest.service.JerseyWrapper;
@@ -146,6 +147,26 @@ public class RESTServicePlugin implements Plugin {
 
         // Release the excluded URL
         AuthCheckFilter.removeExclude(JerseyWrapper.SERVLET_URL);
+    }
+
+    /**
+     * Checks if the IP addresses that are verified against {@link #ALLOWED_IPS} can be controlled by the client.
+     *
+     * The REST API is served by the admin console's web server. When that is configured to use 'Forwarded' or
+     * 'X-Forwarded-For' style HTTP headers to determine the address of the client, but no trusted reverse proxies are
+     * configured, then these headers are honored when sent by any peer. In that case, any client can pretend to have
+     * an address that is on the list of allowed IP addresses.
+     *
+     * Note that changes to the admin console configuration only take effect after the admin console is restarted. This
+     * method evaluates the configured values, which may differ from the configuration that is currently in effect.
+     *
+     * @return true if a non-empty list of allowed IP addresses is configured that can be bypassed by spoofing headers.
+     */
+    public static boolean isAllowedIPsCheckSpoofable()
+    {
+        return !ALLOWED_IPS.getValue().isEmpty()
+            && AdminConsolePlugin.ADMIN_CONSOLE_FORWARDED.getValue()
+            && AdminConsolePlugin.ADMIN_CONSOLE_FORWARDED_TRUSTED_PROXIES.getValue().isEmpty();
     }
 
     /**

@@ -108,6 +108,30 @@ The third requirement cannot be verified automatically and is the implementer's 
 implements the interface and carries the annotation, but returns without calling `abortWith(...)` on an
 unauthenticated request, will be loaded successfully and will silently grant unauthenticated access.
 
+### Restricting access by IP address
+
+Access to the REST API can additionally be limited to a list of allowed IP addresses. This is configured in the
+Openfire Admin console under Server > Server Settings > REST API (backed by the `plugin.restapi.allowedIPs` system
+property). When the list is empty, requests from any IP address are accepted.
+
+The plugin checks the IP address of the peer that is directly connected to Openfire. It does not itself inspect
+headers like `X-Forwarded-For`, as these can be set to arbitrary values by any client. When the REST API is accessed
+through a reverse proxy, configure Openfire's admin console to use the forwarded client address instead: enable
+`adminConsole.forwarded.enabled`, and list the IP addresses (or ranges) of your proxies in
+`adminConsole.forwarded.trusted.proxies`. Both can be set on the Admin Console Access page (Server > Server
+Manager > Admin Console Access). Openfire then uses forwarded headers only on requests that come from one of those
+trusted proxies.
+
+Be aware of the following:
+
+- When `adminConsole.forwarded.enabled` is `true` but no trusted proxies are configured, Openfire uses forwarded
+  headers from _any_ peer. Any client can then bypass the IP address check by sending a forged header. The REST API
+  shows a warning on its admin console page when it detects this configuration.
+- Make sure that your reverse proxy _replaces_ any `Forwarded` or `X-Forwarded-For` header that it receives from the
+  client, instead of appending to it. Otherwise, a value provided by the client can still end up being used as the
+  client's address.
+- Changes to the `adminConsole.forwarded.*` properties take effect only after the admin console has been restarted.
+
 # User related REST Endpoints
 
 ## Retrieve users

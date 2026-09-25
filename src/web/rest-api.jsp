@@ -112,9 +112,6 @@
 </head>
 <body>
 
-    <p>Use the form below to enable or disable the REST API and
-        configure the authentication.</p>
-
     <%
         if (success) {
     %>
@@ -136,6 +133,29 @@
         }
     %>
     
+    <%
+        if (RESTServicePlugin.isAllowedIPsCheckSpoofable()) {
+    %>
+    <div class="jive-warning">
+        <table cellpadding="0" cellspacing="0" border="0">
+            <tbody>
+            <tr>
+                <td class="jive-icon"><img src="images/warning-16x16.gif"
+                                           width="16" height="16" border="0"></td>
+                <td class="jive-icon-label">Access is restricted to specific IP addresses, but the admin console is
+                    configured to determine the client address from forwarded HTTP headers (such as X-Forwarded-For),
+                    without a list of trusted proxies. Any client can bypass the IP address check by sending such a header.
+                    Configure the addresses of your reverse proxies as trusted proxies on the
+                    <a href="../../system-admin-console-access.jsp">Admin Console Access</a> page.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <%
+        }
+    %>
     <%  
         if (errors.get("loadingStatus") != null) { 
     %>
@@ -174,6 +194,9 @@
     <%
         }
     %>
+
+    <p>Use the form below to enable or disable the REST API and
+        configure the authentication.</p>
 
     <form action="rest-api.jsp?save" method="post">
 
@@ -230,6 +253,7 @@
 
                     <label for="allowedIPs">Allowed IP Addresses:</label>
                     <textarea name="allowedIPs" cols="40" rows="3" wrap="virtual"><%=((allowedIPs != null) ? allowedIPs : "")%></textarea>
+                    <div style="margin-left: 20px; margin-top: 5px;">Note: when the REST API is accessed through a reverse proxy, configure Openfire to use the forwarded client address, and to trust only your proxies, on the <a href="../../system-admin-console-access.jsp">Admin Console Access</a> page.</div>
                     <br>
                     <br>
 
