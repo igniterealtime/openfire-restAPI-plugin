@@ -1,0 +1,70 @@
+</main>
+<script>
+    (function () {
+        var headings = document.querySelectorAll('main h1, main h2, main h3, main h4, main h5, main h6');
+
+        // Make heading IDs unique, using the same suffix scheme that GitHub uses when rendering readme.md.
+        var seen = {};
+        headings.forEach(function (heading) {
+            var anchor = heading.querySelector('a[id]');
+            if (!anchor) {
+                return;
+            }
+            var id = anchor.id;
+            if (seen.hasOwnProperty(id)) {
+                seen[id]++;
+                anchor.id = id + '-' + seen[id];
+                anchor.setAttribute('href', '#' + anchor.id);
+            } else {
+                seen[id] = 0;
+            }
+        });
+
+        // Build a table of contents from the top two heading levels.
+        var toc = document.getElementById('toc');
+        var root = document.createElement('ul');
+        var current = null;
+        headings.forEach(function (heading) {
+            var anchor = heading.querySelector('a[id]');
+            if (!anchor || (heading.tagName !== 'H1' && heading.tagName !== 'H2')) {
+                return;
+            }
+            var item = document.createElement('li');
+            var link = document.createElement('a');
+            link.href = '#' + anchor.id;
+            link.textContent = heading.textContent.trim();
+            item.appendChild(link);
+            if (heading.tagName === 'H1' || !current) {
+                root.appendChild(item);
+                current = item;
+            } else {
+                var list = current.querySelector('ul');
+                if (!list) {
+                    list = document.createElement('ul');
+                    current.appendChild(list);
+                }
+                list.appendChild(item);
+            }
+        });
+        if (root.children.length > 0) {
+            // Collapsible on narrow screens, where the table of contents is shown above the content instead of beside it.
+            var details = document.createElement('details');
+            var summary = document.createElement('summary');
+            summary.textContent = 'Contents';
+            details.appendChild(summary);
+            details.appendChild(root);
+            details.open = window.matchMedia('(min-width: 1100px)').matches;
+            toc.appendChild(details);
+        }
+
+        // Scroll to the requested section now that all IDs are final.
+        if (location.hash) {
+            var target = document.getElementById(decodeURIComponent(location.hash.substring(1)));
+            if (target) {
+                target.scrollIntoView();
+            }
+        }
+    })();
+</script>
+</body>
+</html>
