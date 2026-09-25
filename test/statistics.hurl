@@ -1,4 +1,5 @@
-GET http://localhost:9090/plugins/restapi/v1/system/statistics/sessions
+# TEST: Get the session statistics
+GET {{restapi_url}}/system/statistics/sessions
 Authorization: {{authkey}}
 HTTP 200
 [Asserts]

@@ -38,11 +38,11 @@ jobs:
           config: ./test/demoboot-with-additions.xml
           plugin: ./restAPI.jar
       
-      - uses: gacts/install-hurl@v1
-
       - name: Test the plugin
         run: |
-          hurl --test --report-junit test-results.xml --variables-file test/test.env --jobs 1 test/*.hurl
+          docker run --rm --network host --user "$(id -u):$(id -g)" --volume "$PWD:$PWD" --workdir "$PWD" \
+            ghcr.io/orange-opensource/hurl:8.0.1 \
+            --test --report-junit test-results.xml --variables-file test/test.env --jobs 1 test/*.hurl
 
       - name: Expose Openfire logs
         uses: actions/upload-artifact@v7
