@@ -34,15 +34,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 @Path("restapi/v1/chatservices")
-@Tag(name = "Chat service", description = "Managing Multi-User chat services.")
+@Tag(name = "Chat service", description = "Managing multi-user chat services.")
 public class MUCServiceService {
 
     @GET
     @Operation( summary = "Get chat services",
         description = "Get a list of all multi-user chat services.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "All chat services", content = @Content(schema = @Schema(implementation = MUCServiceEntities.class))),
-            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "200", description = "All chat services.", content = @Content(schema = @Schema(implementation = MUCServiceEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
@@ -52,11 +52,11 @@ public class MUCServiceService {
     }
 
     @POST
-    @Operation( summary = "Create new multi-user chat service",
+    @Operation( summary = "Create chat service",
         description = "Create a new multi-user chat service.",
         responses = {
             @ApiResponse(responseCode = "201", description = "Service created."),
-            @ApiResponse(responseCode = "401", description = "Web service authentication failed.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
             @ApiResponse(responseCode = "403", description = "Service creation is not permitted.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "Service already exists, or another conflict occurred while creating the service.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))

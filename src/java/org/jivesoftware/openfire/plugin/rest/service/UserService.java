@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.UserServiceController;
 import org.jivesoftware.openfire.plugin.rest.entity.UserEntities;
 import org.jivesoftware.openfire.plugin.rest.entity.UserEntity;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -49,12 +50,14 @@ public class UserService {
         description = "Retrieve all users defined in Openfire (with optional filtering).",
         responses = {
             @ApiResponse(responseCode = "200", description = "A list of Openfire users.", content = @Content(schema = @Schema(implementation = UserEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public UserEntities getUsers(
-            @Parameter(description = "Search/Filter by username. This act like the wildcard search %String%", required = false) @QueryParam("search") String userSearch,
+            @Parameter(description = "Search/Filter by username. This acts like the wildcard search %String%.", required = false) @QueryParam("search") String userSearch,
             @Parameter(description = "Filter by a user property name.", required = false) @QueryParam("propertyKey") String propertyKey,
-            @Parameter(description = "Filter by user property value. Note: This can only be used in combination with a property name parameter", required = false) @QueryParam("propertyValue") String propertyValue)
+            @Parameter(description = "Filter by user property value. Note: This can only be used in combination with a property name parameter.", required = false) @QueryParam("propertyValue") String propertyValue)
         throws ServiceException
     {
         return plugin.getUserEntities(userSearch, propertyKey, propertyValue);
@@ -65,6 +68,10 @@ public class UserService {
         description = "Add a new user to Openfire.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The user was created."),
+            @ApiResponse(responseCode = "400", description = "No user definition, username or password was provided.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "409", description = "A user with this username already exists.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createUser(
@@ -80,8 +87,10 @@ public class UserService {
     @Operation( summary = "Get user",
         description = "Retrieve a user that is defined in Openfire.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "A list of Openfire users.", content = @Content(schema = @Schema(implementation = UserEntity.class))),
-            @ApiResponse(responseCode = "404", description = "No user with that username was found."),
+            @ApiResponse(responseCode = "200", description = "The Openfire user.", content = @Content(schema = @Schema(implementation = UserEntity.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "No user with that username was found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public UserEntity getUser(
@@ -97,11 +106,15 @@ public class UserService {
         description = "Update an existing user in Openfire.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The user was updated."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "No user with that username was found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "The user is to be renamed, but a user with the new username already exists.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response updateUser(
             @Parameter(description = "The username of the user to update.", required = true) @PathParam("username") String username,
-            @RequestBody(description = "The definition update of the user.", required = true) UserEntity userEntity)
+            @RequestBody(description = "The updated definition of the user.", required = true) UserEntity userEntity)
         throws ServiceException
     {
         plugin.updateUser(username, userEntity);
@@ -114,7 +127,9 @@ public class UserService {
         description = "Remove an existing user from Openfire.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The user was removed."),
-            @ApiResponse(responseCode = "404", description = "No user with that username was found."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "No user with that username was found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
     public Response deleteUser(@Parameter(description = "The username of the user to remove.", required = true) @PathParam("username") String username) throws ServiceException {
         plugin.deleteUser(username);

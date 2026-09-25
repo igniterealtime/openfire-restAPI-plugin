@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.SessionController;
 import org.jivesoftware.openfire.plugin.rest.entity.SessionEntities;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 
 import javax.annotation.PostConstruct;
@@ -47,6 +48,8 @@ public class SessionService {
         description = "Retrieve all live client sessions.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The client sessions currently active in Openfire.", content = @Content(schema = @Schema(implementation = SessionEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public SessionEntities getAllSessions() throws ServiceException {
@@ -59,6 +62,8 @@ public class SessionService {
         description = "Retrieve all live client sessions for a particular user.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The client sessions for one particular user that are currently active in Openfire.", content = @Content(schema = @Schema(implementation = SessionEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public SessionEntities getUserSessions(
@@ -73,6 +78,8 @@ public class SessionService {
         description = "Close/disconnect all live client sessions for a particular user.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The client sessions for one particular user have been closed."),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Path("/{username}")
     public Response kickSession(

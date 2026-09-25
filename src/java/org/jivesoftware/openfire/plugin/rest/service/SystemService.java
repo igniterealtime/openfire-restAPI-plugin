@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.jivesoftware.openfire.plugin.rest.controller.SystemController;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperties;
 import org.jivesoftware.openfire.plugin.rest.entity.SystemProperty;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
 import org.jivesoftware.openfire.spi.ConnectionType;
 
@@ -34,7 +35,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("restapi/v1/system")
-@Tag(name = "System", description = "Managing Openfire system configuration")
+@Tag(name = "System", description = "Managing Openfire system configuration.")
 public class SystemService {
 
     @GET
@@ -43,6 +44,8 @@ public class SystemService {
         description = "Get all Openfire system properties.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system properties.", content = @Content(schema = @Schema(implementation = SystemProperties.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public SystemProperties getSystemProperties() {
@@ -55,8 +58,10 @@ public class SystemService {
         description = "Get a specific Openfire system property.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The requested system property.", content = @Content(schema = @Schema(implementation = SystemProperty.class))),
-            @ApiResponse(responseCode = "403", description = "Reading this system property is prohibited."),
-            @ApiResponse(responseCode = "404", description = "The system property could not be found.")
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "403", description = "Reading this system property is prohibited.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public SystemProperty getSystemProperty(
@@ -72,9 +77,11 @@ public class SystemService {
         description = "Create a new Openfire system property. Will overwrite a pre-existing system property that uses the same name.",
         responses = {
             @ApiResponse(responseCode = "201", description = "The system property is created."),
-            @ApiResponse(responseCode = "400", description = "No system property was provided, the system property has no value, or its name is not valid. The name must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens."),
-            @ApiResponse(responseCode = "403", description = "Prohibited to create this system property."),
-            @ApiResponse(responseCode = "409", description = "The name of the system property differs only in case from the name of an existing system property."),
+            @ApiResponse(responseCode = "400", description = "No system property was provided, the system property has no value, or its name is not valid. The name must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to create this system property.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "The name of the system property differs only in case from the name of an existing system property.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response createSystemProperty(
@@ -91,15 +98,17 @@ public class SystemService {
         description = "Updates an existing Openfire system property.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system property is updated."),
-            @ApiResponse(responseCode = "400", description = "No system property was provided, the system property has no value, or it does not match the name in the URL."),
-            @ApiResponse(responseCode = "403", description = "Prohibited to update this system property."),
-            @ApiResponse(responseCode = "404", description = "The system property could not be found."),
-            @ApiResponse(responseCode = "409", description = "The name of the system property differs only in case from the name of another existing system property.")
+            @ApiResponse(responseCode = "400", description = "No system property was provided, the system property has no value, or it does not match the name in the URL.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to update this system property.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "The name of the system property differs only in case from the name of another existing system property.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response updateSystemProperty(
             @Parameter(description = "The name of the system property to update.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey,
-            @RequestBody(description = "The new system property definition that replaced an existing definition.", required = true) SystemProperty systemProperty)
+            @RequestBody(description = "The new system property definition that replaces an existing definition.", required = true) SystemProperty systemProperty)
         throws ServiceException
     {
         SystemController.getInstance().updateSystemProperty(propertyKey, systemProperty);
@@ -112,10 +121,12 @@ public class SystemService {
         description = "Removes an existing Openfire system property, together with all of its child properties (properties of which the name starts with the name of this property, followed by a dot).",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system property and its child properties are deleted."),
-            @ApiResponse(responseCode = "400", description = "The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens."),
-            @ApiResponse(responseCode = "403", description = "Prohibited to delete this system property, or one of its child properties."),
-            @ApiResponse(responseCode = "404", description = "The system property could not be found."),
-            @ApiResponse(responseCode = "409", description = "Deleting this system property could also delete unintended properties (other than this property and its child properties). This can happen, for example, when its name contains an underscore, which can match any character.")
+            @ApiResponse(responseCode = "400", description = "The name of the system property is not valid. It must consist of one or more dot-separated parts, each consisting of ASCII letters, digits, underscores, apostrophes and hyphens.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "403", description = "Prohibited to delete this system property, or one of its child properties.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "The system property could not be found.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Deleting this system property could also delete unintended properties (other than this property and its child properties). This can happen, for example, when its name contains an underscore, which can match any character.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     public Response deleteSystemProperty(
             @Parameter(description = "The name of the system property to delete.", example = "foo.bar.xyz", required = true) @PathParam("propertyKey") String propertyKey)
@@ -146,7 +157,7 @@ public class SystemService {
 
     @GET
     @Path("/liveness/deadlock")
-    @Operation( summary = "Perform 'deadlock' liveness check.",
+    @Operation( summary = "Perform 'deadlock' liveness check",
         description = "Detects if Openfire has reached a state that it cannot recover from because of a deadlock.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system is live."),
@@ -162,7 +173,7 @@ public class SystemService {
 
     @GET
     @Path("/liveness/properties")
-    @Operation( summary = "Perform 'properties' liveness check.",
+    @Operation( summary = "Perform 'properties' liveness check",
         description = "Detects if Openfire has reached a state that it cannot recover from because a system property change requires a restart to take effect.",
         responses = {
             @ApiResponse(responseCode = "200", description = "The system is live."),
@@ -259,7 +270,7 @@ public class SystemService {
             @ApiResponse(responseCode = "503", description = "Openfire currently does not accept (all) connections.")
         })
     public Response readinessConnections(
-        @Parameter(description = "Optional. Use to limit the check to one particular connection type. One of: SOCKET_S2S, SOCKET_C2S, BOSH_C2S, WEBADMIN, COMPONENT, CONNECTION_MANAGER", example = "SOCKET_C2S", required = false) @QueryParam("connectionType") String connectionType,
+        @Parameter(description = "Optional. Use to limit the check to one particular connection type. One of: SOCKET_S2S, SOCKET_C2S, BOSH_C2S, WEBADMIN, COMPONENT, CONNECTION_MANAGER.", example = "SOCKET_C2S", required = false) @QueryParam("connectionType") String connectionType,
         @Parameter(description = "Check the encrypted (true) or unencrypted (false) variant of the connection type. Only used in combination with 'connectionType', as without it, all types and both encrypted and unencrypted are checked.", required = false) @QueryParam("encrypted") Boolean encrypted
     ) {
         if (connectionType != null && !connectionType.isEmpty()) {

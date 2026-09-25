@@ -27,6 +27,7 @@ import org.jivesoftware.openfire.cluster.ClusterNodeInfo;
 import org.jivesoftware.openfire.cluster.NodeID;
 import org.jivesoftware.openfire.plugin.rest.controller.ClusteringController;
 import org.jivesoftware.openfire.plugin.rest.controller.MUCRoomController;
+import org.jivesoftware.openfire.plugin.rest.exceptions.ErrorResponse;
 import org.jivesoftware.openfire.plugin.rest.entity.*;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ExceptionType;
 import org.jivesoftware.openfire.plugin.rest.exceptions.ServiceException;
@@ -39,7 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Path("restapi/v1/clustering")
-@Tag(name="Clustering", description = "Reporting the status of Openfire clustering")
+@Tag(name="Clustering", description = "Reporting the status of Openfire clustering.")
 public class ClusteringService {
 
     private ClusteringController clusteringController;
@@ -52,9 +53,11 @@ public class ClusteringService {
     @GET
     @Path("/status")
     @Operation( summary = "Get clustering status",
-        description = "Describes the point-in-time state of Openfire's clustering with other servers",
+        description = "Describes the point-in-time state of Openfire's clustering with other servers.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Status returned", content = @Content(schema = @Schema(implementation = ClusteringEntity.class)))
+            @ApiResponse(responseCode = "200", description = "Status returned.", content = @Content(schema = @Schema(implementation = ClusteringEntity.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public ClusteringEntity getClusteringStatus(){
@@ -66,7 +69,9 @@ public class ClusteringService {
     @Operation( summary = "Get all cluster nodes",
         description = "Get a list of all nodes of the cluster. Note that this endpoint can only return data for remote nodes when the instance of Openfire that processes this query has successfully joined the cluster.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Retrieve all cluster nodes", content = @Content(schema = @Schema(implementation = ClusterNodeEntities.class)))
+            @ApiResponse(responseCode = "200", description = "All cluster nodes.", content = @Content(schema = @Schema(implementation = ClusterNodeEntities.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public ClusterNodeEntities getClusterNodes() {
@@ -78,8 +83,10 @@ public class ClusteringService {
     @Operation( summary = "Get a specific cluster node",
         description = "Get a specific node of the cluster. Note that this endpoint can only return data for remote nodes when the instance of Openfire that processes this query has successfully joined the cluster.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Retrieve a cluster node", content = @Content(schema = @Schema(implementation = ClusterNodeEntity.class))),
-            @ApiResponse(responseCode = "404", description = "The provided NodeID does not identify an existing cluster node.")
+            @ApiResponse(responseCode = "200", description = "The cluster node.", content = @Content(schema = @Schema(implementation = ClusterNodeEntity.class))),
+            @ApiResponse(responseCode = "401", description = "Web service authentication failed."),
+            @ApiResponse(responseCode = "404", description = "The provided NodeID does not identify an existing cluster node.", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Unexpected, generic error condition.", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
         })
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public ClusterNodeEntity getClusterNode(@Parameter(description = "The nodeID value for a particular node.", example = "52a89928-66f7-45fd-9bb8-096de07400ac", required = true) @PathParam("nodeId") final String nodeId) throws ServiceException {
