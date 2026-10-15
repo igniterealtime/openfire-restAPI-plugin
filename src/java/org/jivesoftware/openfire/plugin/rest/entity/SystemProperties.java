@@ -16,6 +16,10 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -25,6 +29,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class SystemProperties.
  */
 @XmlRootElement(name = "properties")
+@Schema(description = "A list of Openfire system properties.")
 public class SystemProperties {
 
     /** The properties. */
@@ -43,6 +48,8 @@ public class SystemProperties {
      * @return the properties
      */
     @XmlElement(name = "property")
+    @JsonProperty(value = "property")
+    @ArraySchema(arraySchema = @Schema(description = "The system properties."))
     public List<SystemProperty> getProperties() {
         return properties;
     }

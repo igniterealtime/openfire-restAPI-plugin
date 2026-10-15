@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "result")
 @XmlType(propOrder = { "roomName", "resultType", "message"})
+@Schema(description = "The result of the creation of one multi-user chat room.")
 public class RoomCreationResultEntity {
 
     public enum RoomCreationResultType {
@@ -37,7 +38,7 @@ public class RoomCreationResultEntity {
     String message;
 
     @XmlElement
-    @Schema(description = "The name of the room that was to be created", example = "open_chat")
+    @Schema(description = "The name of the room that was to be created.", example = "open_chat")
     public String getRoomName() {
         return roomName;
     }
@@ -47,7 +48,7 @@ public class RoomCreationResultEntity {
     }
 
     @XmlElement
-    @Schema(description = "The result of creating the room", example = "Failure")
+    @Schema(description = "The result of creating the room.", example = "Failure")
     public RoomCreationResultType getResultType() {
         return resultType;
     }
@@ -57,7 +58,7 @@ public class RoomCreationResultEntity {
     }
 
     @XmlElement
-    @Schema(description = "A message describing the result", example = "Room already existed and therefore not created again")
+    @Schema(description = "A message that describes the result.", example = "Room already existed and therefore not created again")
     public String getMessage() {
         return message;
     }

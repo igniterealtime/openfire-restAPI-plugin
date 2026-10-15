@@ -16,11 +16,14 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlAttribute;
 
 /**
  * The Class UserProperty.
  */
+@Schema(description = "A custom property of an Openfire user.")
 public class UserProperty {
 
     /** The key. */
@@ -55,6 +58,7 @@ public class UserProperty {
      * @return the key
      */
     @XmlAttribute
+    @Schema(description = "The key (name) of the property. Unique per user.", example = "department", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getKey() {
         return key;
     }
@@ -75,6 +79,7 @@ public class UserProperty {
      * @return the value
      */
     @XmlAttribute
+    @Schema(description = "The value of the property.", example = "Sales", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getValue() {
         return value;
     }

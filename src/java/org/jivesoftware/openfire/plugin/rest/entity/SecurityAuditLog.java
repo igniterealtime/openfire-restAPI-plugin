@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -23,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class SecurityAuditLog.
  */
 @XmlRootElement(name = "log")
+@Schema(description = "An entry of the security audit log.")
 public class SecurityAuditLog {
 
     /** The log id. */
@@ -74,6 +77,7 @@ public class SecurityAuditLog {
 	 * @return the log id
 	 */
 	@XmlElement
+	@Schema(description = "The unique identifier of the log entry.", example = "42")
 	public long getLogId() {
 		return logId;
 	}
@@ -93,6 +97,7 @@ public class SecurityAuditLog {
 	 * @return the username
 	 */
 	@XmlElement
+	@Schema(description = "The username of the user that performed the audited action.", example = "admin")
 	public String getUsername() {
 		return username;
 	}
@@ -112,6 +117,7 @@ public class SecurityAuditLog {
 	 * @return the timestamp
 	 */
 	@XmlElement
+	@Schema(description = "The moment at which the audited action occurred, in seconds since the Unix epoch.", example = "1769862896")
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -131,6 +137,7 @@ public class SecurityAuditLog {
 	 * @return the summary
 	 */
 	@XmlElement
+	@Schema(description = "A short description of the audited action.", example = "Created new user john")
 	public String getSummary() {
 		return summary;
 	}
@@ -150,6 +157,7 @@ public class SecurityAuditLog {
 	 * @return the node
 	 */
 	@XmlElement
+	@Schema(description = "The node that triggered the audited action, usually a host name or IP address.", example = "xmpp1.example.org")
 	public String getNode() {
 		return node;
 	}
@@ -169,6 +177,7 @@ public class SecurityAuditLog {
 	 * @return the details
 	 */
 	@XmlElement
+	@Schema(description = "Detailed information about the audited action.", example = "name = John Doe, email = john@example.org")
 	public String getDetails() {
 		return details;
 	}

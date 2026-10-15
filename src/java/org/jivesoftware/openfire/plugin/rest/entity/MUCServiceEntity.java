@@ -16,6 +16,7 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement(name = "chatService")
 @XmlType(propOrder = { "serviceName", "description", "hidden" })
+@Schema(description = "A multi-user chat service.")
 public class MUCServiceEntity {
 
     private String serviceName;
@@ -44,7 +46,7 @@ public class MUCServiceEntity {
     }
 
     @XmlElement
-    @Schema(description = "The name of the chat service", example = "conference")
+    @Schema(description = "The name of the chat service, which is used as the subdomain of the service.", example = "conference", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getServiceName() {
         return serviceName;
     }
@@ -54,7 +56,7 @@ public class MUCServiceEntity {
     }
 
     @XmlElement
-    @Schema(description = "The description of the chat service", example = "A public service")
+    @Schema(description = "The description of the chat service.", example = "A public service")
     public String getDescription() {
         return description;
     }
@@ -64,7 +66,7 @@ public class MUCServiceEntity {
     }
 
     @XmlElement
-    @Schema(description = "Whether the service is hidden", example = "false")
+    @Schema(description = "Whether the service is hidden from service discovery.", example = "false")
     public boolean isHidden() {
         return hidden;
     }

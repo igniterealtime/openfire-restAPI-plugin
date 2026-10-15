@@ -8,6 +8,31 @@ jobs:
     secrets:
       IGNITE_REALTIME_MAVEN_USERNAME: ${{ secrets.IGNITE_REALTIME_MAVEN_USERNAME }}
       IGNITE_REALTIME_MAVEN_PASSWORD: ${{ secrets.IGNITE_REALTIME_MAVEN_PASSWORD }}
+
+  readme-up-to-date:
+    name: Check that the readme documents the current endpoints and data types
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: maven
+
+      - name: Regenerate the documentation
+        run: mvn -B -DskipTests process-classes
+
+      - name: Fail when the readme was not up to date
+        run: |
+          if ! git diff --exit-code readme.md; then
+            echo "::error file=readme.md::The documentation of endpoints and data types in readme.md does not match the OpenAPI annotations in the source code. Run 'mvn process-classes' (or any later build phase, like 'mvn package') and commit the updated readme.md."
+            exit 1
+          fi
+
   hurl-e2e-test:
     name: Hurl E2E Tests
     runs-on: ubuntu-latest

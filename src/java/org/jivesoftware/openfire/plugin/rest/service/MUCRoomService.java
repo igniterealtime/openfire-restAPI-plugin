@@ -242,7 +242,7 @@ public class MUCRoomService {
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public Response inviteUserOrGroupToMUCRoom(
             @Parameter(description = "The name of the chat room to which to invite a user or group.", example = "lobby", required = true) @PathParam("roomName") String roomName,
-            @Parameter(description = "The JID of the entity to invite into the room.", example = "john@example.org", required = true) @PathParam("jid") String jid,
+            @Parameter(description = "The entity to invite into the room: the JID of a user or group, or the name of a local user or group. When a group is invited, all of its members are invited.", example = "john@example.org", required = true) @PathParam("jid") String jid,
             @Parameter(description = "The name of the chat room's MUC service.", example = "conference", required = false) @DefaultValue("conference") @QueryParam("servicename") String serviceName,
             @RequestBody(description = "The invitation message to send and whom to send it to.", required = true) MUCInvitationEntity mucInvitationEntity)
         throws ServiceException
@@ -260,7 +260,7 @@ public class MUCRoomService {
     @POST
     @Path("/{roomName}/invite")
     @Operation( summary = "Invite a collection of users and/or groups",
-        description = "Invites a collection of users and/or groups to join a specific multi-user chat room.",
+        description = "Invites a collection of users and/or groups to join a specific multi-user chat room. Each entity can be identified by the JID of a user or group, or by the name of a local user or group. When a group is invited, all of its members are invited.",
         responses = {
             @ApiResponse(responseCode = "200", description = "Invitation sent."),
             @ApiResponse(responseCode = "401", description = "Web service authentication failed."),

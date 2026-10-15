@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -23,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class MessageEntity.
  */
 @XmlRootElement(name = "message")
+@Schema(description = "A message.")
 public class MessageEntity {
 
     /** The body. */
@@ -40,6 +43,7 @@ public class MessageEntity {
      * @return the body
      */
     @XmlElement
+    @Schema(description = "The text of the message.", example = "The server will be restarted in 5 minutes.", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getBody() {
         return body;
     }

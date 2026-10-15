@@ -16,6 +16,9 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -24,6 +27,7 @@ import javax.xml.bind.annotation.XmlType;
 //xmlns=&quot;jabber:x:event&quot;&gt;&lt;composing/&gt;&lt;/x&gt;&lt;/message&gt
 @XmlRootElement(name = "message")
 @XmlType(propOrder = { "to", "from", "type", "body", "delayStamp", "delayFrom"})
+@Schema(description = "A message from the history of a multi-user chat room.")
 public class MUCRoomMessageEntity {
     String to;
     String from;
@@ -33,6 +37,7 @@ public class MUCRoomMessageEntity {
     String delayFrom;
 
     @XmlElement
+    @Schema(description = "The JID of the addressee of the message.", example = "global@conference.example.org")
     public String getTo() {
         return to;
     }
@@ -41,6 +46,7 @@ public class MUCRoomMessageEntity {
     }
 
     @XmlElement
+    @Schema(description = "The JID of the sender of the message: the room JID, followed by the nickname of the occupant.", example = "global@conference.example.org/john")
     public String getFrom() {
         return from;
     }
@@ -49,6 +55,7 @@ public class MUCRoomMessageEntity {
     }
 
     @XmlElement
+    @Schema(description = "The XMPP message type.", example = "groupchat")
     public String getType() {
         return type;
     }
@@ -57,12 +64,15 @@ public class MUCRoomMessageEntity {
     }
 
     @XmlElement(name="delay_stamp")
+    @JsonProperty(value = "delay_stamp")
+    @Schema(description = "The moment at which the message was originally sent (XEP-0203 delayed delivery timestamp).", example = "2026-01-31T12:34:56.789Z")
     public String getDelayStamp() { return delayStamp; }
     public void setDelayStamp(String delayStamp) {
         this.delayStamp = delayStamp;
     }
 
     @XmlElement
+    @Schema(description = "The text of the message.", example = "Hello, everyone!")
     public String getBody() {
         return body;
     }
@@ -71,6 +81,8 @@ public class MUCRoomMessageEntity {
     }
 
     @XmlElement(name="delay_from")
+    @JsonProperty(value = "delay_from")
+    @Schema(description = "The JID of the entity that delayed the delivery of the message (XEP-0203).", example = "global@conference.example.org")
     public String getDelayFrom() { return delayFrom; }
     public void setDelayFrom(String delayFrom) { this.delayFrom = delayFrom; }
 

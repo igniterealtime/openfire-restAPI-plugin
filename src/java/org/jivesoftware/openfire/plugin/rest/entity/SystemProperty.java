@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -23,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class SystemProperty.
  */
 @XmlRootElement(name = "property")
+@Schema(description = "An Openfire system property.")
 public class SystemProperty {
 
     /** The key. */
@@ -55,6 +58,7 @@ public class SystemProperty {
      * @return the key
      */
     @XmlAttribute
+    @Schema(description = "The name of the system property.", example = "xmpp.domain", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getKey() {
         return key;
     }
@@ -75,6 +79,7 @@ public class SystemProperty {
      * @return the value
      */
     @XmlAttribute
+    @Schema(description = "The value of the system property.", example = "example.org", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getValue() {
         return value;
     }

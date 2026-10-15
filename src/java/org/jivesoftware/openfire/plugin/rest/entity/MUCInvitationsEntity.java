@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @XmlRootElement(name = "mucInvitations")
+@Schema(description = "An invitation for a collection of users and/or groups to join a multi-user chat room.")
 public class MUCInvitationsEntity extends MUCInvitationEntity
 {
     public MUCInvitationsEntity() {
@@ -37,7 +39,7 @@ public class MUCInvitationsEntity extends MUCInvitationEntity
     @XmlElementWrapper(name = "jidsToInvite")
     @XmlElement(name = "jid")
     @JsonProperty(value = "jidsToInvite")
-    @Schema(description = "The JIDs and/or names of the users and groups to invite into the room")
+    @ArraySchema(arraySchema = @Schema(description = "The users and/or groups to invite into the room, each identified by the JID of a user or group, or by the name of a local user or group."), schema = @Schema(example = "john@example.org"))
     public List<String> getJidsToInvite() {
         if (jidsToInvite == null) {
             jidsToInvite = new ArrayList<>();

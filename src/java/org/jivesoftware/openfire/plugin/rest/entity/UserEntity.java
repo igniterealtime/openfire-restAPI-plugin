@@ -17,6 +17,8 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
@@ -30,6 +32,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlRootElement(name = "user")
 @XmlType(propOrder = { "username", "name", "email", "password", "properties" })
+@Schema(description = "An Openfire user.")
 public class UserEntity {
 
     /** The username. */
@@ -76,6 +79,7 @@ public class UserEntity {
      * @return the username
      */
     @XmlElement
+    @Schema(description = "The username of the user. Required when creating a user. When updating a user, providing a different username renames the user.", example = "john")
     public String getUsername() {
         return username;
     }
@@ -96,6 +100,7 @@ public class UserEntity {
      * @return the name
      */
     @XmlElement
+    @Schema(description = "The name of the user.", example = "John Doe")
     public String getName() {
         return name;
     }
@@ -116,6 +121,7 @@ public class UserEntity {
      * @return the email
      */
     @XmlElement
+    @Schema(description = "The email address of the user.", example = "john@example.org")
     public String getEmail() {
         return email;
     }
@@ -135,6 +141,7 @@ public class UserEntity {
      *
      * @return the password
      */
+    @Schema(description = "The password of the user. Required when creating a user. Never included in responses.", example = "s3cr3t")
     public String getPassword() {
         return password;
     }
@@ -157,6 +164,7 @@ public class UserEntity {
     @XmlElement(name = "property")
     @XmlElementWrapper(name = "properties")
     @JsonProperty(value = "properties")
+    @ArraySchema(arraySchema = @Schema(description = "Custom properties of the user. Property keys are unique per user. When updating a user, all existing properties of the user are replaced by the provided properties: omitting this removes all properties of the user."))
     public List<UserProperty> getProperties() {
         return properties;
     }

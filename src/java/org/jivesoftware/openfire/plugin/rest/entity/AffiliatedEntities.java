@@ -15,6 +15,8 @@
  */
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * A base class for pre-existing classes that each represent a collection of MUC-room affiliated users of a specific
  * type.
@@ -24,6 +26,7 @@ package org.jivesoftware.openfire.plugin.rest.entity;
  *
  * @author Guus der Kinderen, guus@goodbytes.nl
  */
+@Schema(description = "A list of entities that have a particular affiliation with a multi-user chat room. Depending on the affiliation, this is an AdminEntities, MemberEntities, OutcastEntities or OwnerEntities value.")
 public abstract class AffiliatedEntities
 {
     /**

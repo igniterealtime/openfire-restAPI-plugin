@@ -19,6 +19,7 @@ package org.jivesoftware.openfire.plugin.rest.service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -84,7 +85,22 @@ public class UserVCardService
     @Consumes({MediaType.APPLICATION_XML})
     public Response setUserVcard(
         @Parameter(description = "The username of the user for which to update the vCard.", required = true) @PathParam("username") String username,
-        @RequestBody(description = "The updated definition of the vCard.", required = true) String vCard)
+        @RequestBody(description = "The updated definition of the vCard, in the vcard-temp format of XEP-0054.", required = true,
+            content = @Content(mediaType = MediaType.APPLICATION_XML, schema = @Schema(type = "string"), examples = @ExampleObject(value =
+                "<vCard xmlns=\"vcard-temp\">\n" +
+                "    <FN>Janice Francis Doe</FN>\n" +
+                "    <N>\n" +
+                "        <FAMILY>Doe</FAMILY>\n" +
+                "        <GIVEN>Janice</GIVEN>\n" +
+                "        <MIDDLE>Francis</MIDDLE>\n" +
+                "    </N>\n" +
+                "    <NICKNAME>Jane</NICKNAME>\n" +
+                "    <EMAIL>\n" +
+                "        <INTERNET/>\n" +
+                "        <PREF/>\n" +
+                "        <USERID>j.doe@example.org</USERID>\n" +
+                "    </EMAIL>\n" +
+                "</vCard>"))) String vCard)
         throws ServiceException
     {
         plugin.setUserVCard(username, vCard);

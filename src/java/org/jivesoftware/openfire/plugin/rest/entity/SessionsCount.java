@@ -16,6 +16,8 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -23,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * The Class SessionsCount.
  */
 @XmlRootElement(name = "sessions")
+@Schema(description = "The number of client sessions.")
 public class SessionsCount {
 
     /** The local sessions. */
@@ -55,6 +58,7 @@ public class SessionsCount {
      * @return the local sessions
      */
     @XmlElement()
+    @Schema(description = "The number of authenticated client sessions (of both anonymous and non-anonymous users) on the cluster node that processes the request.", example = "12")
     public int getLocalSessions() {
         return localSessions;
     }
@@ -74,6 +78,7 @@ public class SessionsCount {
      * @return the cluster sessions
      */
     @XmlElement()
+    @Schema(description = "The number of authenticated client sessions (of both anonymous and non-anonymous users) in the entire cluster.", example = "30")
     public int getClusterSessions() {
         return clusterSessions;
     }

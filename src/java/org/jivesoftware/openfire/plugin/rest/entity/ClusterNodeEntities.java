@@ -16,6 +16,8 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlElement;
@@ -23,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement(name = "clusterNodes")
+@Schema(description = "A list of the nodes in an Openfire cluster.")
 public class ClusterNodeEntities
 {
     private List<ClusterNodeEntity> clusterNodeEntities;
@@ -35,6 +38,7 @@ public class ClusterNodeEntities
 
     @XmlElement(name = "clusterNode")
     @JsonProperty(value = "clusterNodes")
+    @ArraySchema(arraySchema = @Schema(description = "The nodes of the cluster."))
     public List<ClusterNodeEntity> getClusterNodeEntities() {
         return clusterNodeEntities;
     }

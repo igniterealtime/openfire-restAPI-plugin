@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
@@ -28,6 +29,7 @@ import java.util.List;
 
 @XmlRootElement(name = "results")
 @XmlType(propOrder = { "successResults", "failureResults", "otherResults" })
+@Schema(description = "The results of the creation of multiple multi-user chat rooms, grouped by result type.")
 public class RoomCreationResultEntities {
     List<RoomCreationResultEntity> successResults;
     List<RoomCreationResultEntity> failureResults;
@@ -66,7 +68,7 @@ public class RoomCreationResultEntities {
     @XmlElement(name = "result")
     @XmlElementWrapper(name = "success")
     @JsonProperty(value = "success")
-    @Schema(description = "All creation results of type success")
+    @ArraySchema(arraySchema = @Schema(description = "The results of the rooms that were created successfully."))
     public List<RoomCreationResultEntity> getSuccessResults() {
         return successResults;
     }
@@ -74,7 +76,7 @@ public class RoomCreationResultEntities {
     @XmlElement(name = "result")
     @XmlElementWrapper(name = "failure")
     @JsonProperty(value = "failure")
-    @Schema(description = "All creation results of type failure")
+    @ArraySchema(arraySchema = @Schema(description = "The results of the rooms that could not be created."))
     public List<RoomCreationResultEntity> getFailureResults() {
         return failureResults;
     }
@@ -82,7 +84,7 @@ public class RoomCreationResultEntities {
     @XmlElement(name = "result")
     @XmlElementWrapper(name = "other")
     @JsonProperty(value = "other")
-    @Schema(description = "All creation results of a type other than success or failure")
+    @ArraySchema(arraySchema = @Schema(description = "The results of a type other than success or failure."))
     public List<RoomCreationResultEntity> getOtherResults() {
         return otherResults;
     }

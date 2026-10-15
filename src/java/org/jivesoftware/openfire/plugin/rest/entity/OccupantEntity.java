@@ -16,10 +16,13 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "occupant")
+@Schema(description = "An occupant of a multi-user chat room.")
 public class OccupantEntity {
 
     private String jid;
@@ -31,6 +34,7 @@ public class OccupantEntity {
     }
 
     @XmlElement
+    @Schema(description = "The occupant JID: the room JID, followed by the nickname of the occupant.", example = "global@conference.example.org/john")
     public String getJid() {
         return jid;
     }
@@ -40,6 +44,7 @@ public class OccupantEntity {
     }
 
     @XmlElement
+    @Schema(description = "The role of the occupant in the room. One of: 'moderator', 'participant', 'visitor', 'none'.", example = "participant")
     public String getRole() {
         return role;
     }
@@ -49,6 +54,7 @@ public class OccupantEntity {
     }
 
     @XmlElement
+    @Schema(description = "The affiliation of the occupant with the room. One of: 'owner', 'admin', 'member', 'outcast', 'none'.", example = "member")
     public String getAffiliation() {
         return affiliation;
     }
@@ -58,6 +64,7 @@ public class OccupantEntity {
     }
 
     @XmlElement
+    @Schema(description = "The real (full) JID of the user.", example = "john@example.org/laptop")
     public String getUserAddress() {
         return userAddress;
     }

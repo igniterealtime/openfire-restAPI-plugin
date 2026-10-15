@@ -17,6 +17,8 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "sessions")
+@Schema(description = "A list of client sessions.")
 public class SessionEntities {
     List<SessionEntity> sessions;
 
@@ -36,6 +39,7 @@ public class SessionEntities {
 
     @XmlElement(name = "session")
     @JsonProperty(value = "sessions")
+    @ArraySchema(arraySchema = @Schema(description = "The sessions."))
     public List<SessionEntity> getSessions() {
         return sessions;
     }

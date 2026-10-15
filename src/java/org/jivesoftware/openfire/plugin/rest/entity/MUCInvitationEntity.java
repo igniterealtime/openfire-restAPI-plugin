@@ -16,12 +16,14 @@
 
 package org.jivesoftware.openfire.plugin.rest.entity;
 
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "mucInvitation")
+@Schema(description = "An invitation to join a multi-user chat room.")
 public class MUCInvitationEntity {
 
     String reason;
@@ -30,7 +32,7 @@ public class MUCInvitationEntity {
     }
 
     @XmlElement
-    @Schema(description = "The reason that will be included in the invitation message(s)", example = "Come join this cool room please!")
+    @Schema(description = "The reason that is included in the invitation message(s).", example = "Come join this cool room please!")
     public String getReason() {
         return reason;
     }

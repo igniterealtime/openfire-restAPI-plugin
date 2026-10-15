@@ -17,12 +17,15 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement(name = "owners")
+@Schema(description = "A list of entities that have an owner affiliation with a multi-user chat room.")
 public class OwnerEntities extends AffiliatedEntities
 {
     List<String> owners;
@@ -36,6 +39,7 @@ public class OwnerEntities extends AffiliatedEntities
 
     @XmlElement(name = "owner")
     @JsonProperty(value = "owners")
+    @ArraySchema(arraySchema = @Schema(description = "The JIDs (or names of local users) of the entities."), schema = @Schema(example = "admin@example.org"))
     public List<String> getOwners() {
         return owners;
     }

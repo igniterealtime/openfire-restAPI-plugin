@@ -17,6 +17,7 @@
 package org.jivesoftware.openfire.plugin.rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.xmpp.packet.JID;
 
@@ -34,6 +35,7 @@ import javax.xml.bind.annotation.XmlType;
         "canOccupantsChangeSubject", "canOccupantsInvite", "canChangeNickname", "logEnabled",
         "loginRestrictedToNickname", "membersOnly", "moderated", "broadcastPresenceRoles", "owners", "admins",
         "members", "outcasts", "ownerGroups", "adminGroups", "memberGroups", "outcastGroups", "allowPM" })
+@Schema(description = "A multi-user chat room. When a room is created or updated, boolean values that are not provided are treated as 'false'.")
 public class MUCRoomEntity {
 
     private String roomName;
@@ -84,6 +86,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The human-readable name of the room, as shown to users that discover rooms on the chat service.", example = "Global Chat")
     public String getNaturalName() {
         return naturalName;
     }
@@ -93,6 +96,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The name of the room, which is used as the local part of the room's JID. It is converted to lowercase. When updating a room, this must be equal to the room name in the path of the request.", example = "global", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getRoomName() {
         return roomName;
     }
@@ -102,6 +106,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The description of the room.", example = "A room for everyone")
     public String getDescription() {
         return description;
     }
@@ -111,6 +116,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The password that users must provide to enter the room.", example = "s3cr3t")
     public String getPassword() {
         return password;
     }
@@ -120,6 +126,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The subject (topic) of the room.", example = "Welcome!")
     public String getSubject() {
         return subject;
     }
@@ -129,6 +136,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The maximum number of occupants that can be in the room at the same time. 0 means unlimited.", example = "30")
     public int getMaxUsers() {
         return maxUsers;
     }
@@ -138,6 +146,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The moment at which the room was created. When creating a room without this value, the current time is used.")
     public Date getCreationDate() {
         return creationDate;
     }
@@ -147,6 +156,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "The moment at which the configuration of the room was last modified. When creating or updating a room without this value, the current time is used.")
     public Date getModificationDate() {
         return modificationDate;
     }
@@ -156,6 +166,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the room is persistent. Persistent rooms are saved to the database, and are not destroyed when the last occupant leaves.", example = "true")
     public boolean isPersistent() {
         return persistent;
     }
@@ -165,6 +176,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the room is public: searchable and visible through service discovery.", example = "true")
     public boolean isPublicRoom() {
         return publicRoom;
     }
@@ -174,6 +186,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether users are allowed to register with the room.", example = "false")
     public boolean isRegistrationEnabled() {
         return registrationEnabled;
     }
@@ -183,6 +196,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the real JID of every occupant is visible to every other occupant (a non-anonymous room).", example = "false")
     public boolean isCanAnyoneDiscoverJID() {
         return canAnyoneDiscoverJID;
     }
@@ -192,6 +206,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether participants are allowed to change the subject of the room.", example = "false")
     public boolean isCanOccupantsChangeSubject() {
         return canOccupantsChangeSubject;
     }
@@ -201,6 +216,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether occupants can invite other users to the room. When the room is not members-only, anyone can send invitations regardless of this value. When the room is members-only and this is 'false', only owners and admins can send invitations.", example = "false")
     public boolean isCanOccupantsInvite() {
         return canOccupantsInvite;
     }
@@ -214,6 +230,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether occupants are allowed to change their nickname in the room.", example = "true")
     public boolean isCanChangeNickname() {
         return canChangeNickname;
     }
@@ -223,6 +240,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the conversation in the room is logged (saved to the database).", example = "true")
     public boolean isLogEnabled() {
         return logEnabled;
     }
@@ -232,6 +250,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether registered users can only join the room using their registered nickname.", example = "false")
     public boolean isLoginRestrictedToNickname() {
         return loginRestrictedToNickname;
     }
@@ -241,6 +260,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the room is members-only: users need to be a member (or be invited) to enter.", example = "false")
     public boolean isMembersOnly() {
         return membersOnly;
     }
@@ -250,6 +270,7 @@ public class MUCRoomEntity {
     }
 
     @XmlElement
+    @Schema(description = "Whether the room is moderated: only occupants with 'voice' can send messages to all occupants.", example = "false")
     public boolean isModerated() {
         return moderated;
     }
@@ -271,6 +292,7 @@ public class MUCRoomEntity {
     @XmlElement(name = "broadcastPresenceRole")
     @XmlElementWrapper(name = "broadcastPresenceRoles")
     @JsonProperty(value = "broadcastPresenceRoles")
+    @ArraySchema(arraySchema = @Schema(description = "The roles of occupants of which presence is broadcast to the other occupants. Each is one of: 'moderator', 'participant', 'visitor'."), schema = @Schema(example = "moderator"))
     public List<String> getBroadcastPresenceRoles() {
         return broadcastPresenceRoles;
     }
@@ -278,6 +300,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "owners")
     @XmlElement(name = "owner")
     @JsonProperty(value = "owners")
+    @ArraySchema(arraySchema = @Schema(description = "The (bare) JIDs of the users that have an owner affiliation with the room. When creating a room without owners, the 'admin' user is made owner."), schema = @Schema(example = "admin@example.org"))
     public List<String> getOwners() {
         return owners;
     }
@@ -285,6 +308,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "ownerGroups")
     @XmlElement(name = "ownerGroup")
     @JsonProperty(value = "ownerGroups")
+    @ArraySchema(arraySchema = @Schema(description = "The names of the user groups that have an owner affiliation with the room."), schema = @Schema(example = "Management"))
     public List<String> getOwnerGroups() {
         return ownerGroups;
     }
@@ -300,6 +324,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "members")
     @XmlElement(name = "member")
     @JsonProperty(value = "members")
+    @ArraySchema(arraySchema = @Schema(description = "The (bare) JIDs of the users that have a member affiliation with the room."), schema = @Schema(example = "john@example.org"))
     public List<String> getMembers() {
         return members;
     }
@@ -307,6 +332,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "memberGroups")
     @XmlElement(name = "memberGroup")
     @JsonProperty(value = "memberGroups")
+    @ArraySchema(arraySchema = @Schema(description = "The names of the user groups that have a member affiliation with the room."), schema = @Schema(example = "Sales"))
     public List<String> getMemberGroups() {
         return memberGroups;
     }
@@ -322,6 +348,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "outcasts")
     @XmlElement(name = "outcast")
     @JsonProperty(value = "outcasts")
+    @ArraySchema(arraySchema = @Schema(description = "The (bare) JIDs of the users that have an outcast affiliation with the room: users that are banned from the room."), schema = @Schema(example = "spammer@example.org"))
     public List<String> getOutcasts() {
         return outcasts;
     }
@@ -329,6 +356,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "outcastGroups")
     @XmlElement(name = "outcastGroup")
     @JsonProperty(value = "outcastGroups")
+    @ArraySchema(arraySchema = @Schema(description = "The names of the user groups that have an outcast affiliation with the room."), schema = @Schema(example = "Banned"))
     public List<String> getOutcastGroups() {
         return outcastGroups;
     }
@@ -344,6 +372,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "admins")
     @XmlElement(name = "admin")
     @JsonProperty(value = "admins")
+    @ArraySchema(arraySchema = @Schema(description = "The (bare) JIDs of the users that have an admin affiliation with the room."), schema = @Schema(example = "jane@example.org"))
     public List<String> getAdmins() {
         return admins;
     }
@@ -351,6 +380,7 @@ public class MUCRoomEntity {
     @XmlElementWrapper(name = "adminGroups")
     @XmlElement(name = "adminGroup")
     @JsonProperty(value = "adminGroups")
+    @ArraySchema(arraySchema = @Schema(description = "The names of the user groups that have an admin affiliation with the room."), schema = @Schema(example = "Moderators"))
     public List<String> getAdminGroups() {
         return adminGroups;
     }

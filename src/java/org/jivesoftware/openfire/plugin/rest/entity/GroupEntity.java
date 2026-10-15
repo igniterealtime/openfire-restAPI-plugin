@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlRootElement(name = "group")
 @XmlType(propOrder = { "name", "description", "admins", "members", "shared" })
+@Schema(description = "An Openfire user group.")
 public class GroupEntity {
 
     /** The name. */
@@ -75,7 +76,7 @@ public class GroupEntity {
      * @return the name
      */
     @XmlElement
-    @Schema(description = "Name of the group", example = "UserGroup1")
+    @Schema(description = "The name of the group. When updating a group, this must be equal to the group name in the path of the request.", example = "UserGroup1", requiredMode = Schema.RequiredMode.REQUIRED)
     public String getName() {
         return name;
     }
@@ -96,7 +97,7 @@ public class GroupEntity {
      * @return the description
      */
     @XmlElement
-    @Schema(description = "Description of the group", example = "My group of users")
+    @Schema(description = "The description of the group.", example = "My group of users")
     public String getDescription() {
         return description;
     }
@@ -119,7 +120,7 @@ public class GroupEntity {
     @XmlElementWrapper(name = "admins")
     @XmlElement(name = "admin")
     @JsonProperty(value = "admins")
-    @ArraySchema(schema = @Schema(example = "jane.smith"), arraySchema = @Schema(description = "List of admins of the group"))
+    @ArraySchema(schema = @Schema(example = "jane.smith"), arraySchema = @Schema(description = "The admins of the group. When creating or updating a group, each admin can be identified by a username or a JID. Responses contain (bare) JIDs."))
     public List<String> getAdmins() {
         return admins;
     }
@@ -132,7 +133,7 @@ public class GroupEntity {
     @XmlElementWrapper(name = "members")
     @XmlElement(name = "member")
     @JsonProperty(value = "members")
-    @ArraySchema(schema = @Schema(example = "john.jones"), arraySchema = @Schema(description = "List of members of the group"))
+    @ArraySchema(schema = @Schema(example = "john.jones"), arraySchema = @Schema(description = "The members of the group. When creating or updating a group, each member can be identified by a username or a JID. Responses contain (bare) JIDs."))
     public List<String> getMembers() {
         return members;
     }
@@ -162,7 +163,7 @@ public class GroupEntity {
      * @return whether it's a shared group
      */
     @XmlElement(name = "shared")
-    @Schema(description = "Whether the group should automatically appear in the rosters of the users", example = "false")
+    @Schema(description = "Whether the group is shared: whether it automatically appears in the rosters of its members.", example = "false")
     public Boolean getShared(){ return shared; }
 
     /**
