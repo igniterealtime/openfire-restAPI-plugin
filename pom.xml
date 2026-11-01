@@ -44,7 +44,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.6.0</version> <!-- Override inherited 2.17 to enable JUnit 5 tests -->
+                <version>3.6.1</version> <!-- Override inherited 2.17 to enable JUnit 5 tests -->
             </plugin>
         </plugins>
     </build>
